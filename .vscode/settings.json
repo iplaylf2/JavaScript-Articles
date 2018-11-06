@@ -1,0 +1,6 @@
+{
+    "markdown.extension.preview.autoShowPreviewToSide": true,
+    "markdown.extension.toc.githubCompatibility": true,
+    "markdown.extension.showExplorer": true,
+    "markdown.extension.toc.levels": "2..6"
+}
