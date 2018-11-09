@@ -25,13 +25,20 @@ class Environment {
         var bindingContainer = this.findBindingContainer(name);
         bindingContainer[name] = value;
     }
-    defineFunction(func) {
+    defineFunction(func, parameterList = [], variableSet = []) {
         var theEnvironment = this;
         return function (...args) {
             var environment = new Environment(theEnvironment);
-            var callObject = this ? this : {};
-            callObject.environment = environment;
-            return func.apply(callObject, args);
+            for (var name of parameterList) {
+                environment.defineVariable(name);
+            }
+            for (var name of variableSet) {
+                environment.defineVariable(name);
+            }
+            for (var i = 0; i !== args.length && i !== parameterList.length; i++) {
+                environment.setVariable(parameterList[i], args[i]);
+            }
+            return func.call(this, environment);
         };
     }
 }
