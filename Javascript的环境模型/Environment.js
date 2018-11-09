@@ -11,7 +11,7 @@ class Environment {
             return this.bindingContainer;
         } else {
             if (this.environmentPointer === Environment.End) {
-                throw `not found ${name}`;
+                throw `not found variable '${name}'`;
             } else {
                 return this.environmentPointer.findBindingContainer(name);
             }
