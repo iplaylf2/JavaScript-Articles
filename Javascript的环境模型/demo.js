@@ -6,3 +6,7 @@ var getCounter = Environment.Global.defineFunction(function (environment) {
     });
     return counter;
 }, ['start']);
+var counter = getCounter(0);
+counter();
+counter();
+counter();
