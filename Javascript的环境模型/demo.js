@@ -1,10 +1,9 @@
-var getCounter = Environment.Global.defineFunction(function (environment) {
-    var counter = environment.defineFunction(function (environment) {
-        var result = environment.getVariable('start');
-        environment.setVariable('start', result + 1);
-        return result;
-    });
-    return counter;
+var getCounter = Environment.Global.defineFunction(function ($) {
+    return $.defineFunction(function ($) {
+        $.setVariable('result', $.getVariable('start'));
+        $.setVariable('start', $.getVariable('result') + 1);
+        return $.getVariable('result');
+    }, [], ['result']);
 }, ['start']);
 var counter = getCounter(0);
 counter();
