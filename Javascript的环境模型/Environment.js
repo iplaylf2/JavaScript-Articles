@@ -5,28 +5,28 @@ class Environment {
         this.bindingContainer = {};
     }
     defineVariable(name) {
+        console.log(`create binding "*${name}" in environment "\$${this.name}"`);
         this.bindingContainer[name] = null;
-        console.log(`create binding '*${name}' in environment '\$${this.name}'`);
     }
     findBindingContainer(name) {
         if (this.bindingContainer.hasOwnProperty(name)) {
-            console.log(`found binding '*${name}' in environment '\$${this.name}'`);
+            console.log(`found binding "*${name}" in environment "\$${this.name}"`);
             return this.bindingContainer;
         } else {
             if (this.environmentPointer === Environment.End) {
-                throw `not found variable '${name}'`;
+                throw `not found variable "${name}"`;
             } else {
                 return this.environmentPointer.findBindingContainer(name);
             }
         }
     }
     getVariable(name) {
-        console.log(`get variable '${name}' in environment '\$${this.name}'`);
+        console.log(`get variable "${name}" in environment "\$${this.name}"`);
         var binding_container = this.findBindingContainer(name);
         return binding_container[name];
     }
     setVariable(name, value) {
-        console.log(`set variable '${name}' in environment '\$${this.name}'`);
+        console.log(`set variable "${name}" in environment "\$${this.name}"`);
         var binding_container = this.findBindingContainer(name);
         binding_container[name] = value;
     }
@@ -40,12 +40,12 @@ class Environment {
         if (typeof functionName !== 'string') {
             functionName = 'anonymous';
         }
-        console.log(`define function ${functionName} in environment '\$${this.name}'`);
+        console.log(`define function "${functionName}" in environment "\$${this.name}"`);
         var the_environment = this;
         var proxy = function (...args) {
-            console.log(`call function ${functionName}`);
+            console.log(`call function "${functionName}"`);
             var environment = new Environment(the_environment, functionName);
-            console.log(`create environment '\$${environment.name}'`);
+            console.log(`create environment "\$${environment.name}"`);
             for (var name of parameterList) {
                 environment.defineVariable(name);
             }
@@ -55,10 +55,10 @@ class Environment {
             for (var i = 0; i !== args.length && i !== parameterList.length; i++) {
                 environment.setVariable(parameterList[i], args[i]);
             }
-            console.log(`enter environment '\$${environment.name}'`);
+            console.log(`enter environment "\$${environment.name}"`);
             var result = func.call(this, environment);
-            console.log(`function ${functionName} return`);
-            console.log(`exit environment '\$${environment.name}'`);
+            console.log(`function "${functionName}" return`);
+            console.log(`exit environment “\$${environment.name}”`);
             return result;
         };
         return proxy;
