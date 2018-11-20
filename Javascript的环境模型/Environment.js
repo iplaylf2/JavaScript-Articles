@@ -1,6 +1,6 @@
 class Environment {
-    constructor(theEnvironment, functionName) {
-        this.environmentPointer = theEnvironment;
+    constructor(pointer, functionName) {
+        this.environmentPointer = pointer;
         this.name = `${functionName}[${Math.random().toString(36).substr(2)}]`;
         this.bindingContainer = {};
     }
@@ -41,10 +41,10 @@ class Environment {
             functionName = 'anonymous';
         }
         console.log(`define function "${functionName}" in environment "\$${this.name}"`);
-        var the_environment = this;
+        var environment_pointer = this;
         var proxy = function (...args) {
             console.log(`call function "${functionName}"`);
-            var environment = new Environment(the_environment, functionName);
+            var environment = new Environment(environment_pointer, functionName);
             console.log(`create environment "\$${environment.name}"`);
             for (var name of parameterList) {
                 environment.defineVariable(name);
