@@ -4,31 +4,36 @@ class Environment {
         this.name = `${functionName}[${Math.random().toString(36).substr(2)}]`;
         this.bindingContainer = {};
     }
-    defineVariable(name) {
-        console.log(`create binding "*${name}" in environment "\$${this.name}"`);
-        this.bindingContainer[name] = null;
-    }
-    findBindingContainer(name) {
-        if (this.bindingContainer.hasOwnProperty(name)) {
-            console.log(`found binding "*${name}" in environment "\$${this.name}"`);
+    findBindingContainer(variable_name) {
+        console.info(`在环境\$${this.name}中查找变量绑定*${variable_name}。`)
+        if (this.bindingContainer.hasOwnProperty(variable_name)) {
+            console.info('找到了变量绑定。');
             return this.bindingContainer;
         } else {
+            console.info('找不到变量绑定。');
             if (this.environmentPointer === Environment.End) {
-                throw `not found variable "${name}"`;
+                console.info('环境引用走向了尽头。');
+                throw `不存在对应的绑定。`;
             } else {
-                return this.environmentPointer.findBindingContainer(name);
+                console.info('通过环境引用在其他环境查找绑定。');
+                return this.environmentPointer.findBindingContainer(variable_name);
             }
         }
     }
     getVariable(name) {
-        console.log(`get variable "${name}" in environment "\$${this.name}"`);
+        console.info(`使用变量${name}。`);
         var binding_container = this.findBindingContainer(name);
-        return binding_container[name];
+        var value = binding_container[name];
+        console.info(`获得变量${name}的值：`);
+        console.dir(value);
+        return value;
     }
     setVariable(name, value) {
-        console.log(`set variable "${name}" in environment "\$${this.name}"`);
+        console.info(`使用变量${name}。`);
         var binding_container = this.findBindingContainer(name);
         binding_container[name] = value;
+        console.info(`给变量${name}赋值：`);
+        console.dir(value);
     }
     defineFunction(func, { parameterList, variableSet, functionName }) {
         if (!Array.isArray(parameterList)) {
@@ -40,30 +45,37 @@ class Environment {
         if (typeof functionName !== 'string') {
             functionName = 'anonymous';
         }
-        console.log(`define function "${functionName}" in environment "\$${this.name}"`);
+        console.info(`定义函数${functionName}。`);
         var environment_pointer = this;
         var proxy = function (...args) {
-            console.log(`call function "${functionName}"`);
-            var environment = new Environment(environment_pointer, functionName);
-            console.log(`create environment "\$${environment.name}"`);
-            for (var name of parameterList) {
-                environment.defineVariable(name);
+            console.info(`调用函数${functionName}。`);
+            var new_environment = new Environment(environment_pointer, functionName);
+            console.info(`创建环境\$${new_environment.name}。`);
+            var all_variable = parameterList.concat(variableSet);
+            for (var name of all_variable) {
+                new_environment.bindingContainer[name] = null;
             }
-            for (var name of variableSet) {
-                environment.defineVariable(name);
+            console.info(`为环境\$${new_environment.name}生成绑定：${all_variable.map(name => `*${name}`).join()}。`);
+            for (var i = 0; i !== parameterList.length; i++) {
+                new_environment.bindingContainer[parameterList[i]] = args[i];
+                console.info(`给变量${parameterList[i]}赋值：`);
+                console.dir(args[i]);
             }
-            for (var i = 0; i !== args.length && i !== parameterList.length; i++) {
-                environment.setVariable(parameterList[i], args[i]);
-            }
-            console.log(`enter environment "\$${environment.name}"`);
-            var result = func.call(this, environment);
-            console.log(`function "${functionName}" return`);
-            console.log(`exit environment “\$${environment.name}”`);
+            console.info(`进入环境\$${new_environment.name}。`);
+            var result = func.call(this, new_environment);
+            console.info(`函数${functionName}返回：`);
+            console.dir(result);
+            console.info(`退出环境\$${new_environment.name}。`);
             return result;
         };
+        console.info(`函数${functionName}保存了环境\$${this.name}的引用。`);
         return proxy;
     }
 }
 Environment.End = {};
 Environment.Global = new Environment(Environment.End, 'Global');
 Environment.Global.bindingContainer = this;
+Environment.Global.defineVariable = function (name) {
+    console.info(`在环境\$${this.name}中定义变量${name}。`);
+    this.bindingContainer[name] = null;
+};
