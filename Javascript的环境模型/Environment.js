@@ -5,17 +5,17 @@ class Environment {
         this.bindingContainer = {};
     }
     findBindingContainer(variable_name) {
-        console.info(`在环境\$${this.name}中查找变量绑定*${variable_name}。`)
+        console.info(`查找绑定*${variable_name}。`)
         if (this.bindingContainer.hasOwnProperty(variable_name)) {
-            console.info('找到了变量绑定。');
+            console.info('找到了绑定。');
             return this.bindingContainer;
         } else {
-            console.info('找不到变量绑定。');
+            console.info('在该环境中找不到绑定。');
             if (this.environmentPointer === Environment.End) {
                 console.info('环境引用走向了尽头。');
-                throw `不存在对应的绑定。`;
+                throw '不存在对应的绑定。';
             } else {
-                console.info('通过环境引用在其他环境查找绑定。');
+                console.info(`通过环境引用在环境\$${this.name}中查找绑定。`);
                 return this.environmentPointer.findBindingContainer(variable_name);
             }
         }
