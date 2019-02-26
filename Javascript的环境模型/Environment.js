@@ -4,6 +4,10 @@ class Environment {
         this.name = `${functionName}[${Math.random().toString(36).substr(2)}]`;
         this.bindingContainer = {};
     }
+    defineVariable(name) {
+        console.info(`定义变量${name}并创建绑定。`);
+        this.bindingContainer[name] = null;
+    }
     findBindingContainer(variable_name) {
         console.info(`查找绑定*${variable_name}。`)
         if (this.bindingContainer.hasOwnProperty(variable_name)) {
@@ -35,12 +39,9 @@ class Environment {
         console.info(`给变量${name}赋值：`);
         console.dir(value);
     }
-    defineFunction(func, { parameterList, variableSet, functionName }) {
+    defineFunction(func, { parameterList, functionName }) {
         if (!Array.isArray(parameterList)) {
             parameterList = [];
-        }
-        if (!Array.isArray(variableSet)) {
-            variableSet = [];
         }
         if (typeof functionName !== 'string') {
             functionName = 'anonymous';
@@ -51,11 +52,10 @@ class Environment {
             console.info(`调用函数${functionName}。`);
             var new_environment = new Environment(environment_pointer, functionName);
             console.info(`创建环境\$${new_environment.name}。`);
-            var all_variable = parameterList.concat(variableSet);
-            for (var name of all_variable) {
+            for (var name of parameterList) {
                 new_environment.bindingContainer[name] = null;
             }
-            console.info(`为环境\$${new_environment.name}生成绑定：${all_variable.map(name => `*${name}`).join()}。`);
+            console.info(`为环境\$${new_environment.name}生成绑定：${parameterList.map(name => `*${name}`).join()}。`);
             for (var i = 0; i !== parameterList.length; i++) {
                 new_environment.bindingContainer[parameterList[i]] = args[i];
                 console.info(`给变量${parameterList[i]}赋值：`);
@@ -75,7 +75,3 @@ class Environment {
 Environment.End = {};
 Environment.Global = new Environment(Environment.End, 'Global');
 Environment.Global.bindingContainer = this;
-Environment.Global.defineVariable = function (name) {
-    console.info(`在环境\$${this.name}中定义变量${name}。`);
-    this.bindingContainer[name] = null;
-};

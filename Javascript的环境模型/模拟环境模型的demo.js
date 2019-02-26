@@ -14,11 +14,12 @@ Environment.Global.setVariable(
         function ($) {
             return $.defineFunction(
                 function ($) {
+                    $.defineVariable('result');
                     $.setVariable('result', $.getVariable('start'));
                     $.setVariable('start', $.getVariable('start') + 1);
                     return $.getVariable('result');
                 },
-                { variableSet: ['result'], functionName: 'counter' }
+                { functionName: 'counter' }
             );
         },
         { parameterList: ['start'], functionName: 'getCounter' }));
