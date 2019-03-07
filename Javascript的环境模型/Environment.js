@@ -72,6 +72,6 @@ class Environment {
         return proxy;
     }
 }
-Environment.End = {};
+Environment.End = null;
 Environment.Global = new Environment(Environment.End, 'Global');
 Environment.Global.bindingContainer = this;
