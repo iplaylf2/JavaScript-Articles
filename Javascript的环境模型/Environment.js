@@ -40,9 +40,9 @@ const Environment = (global => {
             console.info(`给变量${name}赋值：`);
             console.dir(value);
         }
-        defineFunction($func) {
-            $func.saveEnvironmentPointer(this);
-            var func = $func.getCall();
+        defineFunction(proxy) {
+            proxy.saveEnvironmentPointer(this);
+            var func = proxy.getCall();
             return func;
         }
     }
@@ -54,14 +54,8 @@ const Environment = (global => {
 
 
 class $Function {
-    constructor($func, { parameterList, functionName }) {
+    constructor($func, { parameterList = [], functionName = 'anonymous' }) {
         console.info(`定义函数${functionName}。`);
-        if (!Array.isArray(parameterList)) {
-            parameterList = [];
-        }
-        if (typeof functionName !== 'string') {
-            functionName = 'anonymous';
-        }
         this.$func = $func;
         this.parameterList = parameterList;
         this.functionName = functionName;
@@ -69,6 +63,9 @@ class $Function {
     saveEnvironmentPointer(environmentPointer) {
         this.environmentPointer = environmentPointer;
         console.info(`函数${this.functionName}保存了环境\$${environmentPointer.name}的引用。`);
+    }
+    getCall() {
+        return this.call.bind(this);
     }
     call(...args) {
         const $func = this.$func;
@@ -92,8 +89,5 @@ class $Function {
         console.dir(result);
         console.info(`退出环境\$${new_environment.name}。`);
         return result;
-    }
-    getCall() {
-        return this.call.bind(this);
     }
 }
