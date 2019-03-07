@@ -42,7 +42,7 @@ const Environment = (global => {
         }
         defineFunction($func) {
             $func.saveEnvironmentPointer(this);
-            var func = $func.getCall();
+            var func = $func.get$call();
             return func;
         }
     }
@@ -93,7 +93,7 @@ const $Function = (() => {
             console.info(`退出环境\$${new_environment.name}。`);
             return result;
         }
-        getCall() {
+        get$call() {
             return this.$call.bind(this);
         }
     }
