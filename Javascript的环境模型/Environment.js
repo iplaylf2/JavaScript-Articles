@@ -42,7 +42,7 @@ const Environment = (global => {
         }
         defineFunction($func) {
             $func.saveEnvironmentPointer(this);
-            var func = $func.get$call();
+            var func = $func.getCall();
             return func;
         }
     }
@@ -54,7 +54,7 @@ const Environment = (global => {
 
 const $Function = (() => {
     class $Function {
-        constructor(func, { parameterList, functionName }) {
+        constructor($func, { parameterList, functionName }) {
             console.info(`定义函数${functionName}。`);
             if (!Array.isArray(parameterList)) {
                 parameterList = [];
@@ -62,7 +62,7 @@ const $Function = (() => {
             if (typeof functionName !== 'string') {
                 functionName = 'anonymous';
             }
-            this.real = func;
+            this.$func = $func;
             this.parameterList = parameterList;
             this.functionName = functionName;
         }
@@ -70,8 +70,8 @@ const $Function = (() => {
             this.environmentPointer = environmentPointer;
             console.info(`函数${this.functionName}保存了环境\$${environmentPointer.name}的引用。`);
         }
-        $call(...args) {
-            const func = this.real;
+        call(...args) {
+            const $func = this.$func;
             const parameterList = this.parameterList;
             const functionName = this.functionName;
             console.info(`调用函数${functionName}。`);
@@ -87,14 +87,14 @@ const $Function = (() => {
                 console.dir(args[i]);
             }
             console.info(`进入环境\$${new_environment.name}。`);
-            const result = func(new_environment);
+            const result = $func(new_environment);
             console.info(`函数${functionName}返回：`);
             console.dir(result);
             console.info(`退出环境\$${new_environment.name}。`);
             return result;
         }
-        get$call() {
-            return this.$call.bind(this);
+        getCall() {
+            return this.call.bind(this);
         }
     }
     return $Function;
