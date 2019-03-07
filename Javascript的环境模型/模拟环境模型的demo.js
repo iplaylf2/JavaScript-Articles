@@ -24,5 +24,5 @@ Environment.Global.setVariable(
         },
         { parameterList: ['start'], functionName: 'getCounter' }));
 Environment.Global.defineVariable('counter');
-Environment.Global.setVariable('counter', Environment.Global.getVariable('getCounter')(0));
-Environment.Global.getVariable('counter')();
+Environment.Global.setVariable('counter',  getCounter(0));
+counter();
