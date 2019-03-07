@@ -52,50 +52,48 @@ const Environment = (global => {
     return Environment;
 })(window);
 
-const $Function = (() => {
-    class $Function {
-        constructor($func, { parameterList, functionName }) {
-            console.info(`定义函数${functionName}。`);
-            if (!Array.isArray(parameterList)) {
-                parameterList = [];
-            }
-            if (typeof functionName !== 'string') {
-                functionName = 'anonymous';
-            }
-            this.$func = $func;
-            this.parameterList = parameterList;
-            this.functionName = functionName;
+
+class $Function {
+    constructor($func, { parameterList, functionName }) {
+        console.info(`定义函数${functionName}。`);
+        if (!Array.isArray(parameterList)) {
+            parameterList = [];
         }
-        saveEnvironmentPointer(environmentPointer) {
-            this.environmentPointer = environmentPointer;
-            console.info(`函数${this.functionName}保存了环境\$${environmentPointer.name}的引用。`);
+        if (typeof functionName !== 'string') {
+            functionName = 'anonymous';
         }
-        call(...args) {
-            const $func = this.$func;
-            const parameterList = this.parameterList;
-            const functionName = this.functionName;
-            console.info(`调用函数${functionName}。`);
-            const new_environment = new Environment(this.environmentPointer, functionName);
-            console.info(`创建环境\$${new_environment.name}。`);
-            for (var name of parameterList) {
-                new_environment.bindingContainer[name] = null;
-            }
-            console.info(`为环境\$${new_environment.name}生成绑定：${parameterList.map(name => `*${name}`).join()}。`);
-            for (var i = 0; i !== parameterList.length; i++) {
-                new_environment.bindingContainer[parameterList[i]] = args[i];
-                console.info(`给变量${parameterList[i]}赋值：`);
-                console.dir(args[i]);
-            }
-            console.info(`进入环境\$${new_environment.name}。`);
-            const result = $func(new_environment);
-            console.info(`函数${functionName}返回：`);
-            console.dir(result);
-            console.info(`退出环境\$${new_environment.name}。`);
-            return result;
-        }
-        getCall() {
-            return this.call.bind(this);
-        }
+        this.$func = $func;
+        this.parameterList = parameterList;
+        this.functionName = functionName;
     }
-    return $Function;
-})();
+    saveEnvironmentPointer(environmentPointer) {
+        this.environmentPointer = environmentPointer;
+        console.info(`函数${this.functionName}保存了环境\$${environmentPointer.name}的引用。`);
+    }
+    call(...args) {
+        const $func = this.$func;
+        const parameterList = this.parameterList;
+        const functionName = this.functionName;
+        console.info(`调用函数${functionName}。`);
+        const new_environment = new Environment(this.environmentPointer, functionName);
+        console.info(`创建环境\$${new_environment.name}。`);
+        for (var name of parameterList) {
+            new_environment.bindingContainer[name] = null;
+        }
+        console.info(`为环境\$${new_environment.name}生成绑定：${parameterList.map(name => `*${name}`).join()}。`);
+        for (var i = 0; i !== parameterList.length; i++) {
+            new_environment.bindingContainer[parameterList[i]] = args[i];
+            console.info(`给变量${parameterList[i]}赋值：`);
+            console.dir(args[i]);
+        }
+        console.info(`进入环境\$${new_environment.name}。`);
+        const result = $func(new_environment);
+        console.info(`函数${functionName}返回：`);
+        console.dir(result);
+        console.info(`退出环境\$${new_environment.name}。`);
+        return result;
+    }
+    getCall() {
+        return this.call.bind(this);
+    }
+}
