@@ -1,3 +1,5 @@
+//using Environment.detail.js
+
 // var getCounter = function (start) {
 //     return function () {
 //         var result = start;
