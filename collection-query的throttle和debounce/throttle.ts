@@ -24,10 +24,6 @@ class Throttle<T> {
     this._trailing = x;
   }
 
-  cancel() {
-    clearTimeout(this.timeout);
-  }
-
   get sleep() {
     return this._sleep;
   }
@@ -45,9 +41,7 @@ class Throttle<T> {
   }
 
   private delay() {
-    return new Promise((r) => {
-      this.timeout = setTimeout(r, this.span);
-    });
+    return new Promise((r) => setTimeout(r, this.span));
   }
 
   private span: number;
@@ -55,7 +49,6 @@ class Throttle<T> {
   private _catchLeading!: boolean;
   private _catchTrailing!: boolean;
   private _trailing!: T;
-  private timeout!: ReturnType<typeof setTimeout>;
 }
 
 function throttleWithTrailing<T>(
@@ -71,7 +64,6 @@ function throttleWithTrailing<T>(
       const cancel = function () {
         relay_cancel();
         source_cancel();
-        throttle.cancel();
       };
 
       let source_cancel!: Cancel;
@@ -88,9 +80,7 @@ function throttleWithTrailing<T>(
                       await throttle.cycle();
                       if (throttle.catchTrailing) {
                         emit(EmitType.Next, throttle.theTrailing);
-                      } else if (throttle.catchLeading) {
-                        continue;
-                      } else {
+                      } else if (!throttle.catchLeading) {
                         return;
                       }
                     }
@@ -116,11 +106,9 @@ function throttleWithTrailing<T>(
                   emit(EmitType.Next, throttle.theTrailing);
                 }
                 emit(t);
-                throttle.cancel();
                 break;
               case EmitType.Error:
                 emit(t, x);
-                throttle.cancel();
                 break;
             }
           },
