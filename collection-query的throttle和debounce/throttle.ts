@@ -102,7 +102,7 @@ function throttleWithTrailing<T>(
                 }
                 break;
               case EmitType.Complete:
-                if (!throttle.sleep && throttle.catchLeading) {
+                if (!throttle.sleep && throttle.catchTrailing) {
                   emit(EmitType.Next, throttle.theTrailing);
                 }
                 emit(t);
