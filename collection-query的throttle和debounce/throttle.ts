@@ -112,6 +112,9 @@ function throttleWithTrailing<T>(
                 }
                 break;
               case EmitType.Complete:
+                if (!throttle.sleep && throttle.catchLeading) {
+                  emit(EmitType.Next, throttle.theTrailing);
+                }
                 emit(t);
                 throttle.cancel();
                 break;
@@ -142,7 +145,7 @@ function throttleWithTrailing<T>(
   };
 }
 
-function throttleLeading<T>(t: number) {
+function throttleLeading<T>(span: number) {
   type Item = [{ until: number }, boolean, T];
   return function (s: PushStream<T>): PushStream<T> {
     return transfer(s, [
@@ -150,7 +153,7 @@ function throttleLeading<T>(t: number) {
         ([context], x) => {
           const now = Date.now();
           if (context.until < now) {
-            let until = context.until + t;
+            let until = context.until + span;
             if (until < now) {
               until = context.until + now;
             }
