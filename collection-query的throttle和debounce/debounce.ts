@@ -1,29 +1,48 @@
 import { PushStream, Cancel, EmitType, transfer } from "collection-query";
 import { create, filter, scan, map, take } from "collection-query/push";
 
+export function debounce<T>(
+  t: number,
+  { leading = true, trailing = false }
+): (s: PushStream<T>) => PushStream<T> {
+  if (trailing) {
+    return debounceWithTrailing(t, leading);
+  } else {
+    if (leading) {
+      return debounceLeading(t);
+    } else {
+      return take<any>(0);
+    }
+  }
+}
+
 class Debounce<T> {
   constructor(span: number) {
     this.span = span;
     this._sleep = true;
   }
 
-  async cycle() {
+  startByLeading() {
     this._sleep = false;
     this._catchTrailing = false;
-    while (true) {
-      this.bounce = false;
-      await this.delay();
-      if (!this.bounce) {
-        break;
-      }
-    }
+    return this.delay();
+  }
+
+  startByTrailing(x: T, tag: {}) {
+    this._sleep = false;
+    return this.trailing(x, tag);
+  }
+
+  end() {
     this._sleep = true;
   }
 
-  trailing(x: T) {
-    this.bounce = true;
+  async trailing(x: T, tag: {}) {
     this._catchTrailing = true;
     this._trailing = x;
+    this._tag = tag;
+    await this.delay();
+    return this._tag;
   }
 
   get sleep() {
@@ -46,7 +65,7 @@ class Debounce<T> {
   private _sleep: boolean;
   private _catchTrailing!: boolean;
   private _trailing!: T;
-  private bounce!: boolean;
+  private _tag!: {};
 }
 
 function debounceWithTrailing<T>(
@@ -73,20 +92,35 @@ function debounceWithTrailing<T>(
             switch (t) {
               case EmitType.Next:
                 if (debounce.sleep) {
-                  (async () => {
-                    await debounce.cycle();
-                    if (debounce.catchTrailing) {
-                      emit(EmitType.Next, debounce.theTrailing);
-                    }
-                  })();
-
                   if (leading) {
+                    (async () => {
+                      await debounce.startByLeading();
+                      if (!debounce.catchTrailing) {
+                        debounce.end();
+                      }
+                    })();
                     emit(t, x);
                   } else {
-                    debounce.trailing(x);
+                    (async () => {
+                      const tag = {};
+                      const current = await debounce.startByTrailing(x, {});
+                      if (tag === current) {
+                        const x = debounce.theTrailing;
+                        debounce.end();
+                        emit(t, x);
+                      }
+                    })();
                   }
                 } else {
-                  debounce.trailing(x);
+                  (async () => {
+                    const tag = {};
+                    const current = await debounce.trailing(x, {});
+                    if (tag === current) {
+                      const x = debounce.theTrailing;
+                      debounce.end();
+                      emit(t, x);
+                    }
+                  })();
                 }
                 break;
               case EmitType.Complete:
@@ -141,19 +175,4 @@ function debounceLeading<T>(span: number) {
       map(([, , x]: Item) => x),
     ]);
   };
-}
-
-export function debounce<T>(
-  t: number,
-  { leading = true, trailing = false }
-): (s: PushStream<T>) => PushStream<T> {
-  if (trailing) {
-    return debounceWithTrailing(t, leading);
-  } else {
-    if (leading) {
-      return debounceLeading(t);
-    } else {
-      return take<any>(0);
-    }
-  }
 }

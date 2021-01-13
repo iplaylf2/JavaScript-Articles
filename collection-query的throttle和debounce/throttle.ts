@@ -1,6 +1,21 @@
 import { PushStream, Cancel, EmitType, transfer } from "collection-query";
 import { create, filter, scan, map, take } from "collection-query/push";
 
+export function throttle<T>(
+  t: number,
+  { leading = true, trailing = false }
+): (s: PushStream<T>) => PushStream<T> {
+  if (trailing) {
+    return throttleWithTrailing(t, leading);
+  } else {
+    if (leading) {
+      return throttleLeading(t);
+    } else {
+      return take<any>(0);
+    }
+  }
+}
+
 class Throttle<T> {
   constructor(span: number) {
     this.span = span;
@@ -79,7 +94,7 @@ function throttleWithTrailing<T>(
                     while (true) {
                       await throttle.cycle();
                       if (throttle.catchTrailing) {
-                        emit(EmitType.Next, throttle.theTrailing);
+                        emit(t, throttle.theTrailing);
                       } else if (!throttle.catchLeading) {
                         return;
                       }
@@ -157,19 +172,4 @@ function throttleLeading<T>(span: number) {
       map(([, , x]: Item) => x),
     ]);
   };
-}
-
-export function throttle<T>(
-  t: number,
-  { leading = true, trailing = false }
-): (s: PushStream<T>) => PushStream<T> {
-  if (trailing) {
-    return throttleWithTrailing(t, leading);
-  } else {
-    if (leading) {
-      return throttleLeading(t);
-    } else {
-      return take<any>(0);
-    }
-  }
 }
