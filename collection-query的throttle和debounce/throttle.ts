@@ -58,7 +58,7 @@ class Throttle<T> {
   private timeout!: ReturnType<typeof setTimeout>;
 }
 
-const throttleWithTrailing = function <T>(
+function throttleWithTrailing<T>(
   span: number,
   leading: boolean
 ): (s: PushStream<T>) => PushStream<T> {
@@ -140,9 +140,9 @@ const throttleWithTrailing = function <T>(
       return cancel;
     };
   };
-};
+}
 
-const throttleLeading = function <T>(t: number) {
+function throttleLeading<T>(t: number) {
   type Item = [{ until: number }, boolean, T];
   return function (s: PushStream<T>): PushStream<T> {
     return transfer(s, [
@@ -166,7 +166,7 @@ const throttleLeading = function <T>(t: number) {
       map(([, , x]: Item) => x),
     ]);
   };
-};
+}
 
 export function throttle<T>(
   t: number,
