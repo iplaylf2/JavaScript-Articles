@@ -30,19 +30,25 @@ class Debounce<T> {
 
   startByTrailing(x: T, tag: {}) {
     this._sleep = false;
-    return this.trailing(x, tag);
+    return this.pushTrailing(x, tag);
   }
 
   end() {
     this._sleep = true;
   }
 
-  async trailing(x: T, tag: {}) {
+  async pushTrailing(x: T, tag: {}) {
     this._catchTrailing = true;
     this._trailing = x;
     this._tag = tag;
     await this.delay();
     return this._tag;
+  }
+
+  popTrailing() {
+    const x = this._trailing;
+    this._trailing = undefined;
+    return x;
   }
 
   get sleep() {
@@ -51,10 +57,6 @@ class Debounce<T> {
 
   get catchTrailing() {
     return this._catchTrailing;
-  }
-
-  get theTrailing() {
-    return this._trailing;
   }
 
   private delay() {
@@ -105,7 +107,7 @@ function debounceWithTrailing<T>(
                       const tag = {};
                       const current = await debounce.startByTrailing(x, {});
                       if (tag === current) {
-                        const x = debounce.theTrailing;
+                        const x = debounce.popTrailing();
                         debounce.end();
                         emit(t, x);
                       }
@@ -114,9 +116,9 @@ function debounceWithTrailing<T>(
                 } else {
                   (async () => {
                     const tag = {};
-                    const current = await debounce.trailing(x, {});
+                    const current = await debounce.pushTrailing(x, {});
                     if (tag === current) {
-                      const x = debounce.theTrailing;
+                      const x = debounce.popTrailing();
                       debounce.end();
                       emit(t, x);
                     }
@@ -125,7 +127,7 @@ function debounceWithTrailing<T>(
                 break;
               case EmitType.Complete:
                 if (!debounce.sleep && debounce.catchTrailing) {
-                  emit(EmitType.Next, debounce.theTrailing);
+                  emit(EmitType.Next, debounce.popTrailing());
                 }
                 emit(t);
                 break;

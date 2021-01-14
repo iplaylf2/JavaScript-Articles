@@ -34,9 +34,15 @@ class Throttle<T> {
     this._catchLeading = true;
   }
 
-  trailing(x: T) {
+  pushTrailing(x: T) {
     this._catchTrailing = true;
     this._trailing = x;
+  }
+
+  popTrailing() {
+    const x = this._trailing;
+    this._trailing = undefined;
+    return x;
   }
 
   get sleep() {
@@ -49,10 +55,6 @@ class Throttle<T> {
 
   get catchTrailing() {
     return this._catchTrailing;
-  }
-
-  get theTrailing() {
-    return this._trailing;
   }
 
   private delay() {
@@ -94,7 +96,7 @@ function throttleWithTrailing<T>(
                     while (true) {
                       await throttle.cycle();
                       if (throttle.catchTrailing) {
-                        emit(t, throttle.theTrailing);
+                        emit(t, throttle.popTrailing());
                       } else if (!throttle.catchLeading) {
                         return;
                       }
@@ -105,20 +107,20 @@ function throttleWithTrailing<T>(
                     throttle.leading();
                     emit(t, x);
                   } else {
-                    throttle.trailing(x);
+                    throttle.pushTrailing(x);
                   }
                 } else {
                   if (leading && !throttle.catchLeading) {
                     throttle.leading();
                     emit(t, x);
                   } else {
-                    throttle.trailing(x);
+                    throttle.pushTrailing(x);
                   }
                 }
                 break;
               case EmitType.Complete:
                 if (!throttle.sleep && throttle.catchTrailing) {
-                  emit(EmitType.Next, throttle.theTrailing);
+                  emit(EmitType.Next, throttle.popTrailing());
                 }
                 emit(t);
                 break;
