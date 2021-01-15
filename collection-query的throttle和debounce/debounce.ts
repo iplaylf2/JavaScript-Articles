@@ -163,7 +163,7 @@ function debounceLeading<T>(span: number) {
     return transfer(s, [
       scan<T, Item>(
         ([context], x) => {
-          const now = Date.now();
+          const now = performance.now();
           let leading = false;
           if (context.until < now) {
             leading = true;
