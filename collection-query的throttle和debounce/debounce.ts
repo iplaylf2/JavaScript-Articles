@@ -3,7 +3,7 @@ import { create, filter, scan, map, take } from "collection-query/push";
 
 export function debounce<T>(
   t: number,
-  option = { leading : true, trailing : false }
+  option = { leading: true, trailing: false }
 ): (s: PushStream<T>) => PushStream<T> {
   const { leading, trailing } = option;
   if (trailing) {
@@ -106,7 +106,7 @@ function debounceWithTrailing<T>(
                   } else {
                     (async () => {
                       const tag = {};
-                      const current = await debounce.startByTrailing(x, {});
+                      const current = await debounce.startByTrailing(x, tag);
                       if (tag === current) {
                         const x = debounce.popTrailing();
                         debounce.end();
@@ -117,7 +117,7 @@ function debounceWithTrailing<T>(
                 } else {
                   (async () => {
                     const tag = {};
-                    const current = await debounce.pushTrailing(x, {});
+                    const current = await debounce.pushTrailing(x, tag);
                     if (tag === current) {
                       const x = debounce.popTrailing();
                       debounce.end();
