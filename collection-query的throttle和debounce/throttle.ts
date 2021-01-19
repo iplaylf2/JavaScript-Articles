@@ -3,8 +3,9 @@ import { create, filter, scan, map, take } from "collection-query/push";
 
 export function throttle<T>(
   t: number,
-  { leading = true, trailing = false }
+  option = { leading : true, trailing : false }
 ): (s: PushStream<T>) => PushStream<T> {
+  const { leading, trailing } = option;
   if (trailing) {
     return throttleWithTrailing(t, leading);
   } else {
