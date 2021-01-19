@@ -3,7 +3,7 @@ import { create, filter, scan, map, take } from "collection-query/push";
 
 export function throttle<T>(
   t: number,
-  option = { leading : true, trailing : false }
+  option = { leading: true, trailing: false }
 ): (s: PushStream<T>) => PushStream<T> {
   const { leading, trailing } = option;
   if (trailing) {
@@ -161,7 +161,7 @@ function throttleLeading<T>(span: number) {
           if (context.until < now) {
             let until = context.until + span;
             if (until < now) {
-              until = context.until + now;
+              until = now + span;
             }
             context.until = until;
             return [context, true, x];
