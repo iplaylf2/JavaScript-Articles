@@ -52,11 +52,11 @@ document.body.innerHTML = `
 <ul>
     <li>normal</li>
     <li>throttle(100, { leading: true})</li>
-    <li>throttle(100, { tailing: true})</li>
-    <li>throttle(100, { leading: true, tailing: true})</li>
+    <li>throttle(100, { trailing: true})</li>
+    <li>throttle(100, { leading: true, trailing: true})</li>
     <li>debounce(100, { leading: true})</li>
-    <li>debounce(100, { tailing: true})</li>
-    <li>debounce(100, { leading: true, tailing: true})</li>
+    <li>debounce(100, { trailing: true})</li>
+    <li>debounce(100, { leading: true, trailing: true})</li>
 </ul>
 <canvas height= "640" width= "1024"></canvas>
 `;
@@ -111,14 +111,14 @@ document.body.innerHTML = `
     document.body.addEventListener("mousemove", () => emit(EmitType.Next));
   });
   const t1 = transfer(move_s, [throttle(100, { leading: true })]);
-  const t2 = transfer(move_s, [throttle(100, { tailing: true })]);
+  const t2 = transfer(move_s, [throttle(100, { trailing: true })]);
   const t3 = transfer(move_s, [
-    throttle(100, { leading: true, tailing: true }),
+    throttle(100, { leading: true, trailing: true }),
   ]);
   const d1 = transfer(move_s, [debounce(100, { leading: true })]);
-  const d2 = transfer(move_s, [debounce(100, { tailing: true })]);
+  const d2 = transfer(move_s, [debounce(100, { trailing: true })]);
   const d3 = transfer(move_s, [
-    debounce(100, { leading: true, tailing: true }),
+    debounce(100, { leading: true, trailing: true }),
   ]);
 
   document.body.addEventListener("mousemove", () => {
