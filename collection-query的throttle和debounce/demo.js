@@ -3,70 +3,124 @@ import { create, forEach } from "collection-query/push";
 import { throttle } from "./throttle.ts";
 import { debounce } from "./debounce.ts";
 
-document.body.innerHTML = `
-<style>
-    body{
-        position: relative;
-    }
-    ul{
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        list-style: none;
-        height: 640;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-        z-index: 1;
-    }
-    canvas{
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%)
-    }
-    li:nth-child(1){
-      color: #1ABC9C;
-    }
-    li:nth-child(2){
-      color: #27AE60;
-    }
-    li:nth-child(3){
-      color: #3498DB;
-    }
-    li:nth-child(4){
-      color: #9B59B6;
-    }
-    li:nth-child(5){
-      color: #34495E;
-    }
-    li:nth-child(6){
-      color: #F39C12;
-    }
-    li:nth-child(7){
-      color: #D35400;
-    }
-</style>
-<ul>
-    <li>normal</li>
-    <li>throttle(100, { leading: true})</li>
-    <li>throttle(100, { trailing: true})</li>
-    <li>throttle(100, { leading: true, trailing: true})</li>
-    <li>debounce(100, { leading: true})</li>
-    <li>debounce(100, { trailing: true})</li>
-    <li>debounce(100, { leading: true, trailing: true})</li>
-</ul>
-<canvas height= "640" width= "1024"></canvas>
-`;
-
 (() => {
+  const span = 100;
+
+  const move_s = create((emit) =>
+    document.body.addEventListener("mousemove", function listen() {
+      const open = emit(EmitType.Next);
+      if (!open) {
+        document.body.removeEventListener("mousemove", listen);
+      }
+    })
+  );
+
+  const filter_array = [
+    [
+      "normal",
+      "#1ABC9C",
+      (color, order) => {
+        document.body.addEventListener("mousemove", () =>
+          paint_bar(color, order, get_point())
+        );
+      },
+    ],
+    [
+      `throttle(${span}, { leading: true })`,
+      "#27AE60",
+      (color, order) => {
+        const s = transfer(move_s, [throttle(span, { leading: true })]);
+        forEach(s, () => paint_bar(color, order, get_point()));
+      },
+    ],
+    [
+      `throttle(${span}, { trailing: true })`,
+      "#3498DB",
+      (color, order) => {
+        const s = transfer(move_s, [throttle(span, { trailing: true })]);
+        forEach(s, () => paint_bar(color, order, get_point()));
+      },
+    ],
+    [
+      `throttle(${span}, { leading: true, trailing: true })`,
+      "#9B59B6",
+      (color, order) => {
+        const s = transfer(move_s, [
+          throttle(span, { leading: true, trailing: true }),
+        ]);
+        forEach(s, () => paint_bar(color, order, get_point()));
+      },
+    ],
+    [
+      `debounce(${span}, { leading: true })`,
+      "#34495E",
+      (color, order) => {
+        const s = transfer(move_s, [debounce(span, { leading: true })]);
+        forEach(s, () => paint_bar(color, order, get_point()));
+      },
+    ],
+    [
+      `debounce(${span}, { trailing: true })`,
+      "#F39C12",
+      (color, order) => {
+        const s = transfer(move_s, [debounce(span, { trailing: true })]);
+        forEach(s, () => paint_bar(color, order, get_point()));
+      },
+    ],
+    [
+      `debounce(${span}, { leading: true, trailing: true })`,
+      "#D35400",
+      (color, order) => {
+        const s = transfer(move_s, [
+          debounce(span, { leading: true, trailing: true }),
+        ]);
+        forEach(s, () => paint_bar(color, order, get_point()));
+      },
+    ],
+  ];
+
   const canvas_width = 1024;
   const canvas_height = 640;
-  const region = 7;
+  const region = filter_array.length;
   const width = 1;
   const height = canvas_height / region;
+
+  document.body.innerHTML = `
+  <style>
+    body{
+      position: relative;
+    }
+    ul{
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      list-style: none;
+      height: ${canvas_height};
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      z-index: 1;
+    }
+    canvas{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%)
+    }
+  </style>
+  <ul>
+      ${filter_array
+        .map(
+          ([text, color]) => `
+    <li style="color: ${color};">${text}</li>
+    `
+        )
+        .join("")}
+  </ul>
+  <canvas height= "${canvas_height}" width= "${canvas_width}"></canvas>
+  `;
 
   const ctx = document.querySelector("canvas").getContext("2d");
 
@@ -75,20 +129,10 @@ document.body.innerHTML = `
     ctx.fillRect(0, 0, canvas_width, canvas_height);
   };
 
-  const color = [
-    "#1ABC9C",
-    "#27AE60",
-    "#3498DB",
-    "#9B59B6",
-    "#34495E",
-    "#F39C12",
-    "#D35400",
-  ];
-
-  const paint_bar = function (order, point) {
+  const paint_bar = function (color, order, point) {
     const y = order * height;
     const x = point;
-    ctx.fillStyle = color[order];
+    ctx.fillStyle = color;
     ctx.fillRect(x, y, width, height);
   };
 
@@ -107,31 +151,8 @@ document.body.innerHTML = `
     return span * width_scale;
   };
 
-  const move_s = create((emit) =>
-    document.body.addEventListener("mousemove", function listen() {
-      const open = emit(EmitType.Next);
-      if (!open) {
-        document.body.removeEventListener("mousemove", listen);
-      }
-    })
-  );
-  const t1 = transfer(move_s, [throttle(100, { leading: true })]);
-  const t2 = transfer(move_s, [throttle(100, { trailing: true })]);
-  const t3 = transfer(move_s, [
-    throttle(100, { leading: true, trailing: true }),
-  ]);
-  const d1 = transfer(move_s, [debounce(100, { leading: true })]);
-  const d2 = transfer(move_s, [debounce(100, { trailing: true })]);
-  const d3 = transfer(move_s, [
-    debounce(100, { leading: true, trailing: true }),
-  ]);
-
-  document.body.addEventListener("mousemove", () => paint_bar(0, get_point()));
-
-  forEach(t1, () => paint_bar(1, get_point()));
-  forEach(t2, () => paint_bar(2, get_point()));
-  forEach(t3, () => paint_bar(3, get_point()));
-  forEach(d1, () => paint_bar(4, get_point()));
-  forEach(d2, () => paint_bar(5, get_point()));
-  forEach(d3, () => paint_bar(6, get_point()));
+  let i = 0;
+  for (const [, color, x] of filter_array) {
+    x(color, i++);
+  }
 })();
