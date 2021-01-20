@@ -107,9 +107,14 @@ document.body.innerHTML = `
     return span * width_scale;
   };
 
-  const move_s = create((emit) => {
-    document.body.addEventListener("mousemove", () => emit(EmitType.Next));
-  });
+  const move_s = create((emit) =>
+    document.body.addEventListener("mousemove", function listen() {
+      const open = emit(EmitType.Next);
+      if (!open) {
+        document.body.removeEventListener("mousemove", listen);
+      }
+    })
+  );
   const t1 = transfer(move_s, [throttle(100, { leading: true })]);
   const t2 = transfer(move_s, [throttle(100, { trailing: true })]);
   const t3 = transfer(move_s, [
@@ -121,26 +126,12 @@ document.body.innerHTML = `
     debounce(100, { leading: true, trailing: true }),
   ]);
 
-  document.body.addEventListener("mousemove", () => {
-    paint_bar(0, get_point());
-  });
+  document.body.addEventListener("mousemove", () => paint_bar(0, get_point()));
 
-  forEach(t1, () => {
-    paint_bar(1, get_point());
-  });
-  forEach(t2, () => {
-    paint_bar(2, get_point());
-  });
-  forEach(t3, () => {
-    paint_bar(3, get_point());
-  });
-  forEach(d1, () => {
-    paint_bar(4, get_point());
-  });
-  forEach(d2, () => {
-    paint_bar(5, get_point());
-  });
-  forEach(d3, () => {
-    paint_bar(6, get_point());
-  });
+  forEach(t1, () => paint_bar(1, get_point()));
+  forEach(t2, () => paint_bar(2, get_point()));
+  forEach(t3, () => paint_bar(3, get_point()));
+  forEach(d1, () => paint_bar(4, get_point()));
+  forEach(d2, () => paint_bar(5, get_point()));
+  forEach(d3, () => paint_bar(6, get_point()));
 })();
