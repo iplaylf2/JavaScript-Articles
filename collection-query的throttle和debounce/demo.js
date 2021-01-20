@@ -31,7 +31,7 @@ document.body.innerHTML = `
       color: #1ABC9C;
     }
     li:nth-child(2){
-      color: #2ECC71;
+      color: #27AE60;
     }
     li:nth-child(3){
       color: #3498DB;
@@ -43,10 +43,10 @@ document.body.innerHTML = `
       color: #34495E;
     }
     li:nth-child(6){
-      color: #F1C40F;
+      color: #F39C12;
     }
     li:nth-child(7){
-      color: #E67E22;
+      color: #D35400;
     }
 </style>
 <ul>
@@ -77,12 +77,12 @@ document.body.innerHTML = `
 
   const color = [
     "#1ABC9C",
-    "#2ECC71",
+    "#27AE60",
     "#3498DB",
-    "9B59B6",
-    "34495E",
-    "F1C40F",
-    "E67E22",
+    "#9B59B6",
+    "#34495E",
+    "#F39C12",
+    "#D35400",
   ];
 
   const paint_bar = function (order, point) {
