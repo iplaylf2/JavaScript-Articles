@@ -6,14 +6,14 @@ import { debounce } from "./debounce.ts";
 (() => {
   const span = 100;
 
-  const move_s = create((emit) =>
-    document.body.addEventListener("mousemove", function listen() {
-      const open = emit(EmitType.Next);
-      if (!open) {
-        document.body.removeEventListener("mousemove", listen);
-      }
-    })
-  );
+  const move_s = create((emit) => {
+    const listen = function listen() {
+      emit(EmitType.Next);
+    };
+    document.body.addEventListener("mousemove", listen);
+
+    return () => document.body.removeEventListener("mousemove", listen);
+  });
 
   const filter_array = [
     [
