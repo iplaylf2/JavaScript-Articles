@@ -1,5 +1,12 @@
 import { PushStream, Cancel, EmitType, transfer } from "collection-query";
-import { create, filter, scan, map, take } from "collection-query/push";
+import {
+  EmitForm,
+  create,
+  filter,
+  scan,
+  map,
+  take,
+} from "collection-query/push";
 
 export function debounce<T>(
   t: number,
@@ -48,7 +55,7 @@ class Debounce<T> {
 
   popTrailing() {
     const x = this._trailing;
-    this._trailing = undefined;
+    this._trailing = null!;
     return x;
   }
 
@@ -81,77 +88,73 @@ function debounceWithTrailing<T>(
 
   return function (s) {
     return function (receiver, expose): Cancel {
-      const cancel = function () {
-        relay_cancel();
-        source_cancel();
+      let relay_emit!: EmitForm<T>;
+      let _source_cancel: Cancel;
+      const source_cancel = function () {
+        _source_cancel();
       };
 
-      let source_cancel!: Cancel;
+      const relay_emitter = create<T>((emit) => {
+        relay_emit = emit;
+        return source_cancel;
+      });
+
+      const cancel = relay_emitter(receiver, (c) => {
+        if (expose) {
+          expose(c);
+        }
+      });
 
       const debounce = new Debounce<T>(span);
-      const relay_emitter = create<T>((emit) => {
-        s(
-          (t, x?) => {
-            switch (t) {
-              case EmitType.Next:
-                if (debounce.sleep) {
-                  if (leading) {
-                    (async () => {
-                      await debounce.startByLeading();
-                      if (!debounce.catchTrailing) {
-                        debounce.end();
-                      }
-                    })();
-                    emit(t, x);
-                  } else {
-                    (async () => {
-                      const tag = {};
-                      const current = await debounce.startByTrailing(x, tag);
-                      if (tag === current) {
-                        const x = debounce.popTrailing();
-                        debounce.end();
-                        emit(t, x);
-                      }
-                    })();
-                  }
+      s(
+        (t, x?) => {
+          switch (t) {
+            case EmitType.Next:
+              if (debounce.sleep) {
+                if (leading) {
+                  (async () => {
+                    await debounce.startByLeading();
+                    if (!debounce.catchTrailing) {
+                      debounce.end();
+                    }
+                  })();
+                  relay_emit(t, x);
                 } else {
                   (async () => {
                     const tag = {};
-                    const current = await debounce.pushTrailing(x, tag);
+                    const current = await debounce.startByTrailing(x, tag);
                     if (tag === current) {
                       const x = debounce.popTrailing();
                       debounce.end();
-                      emit(t, x);
+                      relay_emit(t, x);
                     }
                   })();
                 }
-                break;
-              case EmitType.Complete:
-                if (!debounce.sleep && debounce.catchTrailing) {
-                  emit(EmitType.Next, debounce.popTrailing());
-                }
-                emit(t);
-                break;
-              case EmitType.Error:
-                emit(t, x);
-                break;
-            }
-          },
-          (c) => {
-            source_cancel = c;
+              } else {
+                (async () => {
+                  const tag = {};
+                  const current = await debounce.pushTrailing(x, tag);
+                  if (tag === current) {
+                    const x = debounce.popTrailing();
+                    debounce.end();
+                    relay_emit(t, x);
+                  }
+                })();
+              }
+              break;
+            case EmitType.Complete:
+              if (!debounce.sleep && debounce.catchTrailing) {
+                relay_emit(EmitType.Next, debounce.popTrailing());
+              }
+              relay_emit(t);
+              break;
+            case EmitType.Error:
+              relay_emit(t, x);
+              break;
           }
-        );
-      });
-
-      let relay_cancel!: Cancel;
-
-      relay_emitter(receiver, (c) => {
-        relay_cancel = c;
-
-        if (expose) {
-          expose(cancel);
-        }
-      });
+        },
+        (c) => (_source_cancel = c)
+      );
 
       return cancel;
     };

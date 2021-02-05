@@ -1,5 +1,12 @@
 import { PushStream, Cancel, EmitType, transfer } from "collection-query";
-import { create, filter, scan, map, take } from "collection-query/push";
+import {
+  create,
+  filter,
+  scan,
+  map,
+  take,
+  EmitForm,
+} from "collection-query/push";
 
 export function throttle<T>(
   t: number,
@@ -42,7 +49,7 @@ class Throttle<T> {
 
   popTrailing() {
     const x = this._trailing;
-    this._trailing = undefined;
+    this._trailing = null!;
     return x;
   }
 
@@ -79,72 +86,69 @@ function throttleWithTrailing<T>(
 
   return function (s) {
     return function (receiver, expose): Cancel {
-      const cancel = function () {
-        relay_cancel();
-        source_cancel();
+      let relay_emit!: EmitForm<T>;
+      let _source_cancel: Cancel;
+      const source_cancel = function () {
+        _source_cancel();
       };
 
-      let source_cancel!: Cancel;
-
-      const throttle = new Throttle<T>(span);
       const relay_emitter = create<T>((emit) => {
-        s(
-          (t, x?) => {
-            switch (t) {
-              case EmitType.Next:
-                if (throttle.sleep) {
-                  (async () => {
-                    while (true) {
-                      await throttle.cycle();
-                      if (throttle.catchTrailing) {
-                        emit(t, throttle.popTrailing());
-                      } else if (!throttle.catchLeading) {
-                        return;
-                      }
-                    }
-                  })();
-
-                  if (leading) {
-                    throttle.leading();
-                    emit(t, x);
-                  } else {
-                    throttle.pushTrailing(x);
-                  }
-                } else {
-                  if (leading && !throttle.catchLeading) {
-                    throttle.leading();
-                    emit(t, x);
-                  } else {
-                    throttle.pushTrailing(x);
-                  }
-                }
-                break;
-              case EmitType.Complete:
-                if (!throttle.sleep && throttle.catchTrailing) {
-                  emit(EmitType.Next, throttle.popTrailing());
-                }
-                emit(t);
-                break;
-              case EmitType.Error:
-                emit(t, x);
-                break;
-            }
-          },
-          (c) => {
-            source_cancel = c;
-          }
-        );
+        relay_emit = emit;
+        return source_cancel;
       });
 
-      let relay_cancel!: Cancel;
-
-      relay_emitter(receiver, (c) => {
-        relay_cancel = c;
-
+      const cancel = relay_emitter(receiver, (c) => {
         if (expose) {
-          expose(cancel);
+          expose(c);
         }
       });
+
+      const throttle = new Throttle<T>(span);
+
+      s(
+        (t, x?) => {
+          switch (t) {
+            case EmitType.Next:
+              if (throttle.sleep) {
+                (async () => {
+                  while (true) {
+                    await throttle.cycle();
+                    if (throttle.catchTrailing) {
+                      relay_emit(t, throttle.popTrailing());
+                    } else if (!throttle.catchLeading) {
+                      return;
+                    }
+                  }
+                })();
+
+                if (leading) {
+                  throttle.leading();
+                  relay_emit(t, x);
+                } else {
+                  throttle.pushTrailing(x);
+                }
+              } else {
+                if (leading && !throttle.catchLeading) {
+                  throttle.leading();
+                  relay_emit(t, x);
+                } else {
+                  throttle.pushTrailing(x);
+                }
+              }
+              break;
+            case EmitType.Complete:
+              if (!throttle.sleep && throttle.catchTrailing) {
+                relay_emit(EmitType.Next, throttle.popTrailing());
+              }
+              relay_emit(t);
+              break;
+            case EmitType.Error:
+              relay_emit(t, x);
+              break;
+          }
+        },
+        (c) => (_source_cancel = c)
+      );
 
       return cancel;
     };
