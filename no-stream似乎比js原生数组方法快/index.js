@@ -30,7 +30,7 @@ import { debounce } from "./debounce";
     ],
     [
       `throttle(${span})`,
-      "#27AE60",
+      "#9B59B6",
       (color, order) => {
         const s = throttle(span)(move_s);
         s.foreach(() => paint_bar(color, order, get_point()));
@@ -38,7 +38,7 @@ import { debounce } from "./debounce";
     ],
     [
       `debounce(${span})`,
-      "#34495E",
+      "#D35400",
       (color, order) => {
         const s = debounce(span)(move_s);
         s.foreach(() => paint_bar(color, order, get_point()));
