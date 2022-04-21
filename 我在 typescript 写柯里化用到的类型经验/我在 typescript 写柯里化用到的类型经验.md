@@ -173,12 +173,12 @@ extends 出现在 typescript 的 4 种场景之中。
 
 ### 泛型约束
 
-如果你的项目中使用了 typescript-eslint ，那么用到 Function 时一定会[报错](https://typescript-eslint.io/rules/ban-types/#default-options)。它给出了两个理由。
+如果你的项目中使用了 typescript-eslint ，那么用到 Function 类型时有可能会[报错](https://typescript-eslint.io/rules/ban-types/#default-options)。它给出了两个理由。
 
 - Function 没有约束参数和返回值，它不是类型安全的。
 - Function 也是构造函数的抽象类型，如果我们不用 new 去调用一个构造函数，会有不可预测的后果。
 
-我们可以定义一个 BaseFunction 去表达一个普通的函数，而且它不是一个构造函数
+我们可以定义一个 BaseFunction 去表达一个普通的函数，而且它不是一个构造函数。
 
 ```typescript
 type BaseFunction<Params extends unknown[], Return> = (
@@ -188,11 +188,33 @@ type BaseFunction<Params extends unknown[], Return> = (
 
 这里的 extends 起到了泛型约束的作用。
 
-`Params extends unknown[]` ，用前文的语言去解释，（更）具体的类型 Params 派生于（更）抽象的类型 unknown[]。
+`Params extends unknown[]` ，用前文的概念去解释就是，（更）具体的类型 Params 派生于（更）抽象的类型 unknown[] 。
 
 在接下来的上下文中，Params 是 unknown[] 的具体类型，它兼容 unknown[] ，具有  unknown[] 的一切特性。
 
-所以 Params 可以用于 [Rest](https://www.typescriptlang.org/docs/handbook/2/functions.html#rest-parameters-and-arguments) 参数的类型。如果
+作为代价，实际传入 Params 的参数需要接受类型的约束，它必须派生于 unknown[] 。
+
+在[函数类型表达式](https://www.typescriptlang.org/docs/handbook/2/functions.html#function-type-expressions) `(...args: Params) => Return` 中，args 是一个 [rest 参数](https://www.typescriptlang.org/docs/handbook/2/functions.html#rest-parameters-and-arguments)，它的类型必须是数组或者[元组](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types)，否则编译就不会通过。
+
+而 args 的类型 Params ，是 unknown[] 的具体类型，因此满足了 rest 参数的条件。
+
+再者，另一个泛型参数 Return 类型，它没有泛型约束，可以是任意类型，在类型表达式中也没有受到限制。
+
+最终我们就得到了一个合法的 BaseFunction 类型。
+
+``` typescript
+const repeat: BaseFunction<[string, number], string> = (a, b) => a.repeat(b); // 编译通过
+
+class Foo {
+  constructor(public name: string) {}
+}
+
+const new_foo: BaseFunction<[string], Foo> = Foo; // 编译不通过
+```
+
+如果要表达构造函数，需要使用[构造签名](https://www.typescriptlang.org/docs/handbook/2/functions.html#construct-signatures) `new (...args: Params) => Instance` ，这里就不赘述了。
+
+### 条件类型的约束
 
 ## tuple
 
