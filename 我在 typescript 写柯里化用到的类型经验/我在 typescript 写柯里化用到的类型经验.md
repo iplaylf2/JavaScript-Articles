@@ -46,7 +46,7 @@ x = false;
 
 那么，姑且在这定义 any 是所有类型的最具体和最抽象的版本。
 
-如同向上兼容，类型总是兼容它更抽象的版本。所以 any 类型的变量，能赋值给所有类型的变量，也能接受所有类型的值。
+如同向上[兼容](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#advanced-topics)，类型总是兼容它更抽象的版本。所以 any 类型的变量，能赋值给所有类型的变量，也能接受所有类型的值。
 
 ### unknown
 
@@ -169,7 +169,7 @@ extends 出现在 typescript 的 4 种场景之中。
 
 每种场景的 extends 作用不同，但它们具有相同的语义——派生。而且，extends 左边的元素总是更具体的类型，右边的元素总是更抽象的类型。
 
-本文的重点是后面 2 种场景，泛型约束和条件类型的约束。
+本文将重点讲述后面 2 种场景，泛型约束和条件类型的约束。
 
 ### 泛型约束
 
@@ -186,7 +186,7 @@ type BaseFunction<Params extends unknown[], Return> = (
 ) => Return;
 ```
 
-这里的 extends 起到了泛型约束的作用。
+在这里，泛型参数列表中的 extends ，起到了泛型约束的作用。
 
 `Params extends unknown[]` ，用前文的概念去解释就是，（更）具体的类型 Params 派生于（更）抽象的类型 unknown[] 。
 
@@ -222,7 +222,7 @@ const new_foo: BaseFunction<[string], Foo> = Foo; // 编译不通过
 type IsBaseFunction<T> = T extends BaseFunction<any, any> ? true : false;
 ```
 
-这里的 extends 就起到了条件类型约束的作用。
+在这里，条件类型表达式中的 extends ，起到了条件类型约束的作用。
 
 `T extends BaseFunction<any, any>` ，假设具体类型 T 派生于抽象类型 `BaseFunction<any, any>` 。如果满足这个约束，就会采用第一个表达式的结果作为类型，否则采用第二个的。
 
@@ -231,12 +231,19 @@ type test1 = IsBaseFunction<{}>; // 类型 test1 为 false
 type test2 = IsBaseFunction<() => void>; // 类型 test2 为 true
 ```
 
-### 更复杂的场景
+### extends 小结
 
+这一节只是简单地讲述泛型约束和条件类型约束中的 extends ，它们共同的语义就是派生。
 
+关于泛型和条件类型的更多内容会在后面有选择地展开。
 
-## tuple
+还有一点需要补充一下，一个类型能够派生于它本身。我们可以用条件类型表达式来验证一下。
 
-给柯里化函数写类型，免不了处理函数类型。函数类型可以拆成两部分看待，参数列表和返回值，而参数列表往往是 [tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) 类型。
+```typescript
+type test1 = number extends number ? true : false; // 类型 test1 为 true
+type test2 = { x: string } extends { x: string } ? true : false; // 类型 test2 为 true
+```
 
-下面是 facade.ts 的一段代码
+*如果类型定义的名字部分不是泛型，条件类型表达式会立刻计算得到结果。*
+
+“一个类型能够派生于它本身”，这个说法听起来怪怪的，也许用 [assignability](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#advanced-topics) 更合适，但是我不知道怎么翻译。
