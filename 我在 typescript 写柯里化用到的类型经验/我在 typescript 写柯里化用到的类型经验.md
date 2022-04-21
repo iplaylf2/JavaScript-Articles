@@ -194,7 +194,7 @@ type BaseFunction<Params extends unknown[], Return> = (
 
 作为代价，实际传入 Params 的参数需要接受类型的约束，它必须派生于 unknown[] 。
 
-在[函数类型表达式](https://www.typescriptlang.org/docs/handbook/2/functions.html#function-type-expressions) `(...args: Params) => Return` 中，args 是一个 [rest 参数](https://www.typescriptlang.org/docs/handbook/2/functions.html#rest-parameters-and-arguments)，它的类型必须是数组或者[元组](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types)，否则编译就不会通过。
+在[函数类型表达式](https://www.typescriptlang.org/docs/handbook/2/functions.html#function-type-expressions) `(...args: Params) => Return` 中，args 是一个 [rest 参数](https://www.typescriptlang.org/docs/handbook/2/functions.html#rest-parameters-and-arguments)，它的类型必须是数组或者[元组](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types)。
 
 而 args 的类型 Params ，是 unknown[] 的具体类型，因此满足了 rest 参数的条件。
 
@@ -244,6 +244,6 @@ type test1 = number extends number ? true : false; // 类型 test1 为 true
 type test2 = { x: string } extends { x: string } ? true : false; // 类型 test2 为 true
 ```
 
-*如果类型定义的名字部分不是泛型，条件类型表达式会立刻计算得到结果。*
+*如果类型定义的名字部分不包含泛型，条件类型表达式会立刻计算得到结果。*
 
 “一个类型能够派生于它本身”，这个说法听起来怪怪的，也许用 [assignability](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#advanced-topics) 更合适，但是我不知道怎么翻译。
