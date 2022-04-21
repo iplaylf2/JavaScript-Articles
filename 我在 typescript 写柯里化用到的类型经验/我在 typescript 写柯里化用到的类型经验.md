@@ -165,7 +165,7 @@ extends 出现在 typescript 的 4 种场景之中。
 - Class 的[继承](https://www.typescriptlang.org/docs/handbook/2/classes.html#extends-clauses)
 - Object Types 的[派生](https://www.typescriptlang.org/docs/handbook/2/objects.html#extending-types)
 - 泛型[约束](https://www.typescriptlang.org/docs/handbook/2/generics.html#generic-constraints)
-- 条件类型的[约束](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html)
+- 条件类型[约束](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html)
 
 每种场景的 extends 作用不同，但它们具有相同的语义——派生。而且，extends 左边的元素总是更具体的类型，右边的元素总是更抽象的类型。
 
@@ -202,7 +202,7 @@ type BaseFunction<Params extends unknown[], Return> = (
 
 最终我们就得到了一个合法的 BaseFunction 类型。
 
-``` typescript
+```typescript
 const repeat: BaseFunction<[string, number], string> = (a, b) => a.repeat(b); // 编译通过
 
 class Foo {
@@ -214,7 +214,26 @@ const new_foo: BaseFunction<[string], Foo> = Foo; // 编译不通过
 
 如果要表达构造函数，需要使用[构造签名](https://www.typescriptlang.org/docs/handbook/2/functions.html#construct-signatures) `new (...args: Params) => Instance` ，这里就不赘述了。
 
-### 条件类型的约束
+### 条件类型约束
+
+有了 BaseFunction ，我们可以再造一个 IsBaseFunction 来判断一个类型是不是普通的函数。
+
+```typescript
+type IsBaseFunction<T> = T extends BaseFunction<any, any> ? true : false;
+```
+
+这里的 extends 就起到了条件类型约束的作用。
+
+`T extends BaseFunction<any, any>` ，假设具体类型 T 派生于抽象类型 `BaseFunction<any, any>` 。如果满足这个约束，就会采用第一个表达式的结果作为类型，否则采用第二个的。
+
+```typescript
+type test1 = IsBaseFunction<{}>; // 类型 test1 为 false
+type test2 = IsBaseFunction<() => void>; // 类型 test2 为 true
+```
+
+### 更复杂的场景
+
+
 
 ## tuple
 
