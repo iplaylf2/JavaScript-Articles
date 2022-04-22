@@ -1,5 +1,20 @@
 # 我在 typescript 写柯里化用到的类型经验
 
+- [我写了个库，但本文重点不是它](#我写了个库但本文重点不是它)
+- [只是一些朴实的技巧](#只是一些朴实的技巧)
+- [说一下 any 、 unknown 、 never](#说一下-any--unknown--never)
+  - [any](#any)
+  - [unknown](#unknown)
+  - [never](#never)
+- [派生图谱](#派生图谱)
+- [类型断言](#类型断言)
+  - [有可能兼容的 as](#有可能兼容的-as)
+  - [不可能兼容的 as](#不可能兼容的-as)
+- [extends](#extends)
+  - [泛型约束的 extends](#泛型约束的-extends)
+  - [条件类型约束的 extends](#条件类型约束的-extends)
+  - [一个类型派生于它本身](#一个类型派生于它本身)
+
 ## 我写了个库，但本文重点不是它
 
 我写了个库，[facade.ts](https://github.com/iplaylf2/facade.ts) ，可以把一个函数变成柯里化的函数。
@@ -231,20 +246,16 @@ type test1 = IsBaseFunction<{}>; // 类型 test1 为 false
 type test2 = IsBaseFunction<() => void>; // 类型 test2 为 true
 ```
 
-### 小结
+### 一个类型派生于它本身
 
-这一节只是简单地讲述泛型约束和条件类型约束中的 extends ，它们共同的语义就是派生。
-
-关于泛型和条件类型的更多内容会在后面有选择地展开。
-
-还有一点需要补充一下，一个类型能够派生于它本身。我们可以用条件类型表达式来验证一下。
+还有一点需要补充一下，一个类型派生于它本身。我们可以用条件类型表达式来验证一下。
 
 ```typescript
 type test1 = number extends number ? true : false; // 类型 test1 为 true
 type test2 = { x: string } extends { x: string } ? true : false; // 类型 test2 为 true
 ```
 
-*如果类型定义的名字部分不包含泛型，条件类型表达式会立刻计算得到结果。*
+（*如果类型定义的名字部分不包含泛型，条件类型表达式会立刻计算得到结果。*）
 
-“一个类型能够派生于它本身”，这个说法听起来怪怪的，也许用 [assignability](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#advanced-topics) 比派生更合适，但是我不知道怎么翻译。
+“一个类型派生于它本身”，这个说法听起来怪怪的，或许用 [assignability](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#advanced-topics) 比派生更合适，但是我不知道怎么翻译。
 
