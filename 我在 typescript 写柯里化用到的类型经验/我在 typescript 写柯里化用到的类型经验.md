@@ -15,9 +15,9 @@ $((x: string, n: number) => x.repeat(n))("Hello!")(3);
 
 ## 只是一些朴实的技巧
 
-其实我不太愿意用体操这个词，至少题目没用到。因为我看其他的类型体操文也会被劝退。
+其实我不太愿意用体操这个词，至少题目没用到。typescript 的类型操作很多都有文档出处，虽然也有特例，但常规操作的组合就能满足大部分需求。
 
-在这，我会尽量说一些简单朴实的技巧，尽量指出该技巧在官方文档的出处。
+这并不是奇技淫巧，本文将要介绍的只是一些朴实的技巧，并且会尽量链接相关知识的出处。
 
 ## 说一下 any 、 unknown 、 never
 
@@ -75,7 +75,7 @@ const bar: number = x;
 
 所以在这个例子中，never 的 x 可以赋值给不同类型的值。
 
-虽然 never 的语义是不可到达，不可得到的类型，但它的确是上文所述的最具体的类型。
+虽然 never 的语义是不可到达，不可得到的类型，但它的确是上文所述的最具体的类型。而这种奇怪的属性，会在后面的类型操作中制造很大的麻烦。
 
 ## 派生图谱
 
@@ -128,11 +128,11 @@ interface Cat extends Animal {
 const azhu = { name: "azhu", climbTree(): void {} } as Animal; // 转化成更抽象的版本
 azhu.climbTree(); // Animal 没有 climbTree 字段，编译不通过
 const azhu_cat = azhu as Cat; // 转化成更具体的版本
-azhu_cat.climbTree(); // 来自 azhu 的值有 climbTree 字段，正确的类型不会直接导致运行出错
+azhu_cat.climbTree(); // 来自 azhu 的值有 climbTree 字段，兼容的类型不会直接导致运行出错
 
 const foo: Animal = { name: "foo" };
 const foo_cat = foo as Cat; // 转化成更具体的版本
-foo_cat.climbTree(); // 来自 foo 的值没有 climbTree 字段，不正确的类型直接导致了运行出错
+foo_cat.climbTree(); // 来自 foo 的值没有 climbTree 字段，不兼容的类型直接导致了运行出错
 ```
 
 一个抽象的类型的值，如果来自于它更具体的类型，才有可能在转化成更具体的版本时保持兼容。
@@ -169,9 +169,9 @@ extends 出现在 typescript 的 4 种场景之中。
 
 每种场景的 extends 作用不同，但它们具有相同的语义——派生。而且，extends 左边的元素总是更具体的类型，右边的元素总是更抽象的类型。
 
-本文将重点讲述后面 2 种场景，泛型约束和条件类型的约束。
+这里主要认识一下泛型约束和条件类型约束中的 extends 。
 
-### 泛型约束
+### 泛型约束的 extends
 
 如果你的项目中使用了 typescript-eslint ，那么用到 Function 类型时有可能会[报错](https://typescript-eslint.io/rules/ban-types/#default-options)。它给出了两个理由。
 
@@ -214,7 +214,7 @@ const new_foo: BaseFunction<[string], Foo> = Foo; // 编译不通过
 
 如果要表达构造函数，需要使用[构造签名](https://www.typescriptlang.org/docs/handbook/2/functions.html#construct-signatures) `new (...args: Params) => Instance` ，这里就不赘述了。
 
-### 条件类型约束
+### 条件类型约束的 extends
 
 有了 BaseFunction ，我们可以再造一个 IsBaseFunction 来判断一个类型是不是普通的函数。
 
@@ -231,7 +231,7 @@ type test1 = IsBaseFunction<{}>; // 类型 test1 为 false
 type test2 = IsBaseFunction<() => void>; // 类型 test2 为 true
 ```
 
-### extends 小结
+### 小结
 
 这一节只是简单地讲述泛型约束和条件类型约束中的 extends ，它们共同的语义就是派生。
 
@@ -246,4 +246,5 @@ type test2 = { x: string } extends { x: string } ? true : false; // 类型 test2
 
 *如果类型定义的名字部分不包含泛型，条件类型表达式会立刻计算得到结果。*
 
-“一个类型能够派生于它本身”，这个说法听起来怪怪的，也许用 [assignability](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#advanced-topics) 更合适，但是我不知道怎么翻译。
+“一个类型能够派生于它本身”，这个说法听起来怪怪的，也许用 [assignability](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#advanced-topics) 比派生更合适，但是我不知道怎么翻译。
+
