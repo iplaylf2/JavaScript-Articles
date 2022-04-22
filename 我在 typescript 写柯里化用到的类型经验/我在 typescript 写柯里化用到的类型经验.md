@@ -2,10 +2,10 @@
 
 - [我写了个库，但本文重点不是它](#我写了个库但本文重点不是它)
 - [只是一些朴实的技巧](#只是一些朴实的技巧)
-- [说一下 any 、 unknown 、 never](#说一下-any--unknown--never)
+- [说一下 any 、never 、unknown](#说一下-any-never-unknown)
   - [any](#any)
-  - [unknown](#unknown)
   - [never](#never)
+  - [unknown](#unknown)
 - [派生图谱](#派生图谱)
 - [类型断言](#类型断言)
   - [有可能兼容的 as](#有可能兼容的-as)
@@ -14,6 +14,10 @@
   - [泛型约束的 extends](#泛型约束的-extends)
   - [条件类型约束的 extends](#条件类型约束的-extends)
   - [一个类型派生于它本身](#一个类型派生于它本身)
+- [infer](#infer)
+  - [提取局部类型](#提取局部类型)
+  - [提取整体类型](#提取整体类型)
+  - [条件类型表达式一定是个三元表达式](#条件类型表达式一定是个三元表达式)
 
 ## 我写了个库，但本文重点不是它
 
@@ -34,11 +38,11 @@ $((x: string, n: number) => x.repeat(n))("Hello!")(3);
 
 这并不是奇技淫巧，本文将要介绍的只是一些朴实的技巧，并且会尽量链接相关知识的出处。
 
-## 说一下 any 、 unknown 、 never
+## 说一下 any 、never 、unknown
 
-做体操会大量用到 [Conditional Types](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html) 的特性，和与之深深关联的 extends 关键字。
+做体操会大量用到 [条件类型（ Conditional Types ）](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html) 的特性，和与之深深关联的 extends 关键字。
 
-在这之前，有 3 个类型更需要先弄明白，any 、unknown 、never 。
+在这之前，有 3 个类型更需要先弄明白，any 、never 、unknown 。
 
 ### any
 
@@ -52,62 +56,81 @@ const foo: string = x;
 x = false;
 ```
 
-复用别的面向对象语言的经验，有人会以，“ any 是所有类型的基类也是所有类型的子类”，去方便理解它。
+复用别的面向对象语言的经验，子类总是向上兼容基类。有人会以，“ any 是所有类型的基类也是所有类型的子类”，去方便理解 any 。
 
 可是官方文档除了介绍 class 时，没有基类和子类这般说法，像“继承”用到的 extends 关键字也能翻译成“扩展”。
 
-或许，我们可以用 [Type Assertions](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions)（ as 或 <> ）提到的**更具体的**和**更抽象**的去表达类型之间的关系。
+或许，我们可以借用 [Type Assertions](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions)（ as 或 <> ）提到的**更具体的**和**更抽象的**去表达类型之间的关系。
 > TypeScript only allows type assertions which convert to a more specific or less specific version of a type.
 
-那么，姑且在这定义 any 是所有类型的最具体和最抽象的版本。
+更具体的类型总是向上[兼容](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#advanced-topics)它更抽象的版本。
 
-如同向上[兼容](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#advanced-topics)，类型总是兼容它更抽象的版本。所以 any 类型的变量，能赋值给所有类型的变量，也能接受所有类型的值。
+那么，姑且在这定义 any 是所有类型的最具体和最抽象的版本。所以 any 类型的变量，能赋值给所有类型的变量，也能接受所有类型的值。
+
+**啊不！！！any 有一个类型的变量不能去赋值，那就是 never ！**
+
+```typescript
+let x: any = 233;
+const bar: never = x;
+// 不能将类型“any”分配给类型“never”。ts(2322)
+```
+
+### never
+
+[never](https://www.typescriptlang.org/docs/handbook/2/functions.html#never) 才是所有类型最具体的版本，包括 any 。
+
+```typescript
+declare const x: never;
+const foo: string = x;
+const bar: number = x;
+const qux: any = x;
+```
+
+具体的类型能够兼容抽象的版本，所以在这个例子中，never 的 x 可以赋值给不同类型的变量。
+
+虽然 never 的语义是不可到达，不可得到的类型，但它的确是上文所述的最具体的类型。而这种奇怪的属性，会在后面的类型操作中制造巨大的麻烦。
 
 ### unknown
 
-[unknown](https://www.typescriptlang.org/docs/handbook/2/functions.html#unknown) 是除了 any 之外最抽象的版本，其他类型都是基于 unknown 更具体的版本。
+与 never 相反，[unknown](https://www.typescriptlang.org/docs/handbook/2/functions.html#unknown) 是所有类型最抽象的版本，其他类型都是基于 unknown 更具体的版本。
 
-好拗口，具体的类型派生于抽象的类型，这里直接沿用术语派生（ derive ）吧。
-
-any 以外的类型都派生于 unknown 。
+好拗口，具体的类型派生于抽象的类型，这里直接沿用术语派生（ derive ）吧。所有类型都派生于 unknown 。以及 never 派生于所有类型。
 
 ```typescript
 let x: unknown = 233;
 x = false;
 ```
 
-所以在这个例子中，不同类型的值也能赋值给 unknown 的 x 。
+而在这个例子中，不同类型的值都能赋值给 unknown 的 x 。
 
-### never
+**等等！两个最抽象的类型？any 和 unknown 都是最抽象的？**
 
-[never](https://www.typescriptlang.org/docs/handbook/2/functions.html#never) 恰好是与 unknown 相反，他是 any 之外最具体的版本，它派生于所有其他类型。
-
-```typescript
-declare const x: never;
-const foo: string = x;
-const bar: number = x;
+``` typescript
+const x: unknown = 233;
+const foo: any = x;
+const bar: unknown = foo;
 ```
 
-所以在这个例子中，never 的 x 可以赋值给不同类型的值。
-
-虽然 never 的语义是不可到达，不可得到的类型，但它的确是上文所述的最具体的类型。而这种奇怪的属性，会在后面的类型操作中制造很大的麻烦。
+为什么不能有两个“最”？再说了， any 都那么特殊了，再当次特例不奇怪。~~（摆烂。）~~
 
 ## 派生图谱
 
 有了上面的认识，我们可以画一张 typescript 类型的派生图谱。
 
+为了简化关系，这里把 any 作为 unknown 更抽象的版本，unknown 派生于 any。反正不会破坏 unknown 的性质。
+
 ```mermaid
 flowchart LR
+  any --> unknown
 
-  any --> unknown 
+  any2[any]
+  any2 --> never
 
-  unknown --> boolean --> never
-  unknown --> number --> never
-  unknown --> string --> never
-  unknown --> object  --> never
-  unknown --> x1[...] --> never
-
-  never --> any
+  unknown --> boolean --> any2
+  unknown --> number --> any2
+  unknown --> string --> any2
+  unknown --> object --> any2
+  unknown --> rest[...] --> any2
 ```
 
 箭头的方向就是派生的方向。
@@ -203,9 +226,9 @@ type BaseFunction<Params extends unknown[], Return> = (
 
 在这里，泛型参数列表中的 extends ，起到了泛型约束的作用。
 
-`Params extends unknown[]` ，用前文的概念去解释就是，（更）具体的类型 Params 派生于（更）抽象的类型 unknown[] 。
+`Params extends unknown[]` ，用前文的概念去解释就是，（更）具体的类型 Params **派生于**（更）抽象的类型 unknown[] 。
 
-在接下来的上下文中，Params 是 unknown[] 的具体类型，它兼容 unknown[] ，具有  unknown[] 的一切特性。
+在接下来的上下文中，Params 是 unknown[] 的具体类型，它兼容 unknown[] ，具有 unknown[] 的一切特性。
 
 作为代价，实际传入 Params 的参数需要接受类型的约束，它必须派生于 unknown[] 。
 
@@ -239,7 +262,7 @@ type IsBaseFunction<T> = T extends BaseFunction<any, any> ? true : false;
 
 在这里，条件类型表达式中的 extends ，起到了条件类型约束的作用。
 
-`T extends BaseFunction<any, any>` ，假设具体类型 T 派生于抽象类型 `BaseFunction<any, any>` 。如果满足这个约束，就会采用第一个表达式的结果作为类型，否则采用第二个的。
+`T extends BaseFunction<any, any>` 声明了一个约束，具体类型 T **派生于**抽象类型 BaseFunction\<any, any\> 。如果满足这个约束，就会采用第一个分支 `true` 的计算结果作为 IsBaseFunction\<T\> 的类型，否则采用第二个分支 `false` 的结果。
 
 ```typescript
 type test1 = IsBaseFunction<{}>; // 类型 test1 为 false
@@ -259,3 +282,66 @@ type test2 = { x: string } extends { x: string } ? true : false; // 类型 test2
 
 “一个类型派生于它本身”，这个说法听起来怪怪的，或许用 [assignability](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#advanced-topics) 比派生更合适，但是我不知道怎么翻译。
 
+## infer
+
+[infer](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#inferring-within-conditional-types) 关键字是条件类型的另一大利器，用于提取抽象类型的局部类型或整体类型。
+
+### 提取局部类型
+
+这里可以参考 typescript 内置的 Parameters 的定义。
+
+Parameters 能够返回一个函数类型的参数列表的类型。
+
+```typescript
+type Parameters<T extends (...args: any) => any> = T extends (
+  ...args: infer P
+) => any
+  ? P
+  : never;
+```
+
+条件类型表达式没有预设具体类型一定要派生于抽象类型，我们这次分析完全可以忽略泛型约束部分，来减少可能的干扰项。
+
+```typescript
+type Parameters<T> = T extends (...args: infer P) => any ? P : never;
+```
+（*这样的改动并不会影响 Parameters 的结果。*）
+
+`T extends (...args: infer P) => any` 声明一个约束，具体类型 T 派生于抽象类型 (...args: infer P) => any 。
+
+在抽象类型的表达式中，infer 将参数列表 args 的类型**提取为** P 。P 会尽量具体，或者说，P 将会和 T 在兼容该抽象类型时，与 T 的 args 类型相同。
+
+如果满足这个约束，P 作为 Parameters\<T\> 的类型，否则为 never 。
+
+```typescript
+type test1 = Parameters<(a: string, b: number) => boolean>; // test1 的类型为 [a: string, b: number]
+```
+
+### 提取整体类型
+
+提取整体类型的情况比较少见，但也比较简单。
+
+我们来定义一个类型 DoubleParameters ，获取 2 次函数类型的参数列表的类型。
+
+```typescript
+type DoubleParameters<T extends (...args: any) => any> =
+  Parameters<T> extends infer K ? [K, K] : never;
+```
+
+`Parameters<T> extends infer K` 声明一个约束，具体类型 Parameters\<T\> 派生于抽象类型 K 。
+
+infer 将抽象类型整体提取为 K ，K 会尽量具体，K 就是具体类型 Parameters\<T\> 。
+
+这里的条件类型表达式如同定义了一个变量，然后对变量进行了复用。
+
+```typescript
+type test1 = DoubleParameters<(x: string) => number>; // [[x: string], [x: string]]
+```
+
+### 条件类型表达式一定是个三元表达式
+
+可以看到，上文的条件类型表达式例子之中，有泛型约束，表明左边的的具体类型必将派生于右边的抽象类型；有整体类型的提取，来表示右边的抽象类型将与左边的具体类型相同。
+
+即使有足够的上下文信息，去证明条件类型表达式中的具体类型必将派生于抽象类型，条件类型表达式还是一个三元表达式，它还是需要声明第二条不可能抵达的 never 分支。
+
+这或许能够改进，我们可以期待未来有更简单的结构。
