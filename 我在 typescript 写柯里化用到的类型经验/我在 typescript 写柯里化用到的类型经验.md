@@ -12,12 +12,13 @@
   - [不可能兼容的 as](#不可能兼容的-as)
 - [extends](#extends)
   - [泛型约束的 extends](#泛型约束的-extends)
-  - [条件类型约束的 extends](#条件类型约束的-extends)
+  - [条件类型表达式约束的 extends](#条件类型表达式约束的-extends)
   - [一个类型派生于它本身](#一个类型派生于它本身)
 - [infer](#infer)
   - [提取局部类型](#提取局部类型)
   - [提取整体类型](#提取整体类型)
   - [条件类型表达式一定是个三元表达式](#条件类型表达式一定是个三元表达式)
+  - [条件类型不是类型](#条件类型不是类型)
 
 ## 我写了个库，但本文重点不是它
 
@@ -40,7 +41,7 @@ $((x: string, n: number) => x.repeat(n))("Hello!")(3);
 
 ## 说一下 any 、never 、unknown
 
-做体操会大量用到 [条件类型（ Conditional Types ）](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html) 的特性，和与之深深关联的 extends 关键字。
+做体操会大量用到 [条件类型表达式（ Conditional Types ）](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html) 的特性，和与之深深关联的 extends 关键字。
 
 在这之前，有 3 个类型更需要先弄明白，any 、never 、unknown 。
 
@@ -203,11 +204,11 @@ extends 出现在 typescript 的 4 种场景之中。
 - Class 的[继承](https://www.typescriptlang.org/docs/handbook/2/classes.html#extends-clauses)
 - Object Types 的[派生](https://www.typescriptlang.org/docs/handbook/2/objects.html#extending-types)
 - 泛型[约束](https://www.typescriptlang.org/docs/handbook/2/generics.html#generic-constraints)
-- 条件类型[约束](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html)
+- 条件类型表达式[约束](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html)
 
 每种场景的 extends 作用不同，但它们具有相同的语义——派生。而且，extends 左边的元素总是更具体的类型，右边的元素总是更抽象的类型。
 
-这里主要认识一下泛型约束和条件类型约束中的 extends 。
+这里主要认识一下在*泛型约束*和*条件类型表达式约束*它们之中的 extends 。
 
 ### 泛型约束的 extends
 
@@ -252,7 +253,7 @@ const new_foo: BaseFunction<[string], Foo> = Foo; // 编译不通过
 
 如果要表达构造函数，需要使用[构造签名](https://www.typescriptlang.org/docs/handbook/2/functions.html#construct-signatures) `new (...args: Params) => Instance` ，这里就不赘述了。
 
-### 条件类型约束的 extends
+### 条件类型表达式约束的 extends
 
 有了 BaseFunction ，我们可以再造一个 IsBaseFunction 来判断一个类型是不是普通的函数。
 
@@ -260,7 +261,7 @@ const new_foo: BaseFunction<[string], Foo> = Foo; // 编译不通过
 type IsBaseFunction<T> = T extends BaseFunction<any, any> ? true : false;
 ```
 
-在这里，条件类型表达式中的 extends ，起到了条件类型约束的作用。
+在这里的 extends ，起到了条件类型表达式约束的作用。
 
 `T extends BaseFunction<any, any>` 声明了一个约束，具体类型 T **派生于**抽象类型 BaseFunction\<any, any\> 。如果满足这个约束，就会采用第一个分支 `true` 的计算结果作为 IsBaseFunction\<T\> 的类型，否则采用第二个分支 `false` 的结果。
 
@@ -278,13 +279,13 @@ type test1 = number extends number ? true : false; // 类型 test1 为 true
 type test2 = { x: string } extends { x: string } ? true : false; // 类型 test2 为 true
 ```
 
-（*如果类型定义的名字部分不包含泛型，条件类型表达式会立刻计算得到结果。*）
+（*条件类型表达式，在没有未知的泛型类型参数时，在信息足够时，能够立刻计算出结果。*）
 
 “一个类型派生于它本身”，这个说法听起来怪怪的，或许用 [assignability](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#advanced-topics) 比派生更合适，但是我不知道怎么翻译。
 
 ## infer
 
-[infer](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#inferring-within-conditional-types) 关键字是条件类型的另一大利器，用于提取抽象类型的局部类型或整体类型。
+[infer](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#inferring-within-conditional-types) 关键字是条件类型表达式的另一大利器，用于提取抽象类型的局部类型或整体类型。
 
 ### 提取局部类型
 
@@ -345,3 +346,41 @@ type test1 = DoubleParameters<(x: string) => number>; // [[x: string], [x: strin
 即使有足够的上下文信息，去证明条件类型表达式中的具体类型必将派生于抽象类型，条件类型表达式还是一个三元表达式，它还是需要声明第二条不可能抵达的 never 分支。
 
 这或许能够改进，我们可以期待未来有更简单的结构。
+
+### 条件类型不是类型
+
+前文一直很冗长地称条件类型表达式，是因为条件类型表达式确实是个表达式，他能出现在所有类型表达式能出现的地方，条件类型表达式的计算结果就是类型。
+
+```typescript
+const foo: never extends boolean ? string : number = "233";
+const bar = true as number extends unknown ? boolean : string;
+type qux = NonNullable<233 extends number ? "qux" : false>;
+```
+
+那么标题的**条件类型**是什么？如果在定义一个泛型类型时，它在等号（ = ）右边的部分，直接是一个条件类型表达式，那么我们就称这个泛型类型为条件类型。
+
+就如上面提到的 IsBaseFunction 、 Parameters 、 DoubleParameters ，它们都是条件类型。
+
+为什么说条件类型不是类型？因为这种泛型类型，需要通过计算条件类型表达式的结果，才能得到最终的类型，而它的结果在得到泛型类型参数前往往是不可知的。
+
+条件类型不是类型，它的结果才是类型。这会导致一个现象，那就是无法用 infer 提取一个抽象的条件类型的参数。如下面的例子所示。
+
+``` typescript
+type sth = (x: string) => number;
+
+type foo = Parameters<sth> extends Parameters<infer K> ? K : never;
+
+type qux<T extends (...args: any) => any> = Parameters<T> extends Parameters<
+  infer K
+>
+  ? K
+  : never;
+
+type bar = qux<sth>;
+```
+
+上面这个例子，无论 foo 还是 bar，都得不到和 sth 一样的类型。
+
+
+
+
