@@ -21,6 +21,11 @@
   - [条件类型不是类型](#条件类型不是类型)
 - [元组与函数形参](#元组与函数形参)
   - [IsFixedTuple](#isfixedtuple)
+  - [参数列表的小遗憾](#参数列表的小遗憾)
+  - [IsOptionalTuple](#isoptionaltuple)
+    - [infer 的使用和解构很似](#infer-的使用和解构很似)
+      - [论兼容](#论兼容)
+    - [回到 IsOptionalTuple](#回到-isoptionaltuple)
 
 ## 我写了个库，但本文重点不是它
 
@@ -257,7 +262,7 @@ const new_foo: BaseFunction<[string], Foo> = Foo; // 编译不通过
 
 ### 条件类型表达式约束的 extends
 
-有了 BaseFunction ，我们可以再造一个 IsBaseFunction 来判断一个类型是不是普通的函数。
+有了 BaseFunction ，我们可以定义一个条件类型 IsBaseFunction ，用来判断一个类型是否普通的函数类型，-。
 
 ```typescript
 type IsBaseFunction<T> = T extends BaseFunction<any, any> ? true : false;
@@ -324,7 +329,7 @@ type test1 = Parameters<(a: string, b: number) => boolean>; // test1 的类型�
 
 提取整体类型的情况比较少见，但也比较简单。
 
-我们来定义一个类型 DoubleParameters ，获取 2 次参数列表的类型。
+我们来定义一个条件类型 DoubleParameters ，获取 2 次参数列表的类型。
 
 ```typescript
 type DoubleParameters<T extends (...args: any) => any> =
@@ -359,7 +364,7 @@ const bar = true as number extends unknown ? boolean : string;
 type qux = NonNullable<233 extends number ? "qux" : false>;
 ```
 
-那么标题的**条件类型**是什么？如果在定义一个泛型类型时，它在等号（ = ）右边的部分，直接是一个条件类型表达式，那么我们就称这个泛型类型为条件类型。
+那么标题的**条件类型**具体是什么？如果在定义一个泛型类型时，它在等号（ = ）右边的部分，直接是一个条件类型表达式，那么我们就称这个泛型类型为条件类型。
 
 就如上面提到的 IsBaseFunction 、 Parameters 、 DoubleParameters ，它们都是条件类型。
 
@@ -392,22 +397,23 @@ type bar = qux<sth>;
 前文提到过，参数列表的类型是数组，其实再往细里说，参数列表的类型是派生于数组的[元组](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types)。
 
 作为参数列表的元组除了兼容数组，还有以下特点：
+
 - 每一项元素都能拥有不同的类型。
 
 ```typescript
 type foo = [number, boolean];
 ```
 
-- 尾部的元素可以是允许缺省的。
+- 尾部的元素可以是可缺省的。
 
 ```typescript
 type foo = [number, boolean?, string?];
 ```
 
-- 没有缺省的元素时,最后一个元素可以是一个 rest 数组。
+- 元素还可以是 rest 数组。
 
 ```typescript
-type foo = [number, ...boolean[]];
+type foo = [number, ...boolean[]];  
 ```
 
 - 长度可以是固定的。
@@ -425,7 +431,7 @@ type foo = [a:number, b?:boolean, c?:string];
 
 ### IsFixedTuple
 
-柯里化函数要求作为原型的函数它的参数列表是固定的，可数的。于是我需要定义一个判断元组是否固定的条件类型 IsFixedTuple 。
+柯里化函数要求作为原型的函数它的参数列表是固定的，可数的。于是我需要定义一个条件类型 IsFixedTuple ，用来判断元组长度是否固定的，固定为 true ，非固定为 false 。
 
 ```typescript
 type IsFixedTuple<T extends unknown[]> = number extends T["length"]
@@ -433,11 +439,119 @@ type IsFixedTuple<T extends unknown[]> = number extends T["length"]
   : true;
 ```
 
-原理很简单，元组的数量不是固定时，它的长度是类型 number。只需判断具体类型 T 的长度是否为 number，就能判断一个元组类型的长度是否固定。
+原理很简单，元组的数量不是固定时，它的长度是类型 number 它本身。只需判断具体类型 T 的长度是否为 number 它本身，就能判断一个元组类型的长度是否固定。
 
-在条件类型表达式中，需要用到具体类型 T 的 length 属性获得长度，在它的上下文中，T 需要具备数组的特性才能拥有 length 属性。于是我们可以通过泛型约束，声明具体类型 T 派生于某种数组的抽象类型。
+在条件类型表达式中，需要用到具体类型 T 的 length 属性获得长度，在它的上下文中，T 需要具备数组的特性才能拥有 length 属性。于是我们需要通过泛型约束，声明具体类型 T 派生于某种数组的抽象类型。
 
-为什么是 unknown[] ？因为泛型约束会限制传入 T 的实参类型，为了使 T 能接受所有种类的数组类型作为实参，所以使用了元素是最抽象类型的数组类型 unknown[] 。any[] 也行。
+为什么是 unknown[] ？因为泛型约束会限制传入 T 的实参类型，为了使 T 能接受所有种类的数组类型作为实参，所以使用了元素为最抽象类型 unknown 的数组类型 unknown[] 。any[] 也行。
 
-T["length"] 除了会得到 number 本身的类型，还会得到派生于 number 的数值[字面量类型](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types)，如前文中的 1 | 2 | 3 。number 类型兼容数值字面量类型，而 number 不派生于数值字面量。所以在使用 extends 的条件类型表达式中，要准确判断 T["length"] 是否为 number ，只能把 T["length"] 放在抽象类型的位置上，最终得到 `number extends T["length"]` 。
+T["length"] 除了会得到 number 它本身的类型，还会得到派生于 number 的数值[字面量类型](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types)，如前文中的 1 | 2 | 3 。number 类型兼容数值字面量类型，而 number 不派生于数值字面量。所以在使用 extends 的条件类型表达式中，要准确判断 T["length"] 是否为 number 它本身，只能把 T["length"] 放在抽象类型的位置上，最终得到 `number extends T["length"]` 。
 
+```typescript
+type IsFixedTuple<T extends unknown[]> = number extends T["length"]
+  ? false
+  : true;
+
+type foo = IsFixedTuple<[number, boolean]>; // true
+type bar = IsFixedTuple<[number, boolean?, string?]>; // true ；1 | 2 | 3　也算是可数的。
+type qux = IsFixedTuple<[number, ...boolean[]]>; // false
+```
+
+### 参数列表的小遗憾
+
+迄今为止，4.6.3 的 typescript ，没有在参数类型上区分可缺省参数和默认值参数。
+
+```typescript
+const foo = (a: number, b?: string) => {}; // 可缺省参数
+const bar = (a: number, b: string = "") => {}; // 默认值参数
+
+type Foo = Parameters<typeof foo>; // [a: number, b?: string]
+type Bar = Parameters<typeof bar>; // [a: number, b?: string]
+```
+
+在运行时，foo.length 为 2 ，bar.length 为 1 。可是它们参数列表类型是相同的 [a: number, b?: string] ，length 也是 1 | 2 。由于这种差异存在，包含可缺省参数或默认值参数的函数，在转化成柯里化函数时无法保证类型安全，所以我们需要找一个条件类型来辨别它们。
+
+### IsOptionalTuple
+
+也许可以从[联合类型](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types)入手解决问题，但联合类型在类型操作上比较特别，我也不知道如何判断一个类型是否联合类型。
+
+我需要换一种思路，由于它们都表现为尾部的参数是可缺省的，所以我还能通过对尾部参数的辨别去解决问题。
+
+我们来定义一个条件类型 IsOptionalTuple ，判断一个类型是否为可缺省的元组。
+
+```typescript
+type IsOptionalTuple<T extends unknown[]> = T extends [
+  ..._: infer Front,
+  _?: infer Tail
+]
+  ? [..._: Front, _?: Tail] extends T
+    ? true
+    : false
+  : false;
+```
+
+这是由多个条件类型表达式组合而成的条件类型。多亏有格式化插件，不然真没法读。
+
+实际上，只要判断元组最后一个元素是否可缺省的，就能知道这个元组是否为可缺省的元组。
+
+#### infer 的使用和解构很似
+
+在继续分析之前，有一个值得分享的经验，那就是 infer 的使用和解构很似。
+
+我个人认为，infer 的使用能看作是 extends 右边的抽象类型对它左边的具体类型进行解构，这样会直观很多。特别是[元组的解构](https://www.typescriptlang.org/docs/handbook/variable-declarations.html#tuple-destructuring)，不过比起运行时的解构，元组的解构要更为宽松。
+
+在表达式 `T extends [..._: infer Front, _?: infer Tail]` 中，infer 以解构的形式从抽象类型提取最后一项元素的类型为 Tail ，以及前边剩余的元素为元组类型 Front。
+
+这里有几点说明需要补充一下：
+
+1. 元组类型的解构比运行时的解构要更为宽松，rest 元素可以在任意位置。反正提供给上下文的信息是足够的。
+2. 解构得到的 rest 元素还是元组类型。
+3. 元素的命名不影响解构结果，甚至可以相同。这这里命名的作用是给缺省符号 ? 提供放置的位置。
+4. 如同某类型 K 兼容 K | undefined ，元组 [K] 兼容 [K?] ，只要前面的类型一一兼容就好。
+
+~~说明的说明。~~
+
+第 3 点是我自己试出来的。
+
+``` typescript
+type foo = [] extends [x?: infer T] ? T : 233; // foo 为 unknown 。233 是故意的，只要 T 一定不是 233 就行。
+type bar = [x: "x"] extends [x?: infer T] ? T : 233; // bar 为 "x"
+type qux = [x?: "x"] extends [x?: infer T] ? T : 233; // bar 为 "x"
+```
+
+##### 论兼容
+
+第 4 点。对于联合类型，对于 [K?] ，派生这个词似乎不那么好用了，所以这种时候我就说兼容。
+
+有两个类型 A 和 B ，A 兼容 B 意味着什么？简单来说就是， B 能安全使用的场景，A 也能安全使用。
+
+用代码来表达可能直观一点，以下代码编译会报错。
+
+```typescript
+const func = (foo: number | null) => foo + 233;
+// 对象可能为 "null"。ts(2531)
+```
+
+从[类型收缩](https://www.typescriptlang.org/docs/handbook/2/narrowing.html)的角度来看，联合类型总是宽松的，在把它的值当作其中一个类型来使用之前，需要有额外的判断使其能够安全地转化（收缩）为那个类型。
+
+所以类型 K 兼容包含它的联合类型 K | XXX 合情合理。
+
+包含可缺省元素的元组也可以视作宽松的，与上同理，可缺省元组宽松的部分必定会经过收缩才能够使用。所以不可缺省的元组 A ，只要同样位置上的元素的类型一一兼容可缺省的元组 B，那么 A 就兼容 B 。
+
+反过来就不能成立了，宽松的类型是没有经过收缩的，不能直接使用，必定不能兼容它的“不宽松版本”。
+
+#### 回到 IsOptionalTuple
+
+IsOptionalTuple 的 第一条表达式 `T extends [..._: infer Front, _?: infer Tail]` ，它的主要作用是提取 Front 和 Tail，不能直接判断 T 的最后一个元素是否可缺省。所以我们需要第二条表达式 `[..._: Front, _?: Tail] extends T` 。
+
+第二条表达式是第一条表达式约束成立后才会进入的第一个分支中，它能得到第一条表达式约束成立后的上下文信息。那就是，由 T 解构而来，把 T 拆分成两个部分的 Front 和 Tail ，与此同时，Front 是一个元组。这些新的上下文信息，都能在后续的上下文使用。
+
+所以 [..._: Front, _?: Tail] 表达的是，最后一个元素必定是可缺省的 T 的宽松版本。由于宽松的类型不能兼容它的不宽松版本，如果这个宽松版本的 T 兼容 T 它本身，那么 T 它本身最后一个元素必定是可缺省的。所以第二条表达式 `[..._: Front, _?: Tail] extends T` 在新的上下文中，起到了判断 T 的最后一个元素是否可缺省的作用。
+
+最终，我们就这样完成了 IsOptionalTuple 。
+
+```typescript
+type foo = IsOptionalTuple<[]>; // false
+type bar = IsOptionalTuple<[a: number]>; // false
+type qux = IsOptionalTuple<[a: number, b?: string]>; // true
+```
