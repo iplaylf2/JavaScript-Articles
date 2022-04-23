@@ -24,7 +24,7 @@
   - [参数列表的小遗憾](#参数列表的小遗憾)
   - [IsOptionalTuple](#isoptionaltuple)
     - [infer 的使用和解构很似](#infer-的使用和解构很似)
-      - [论兼容](#论兼容)
+    - [论兼容](#论兼容)
     - [回到 IsOptionalTuple](#回到-isoptionaltuple)
 
 ## 我写了个库，但本文重点不是它
@@ -514,12 +514,12 @@ type IsOptionalTuple<T extends unknown[]> = T extends [
 第 3 点是我自己试出来的。
 
 ``` typescript
-type foo = [] extends [x?: infer T] ? T : 233; // foo 为 unknown 。233 是故意的，只要 T 一定不是 233 就行。
-type bar = [x: "x"] extends [x?: infer T] ? T : 233; // bar 为 "x"
-type qux = [x?: "x"] extends [x?: infer T] ? T : 233; // bar 为 "x"
+type foo = [] extends [_?: infer T] ? T : 233; // foo 为 unknown 。233 是故意的，只要 T 一定不是 233 就行。
+type bar = [x: "x"] extends [_?: infer T] ? T : 233; // bar 为 "x"
+type qux = [x?: "x"] extends [_?: infer T] ? T : 233; // bar 为 "x"
 ```
 
-##### 论兼容
+#### 论兼容
 
 第 4 点。对于联合类型，对于 [K?] ，派生这个词似乎不那么好用了，所以这种时候我就说兼容。
 
@@ -546,7 +546,7 @@ IsOptionalTuple 的 第一条表达式 `T extends [..._: infer Front, _?: infer 
 
 第二条表达式是第一条表达式约束成立后才会进入的第一个分支中，它能得到第一条表达式约束成立后的上下文信息。那就是，由 T 解构而来，把 T 拆分成两个部分的 Front 和 Tail ，与此同时，Front 是一个元组。这些新的上下文信息，都能在后续的上下文使用。
 
-所以 [..._: Front, _?: Tail] 表达的是，最后一个元素必定是可缺省的 T 的宽松版本。由于宽松的类型不能兼容它的不宽松版本，如果这个宽松版本的 T 兼容 T 它本身，那么 T 它本身最后一个元素必定是可缺省的。所以第二条表达式 `[..._: Front, _?: Tail] extends T` 在新的上下文中，起到了判断 T 的最后一个元素是否可缺省的作用。
+所以 [..._: Front, _?: Tail] 表达的是，最后一个元素必定是可缺省的 T 的宽松版本。由于宽松的类型不能兼容它的不宽松版本，如果这个宽松版本的 T 兼容了 T 它本身，那么 T 它本身最后一个元素必定是可缺省的。所以第二条表达式 `[..._: Front, _?: Tail] extends T` 在新的上下文中，起到了判断 T 的最后一个元素是否可缺省的作用。
 
 最终，我们就这样完成了 IsOptionalTuple 。
 
