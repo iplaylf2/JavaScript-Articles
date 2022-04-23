@@ -291,7 +291,7 @@ type test2 = { x: string } extends { x: string } ? true : false; // 类型 test2
 
 这里可以参考 typescript 内置的 Parameters 的定义。
 
-Parameters 能够返回一个函数类型的参数列表的类型。
+Parameters 能够返回一个函数类型的参数类型。
 
 ```typescript
 type Parameters<T extends (...args: any) => any> = T extends (
@@ -322,7 +322,7 @@ type test1 = Parameters<(a: string, b: number) => boolean>; // test1 的类型�
 
 提取整体类型的情况比较少见，但也比较简单。
 
-我们来定义一个类型 DoubleParameters ，获取 2 次函数类型的参数列表的类型。
+我们来定义一个类型 DoubleParameters ，获取 2 次参数列表的类型。
 
 ```typescript
 type DoubleParameters<T extends (...args: any) => any> =
@@ -380,7 +380,4 @@ type bar = qux<sth>;
 ```
 
 上面这个例子，无论 foo 还是 bar，都得不到和 sth 一样的类型。
-
-
-
 
