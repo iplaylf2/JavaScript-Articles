@@ -19,6 +19,8 @@
   - [提取整体类型](#提取整体类型)
   - [条件类型表达式一定是个三元表达式](#条件类型表达式一定是个三元表达式)
   - [条件类型不是类型](#条件类型不是类型)
+- [元组与函数形参](#元组与函数形参)
+  - [IsFixedTuple](#isfixedtuple)
 
 ## 我写了个库，但本文重点不是它
 
@@ -233,7 +235,7 @@ type BaseFunction<Params extends unknown[], Return> = (
 
 作为代价，实际传入 Params 的参数需要接受类型的约束，它必须派生于 unknown[] 。
 
-在[函数类型表达式](https://www.typescriptlang.org/docs/handbook/2/functions.html#function-type-expressions) `(...args: Params) => Return` 中，args 是一个 [rest 参数](https://www.typescriptlang.org/docs/handbook/2/functions.html#rest-parameters-and-arguments)，它的类型必须是数组或者[元组](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types)。
+在[函数类型表达式](https://www.typescriptlang.org/docs/handbook/2/functions.html#function-type-expressions) `(...args: Params) => Return` 中，args 是一个 [rest 参数](https://www.typescriptlang.org/docs/handbook/2/functions.html#rest-parameters-and-arguments)，它的类型必须是数组。
 
 而 args 的类型 Params ，是 unknown[] 的具体类型，因此满足了 rest 参数的条件。
 
@@ -291,7 +293,7 @@ type test2 = { x: string } extends { x: string } ? true : false; // 类型 test2
 
 这里可以参考 typescript 内置的 Parameters 的定义。
 
-Parameters 能够返回一个函数类型的参数类型。
+Parameters 能够返回一个函数类型中的参数类型。
 
 ```typescript
 type Parameters<T extends (...args: any) => any> = T extends (
@@ -380,4 +382,63 @@ type bar = qux<sth>;
 ```
 
 上面这个例子，无论 foo 还是 bar，都得不到和 sth 一样的类型。
+
+## 元组与函数形参
+
+有了以上的概念，就能开始对 typescript 的类型进行一些复杂的操作了。
+
+本文开头提到过，我写了一个操作函数的库 facade.ts 。我在其中主要是操作函数类型，而函数形参是操作最多的部分。为了使表达更直白，后文把函数形参称为参数列表。
+
+前文提到过，参数列表的类型是数组，其实再往细里说，参数列表的类型是派生于数组的[元组](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types)。
+
+作为参数列表的元组除了兼容数组，还有以下特点：
+- 每一项元素都能拥有不同的类型。
+
+```typescript
+type foo = [number, boolean];
+```
+
+- 尾部的元素可以是允许缺省的。
+
+```typescript
+type foo = [number, boolean?, string?];
+```
+
+- 没有缺省的元素时,最后一个元素可以是一个 rest 数组。
+
+```typescript
+type foo = [number, ...boolean[]];
+```
+
+- 长度可以是固定的。
+
+```typescript
+type foo = [number, boolean?, string?]["length"]; // 1 | 2 | 3
+type bar = number[]["length"]; // number
+```
+
+- 每一项元素都能有名字。
+
+```typescript
+type foo = [a:number, b?:boolean, c?:string];
+```
+
+### IsFixedTuple
+
+柯里化函数要求作为原型的函数它的参数列表是固定的，可数的。于是我需要定义一个判断元组是否固定的条件类型 IsFixedTuple 。
+
+```typescript
+type IsFixedTuple<T extends unknown[]> = number extends T["length"]
+  ? false
+  : true;
+```
+
+原理很简单，元组的数量不是固定时，它的长度是类型 number。只需判断具体类型 T 的长度是否为 number，就能判断一个元组类型的长度是否固定。
+
+在条件类型表达式中，需要用到具体类型 T 的 length 属性获得长度，在它的上下文中，T 需要具备数组的特性才能拥有 length 属性。于是我们可以通过泛型约束，声明具体类型 T 派生于某种数组的抽象类型。
+
+为什么是 unknown[] ？因为泛型约束会限制传入 T 的实参类型，为了使 T 能接受所有种类的数组类型作为实参，所以使用了元素是最抽象类型的数组类型 unknown[] 。any[] 也行。
+
+T["length"] 除了会得到 number ，还会得到各种 number 的数值[字面量类型](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types)，如前文中的 1 | 2 | 3 。number 类型兼容数值字面量类型，数值字面量类型都派生于 number，而 number 不派生于数值字面量。所以在使用 extends 的条件类型表达式中，要准确判断 T["length"] 是否为 number ，只能把 T["length"] 放在抽象类型的位置上，所以是 `number extends T["length"]` 。
+
 
