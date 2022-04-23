@@ -439,6 +439,5 @@ type IsFixedTuple<T extends unknown[]> = number extends T["length"]
 
 为什么是 unknown[] ？因为泛型约束会限制传入 T 的实参类型，为了使 T 能接受所有种类的数组类型作为实参，所以使用了元素是最抽象类型的数组类型 unknown[] 。any[] 也行。
 
-T["length"] 除了会得到 number ，还会得到各种 number 的数值[字面量类型](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types)，如前文中的 1 | 2 | 3 。number 类型兼容数值字面量类型，数值字面量类型都派生于 number，而 number 不派生于数值字面量。所以在使用 extends 的条件类型表达式中，要准确判断 T["length"] 是否为 number ，只能把 T["length"] 放在抽象类型的位置上，所以是 `number extends T["length"]` 。
-
+T["length"] 除了会得到 number 本身的类型，还会得到派生于 number 的数值[字面量类型](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types)，如前文中的 1 | 2 | 3 。number 类型兼容数值字面量类型，而 number 不派生于数值字面量。所以在使用 extends 的条件类型表达式中，要准确判断 T["length"] 是否为 number ，只能把 T["length"] 放在抽象类型的位置上，最终得到 `number extends T["length"]` 。
 
