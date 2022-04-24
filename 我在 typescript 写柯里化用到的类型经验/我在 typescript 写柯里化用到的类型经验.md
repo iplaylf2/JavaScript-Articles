@@ -58,7 +58,7 @@ $((x: string, n: number) => x.repeat(n))("Hello!")(3);
 
 ## 说一下 any 、never 、unknown
 
-做体操会大量用到 [条件类型表达式（ Conditional Types ）](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html) 的特性，和与之深深关联的 extends 关键字。
+类型操作会大量用到 [条件类型表达式（ Conditional Types ）](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html) 的特性，和与之深深关联的 extends 关键字。
 
 在这之前，有 3 个类型更需要先弄明白，any 、never 、unknown 。
 
@@ -455,13 +455,9 @@ type IsFixedTuple<T extends unknown[]> = number extends T["length"]
 
 为什么是 unknown[] ？因为泛型约束会限制传入 T 的实参类型，为了使 T 能接受所有种类的数组类型作为实参，所以使用了元素为最抽象类型 unknown 的数组类型 unknown[] 。any[] 也行。
 
-T["length"] 除了会得到 number 它本身的类型，还会得到派生于 number 的数值[字面量类型](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types)，如前文中的 1 | 2 | 3 。number 类型兼容数值字面量类型，而 number 不派生于数值字面量。所以在使用 extends 的条件类型表达式中，要准确判断 T["length"] 是否为 number 它本身，只能把 T["length"] 放在抽象类型的位置上，最终得到 `number extends T["length"]` 。
+T["length"] 除了会得到 number 它本身的类型，还会得到派生于 number 的数值[字面量类型](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types)，如前文中的 1 | 2 | 3 。数值字面量类型派生于 number 类型，而 number 不派生于数值字面量。所以在使用 extends 的条件类型表达式中，要准确判断 T["length"] 是否为 number 它本身，只能把 T["length"] 放在抽象类型的位置上，最终得到 `number extends T["length"]` 。
 
 ```typescript
-type IsFixedTuple<T extends unknown[]> = number extends T["length"]
-  ? false
-  : true;
-
 type foo = IsFixedTuple<[number, boolean]>; // true
 type bar = IsFixedTuple<[number, boolean?, string?]>; // true ；1 | 2 | 3　也算是可数的。
 type qux = IsFixedTuple<[number, ...boolean[]]>; // false
@@ -748,7 +744,7 @@ type DTest<T> = T extends 1 ? "fork1" : "fork2";
 type foo = DTest<number>; // "fork2"
 ```
 
-不会触发 distributive 。
+然而并不会触发 distributive 。
 
 ### 实参是 never 不会 distributive ？
 
