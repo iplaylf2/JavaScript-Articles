@@ -26,6 +26,16 @@
     - [infer 的使用和解构很似](#infer-的使用和解构很似)
     - [论兼容](#论兼容)
     - [回到 IsOptionalTuple](#回到-isoptionaltuple)
+- [可以递归的条件类型](#可以递归的条件类型)
+- [联合类型与条件类型](#联合类型与条件类型)
+  - [特例 any](#特例-any)
+  - [拒绝 distributive](#拒绝-distributive)
+  - [如何判断一个类型是否为 any](#如何判断一个类型是否为-any)
+    - [好用的派生图谱](#好用的派生图谱)
+    - [回到 IsAny](#回到-isany)
+  - [实参是 boolean 也会 distributive](#实参是-boolean-也会-distributive)
+  - [实参是 never 不会 distributive ？](#实参是-never-不会-distributive-)
+- [never 制造的麻烦](#never-制造的麻烦)
 
 ## 我写了个库，但本文重点不是它
 
@@ -498,15 +508,15 @@ type IsOptionalTuple<T extends unknown[]> = T extends [
 
 在继续分析之前，有一个值得分享的经验，那就是 infer 的使用和解构很似。
 
-我个人认为，infer 的使用能看作是 extends 右边的抽象类型对它左边的具体类型进行解构，这样会直观很多。特别是[元组的解构](https://www.typescriptlang.org/docs/handbook/variable-declarations.html#tuple-destructuring)，不过比起运行时的解构，元组的解构要更为宽松。
+我个人认为，infer 的使用能看作是 extends 右边的抽象类型对它左边的具体类型进行解构，这样会直观很多。特别是[元组的解构](https://www.typescriptlang.org/docs/handbook/variable-declarations.html#tuple-destructuring)，不过比起运行时的解构，元组类型的解构要更为宽松。
 
 在表达式 `T extends [..._: infer Front, _?: infer Tail]` 中，infer 以解构的形式从抽象类型提取最后一项元素的类型为 Tail ，以及前边剩余的元素为元组类型 Front。
 
 这里有几点说明需要补充一下：
 
-1. 元组类型的解构比运行时的解构要更为宽松，rest 元素可以在任意位置。反正提供给上下文的信息是足够的。
+1. 元组类型的解构比运行时的解构要更为宽松，rest 元素可以在任意位置。只要提供给上下文的信息是足够的。
 2. 解构得到的 rest 元素还是元组类型。
-3. 元素的命名不影响解构结果，甚至可以相同。这这里命名的作用是给缺省符号 ? 提供放置的位置。
+3. 元素的命名不影响解构结果，甚至可以相同。在这里命名的作用是给缺省符号 ? 提供放置的位置。
 4. 如同某类型 K 兼容 K | undefined ，元组 [K] 兼容 [K?] ，只要前面的类型一一兼容就好。
 
 ~~说明的说明。~~
@@ -521,7 +531,7 @@ type qux = [x?: "x"] extends [_?: infer T] ? T : 233; // bar 为 "x"
 
 #### 论兼容
 
-第 4 点。对于联合类型，对于 [K?] ，派生这个词似乎不那么好用了，所以这种时候我就说兼容。
+关于第 4 点。对于联合类型，对于 [K?] ，派生这个词似乎不那么好用了，所以这种时候我就说[兼容](https://www.typescriptlang.org/docs/handbook/type-compatibility.html)。
 
 有两个类型 A 和 B ，A 兼容 B 意味着什么？简单来说就是， B 能安全使用的场景，A 也能安全使用。
 
@@ -538,20 +548,226 @@ const func = (foo: number | null) => foo + 233;
 
 包含可缺省元素的元组也可以视作宽松的，与上同理，可缺省元组宽松的部分必定会经过收缩才能够使用。所以不可缺省的元组 A ，只要同样位置上的元素的类型一一兼容可缺省的元组 B，那么 A 就兼容 B 。
 
-反过来就不能成立了，宽松的类型是没有经过收缩的，不能直接使用，必定不能兼容它的“不宽松版本”。
+反过来就不能成立了，宽松的类型在没有经过收缩前，无法当作不宽松的版本直接使用，它必然不兼容它的不宽松版本。
 
 #### 回到 IsOptionalTuple
 
 IsOptionalTuple 的 第一条表达式 `T extends [..._: infer Front, _?: infer Tail]` ，它的主要作用是提取 Front 和 Tail，不能直接判断 T 的最后一个元素是否可缺省。所以我们需要第二条表达式 `[..._: Front, _?: Tail] extends T` 。
 
-第二条表达式是第一条表达式约束成立后才会进入的第一个分支中，它能得到第一条表达式约束成立后的上下文信息。那就是，由 T 解构而来，把 T 拆分成两个部分的 Front 和 Tail ，与此同时，Front 是一个元组。这些新的上下文信息，都能在后续的上下文使用。
+第二条表达式在第一条表达式约束成立后才会进入的第一个分支中，它能复用第一条表达式约束成立后的上下文信息。
 
-所以 [..._: Front, _?: Tail] 表达的是，最后一个元素必定是可缺省的 T 的宽松版本。由于宽松的类型不能兼容它的不宽松版本，如果这个宽松版本的 T 兼容了 T 它本身，那么 T 它本身最后一个元素必定是可缺省的。所以第二条表达式 `[..._: Front, _?: Tail] extends T` 在新的上下文中，起到了判断 T 的最后一个元素是否可缺省的作用。
+那就是，由 T 解构而来，把 T 拆分成两个部分的 Front 和 Tail 。与此同时，Front 是一个元组。这些新的上下文信息，都能在后续的上下文使用。
 
-最终，我们就这样完成了 IsOptionalTuple 。
+所以 [..._: Front, _?: Tail] 表达的是，最后一个元素必定是可缺省的 T 的宽松版本。
+
+由于宽松的类型不能兼容它的不宽松版本，如果这个宽松版本的 T 兼容了 T 它本身，那么 T 它本身最后一个元素必定是可缺省的。所以第二条表达式 `[..._: Front, _?: Tail] extends T` 在新的上下文中，起到了判断 T 的最后一个元素是否可缺省的作用。
+
+以上就是 IsOptionalTuple 的全部解释。
 
 ```typescript
 type foo = IsOptionalTuple<[]>; // false
 type bar = IsOptionalTuple<[a: number]>; // false
 type qux = IsOptionalTuple<[a: number, b?: string]>; // true
 ```
+
+## 可以递归的条件类型
+
+条件类型的结构和函数的结构很相似，类型名字与函数名字对应，泛型参数列表跟函数形参对应，条件表达式与函数体对应。它们同样是接受实际参数后才计算结果。
+
+条件类型也能像函数那样递归表达，以下拿 Repeat 类型举例，它的作用是把类型 T 复用 N 遍作为元组返回。
+
+```typescript
+type Repeat<
+  T extends unknown,
+  N extends number,
+  R extends T[] = []
+> = N extends R["length"] ? R : Repeat<T, N, [...R, T]>;
+```
+
+Repeat 第 3 个形参 R 是一个默认参数。在使用 Repeat 时如果没有传入第 3 个参数，就会使用默认参数 []，方便使用。
+
+写递归的条件类型就跟写递归函数一样……篇幅有限，此处不展开。
+
+我能分享的是，类型操作没有闭包没有办法用变量去缓存状态，所以需要通过参数列表去传递状态。
+
+Repeat 就是用第 3 个参数 R 来传递未来的结果。在一次次递归调用 Repeat 中，元组 R 的 length 一直增长，直到等于 N 。
+
+```typescript
+type foo = Repeat<unknown, 3>; // [unknown, unknown, unknown]
+type bar = Repeat<unknown, 0>; // []
+type qux = Repeat<string, 2>; // [string, string]
+```
+
+## 联合类型与条件类型
+
+有没有想过 `Repeat<number, 1 | 3>` 会得到什么结果。
+
+```typescript
+type foo = Repeat<number, 1 | 3>;
+// [number] | [number, number, number]
+```
+
+这里不是与上文矛盾，宽松类型兼容了它的不宽松版本。而是条件类型的特殊机制—— [distributive](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types) 。
+
+此时的 `Repeat<number, 1 | 3>` 相当于 `Repeat<number, 1> | Repeat<number, 3>` 。
+
+如果直接使用条件类型表达式，是不会违背前文所述的兼容理论。
+
+```typescript
+type foo = 1 | 3 extends 1 ? "gg" : 233; // 233
+
+type D<T> = T extends 1 ? "gg" : 233;
+type bar = D<1 | 3>; // "gg" | 233
+```
+
+typescript 的一些[内置条件类型](https://www.typescriptlang.org/docs/handbook/utility-types.html)，如：Exclude 、Extract 、NonNullable 等，都依赖于 distributive 这个特性，感兴趣的自己看定义。
+
+### 特例 any
+
+讨厌的特例来了，在非条件类型的情况下也会 distributive ，那就是 any 。
+
+```typescript
+type foo = any extends 1 ? "gg" : 233; // "gg" | 233
+
+type D<T> = T extends 1 ? "gg" : 233;
+type bar = D<any>; // "gg" | 233
+```
+
+any 总是遍历条件类型表达式的两个分支。
+
+也许 any 的语义是包括所有的类型，除了 never ，所以才那么特殊吧。
+
+### 拒绝 distributive
+
+如果想要拒绝 distributive ，那么就把类型 T 装到元组里，此时就能用本文的兼容理论去解释条件类型表达式。
+
+```typescript
+type foo = [any] extends [1] ? "gg" : 233; // "gg"
+
+type D<T> = [T] extends [1] ? "gg" : 233;
+type bar = D<any>; // "gg"
+```
+
+（*我是试出来了才知道文档有 distributive 这种说法，以及拒绝它的方法。*）
+
+这种机制其实很奇怪，细究的话我也不知道怎么圆，开始难受起来了。
+
+### 如何判断一个类型是否为 any
+
+提到了联合类型，提到了 any ，不妨我们再提提[交叉类型](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types) 。
+
+使用交叉类型来辨别 any 。
+
+```typescript
+type IsAny<T> = 0 extends 1 & T ? true : false;
+
+type A = IsAny<any>; // true
+type B = IsAny<number>; // false
+type C = IsAny<unknown>; // false
+type D = IsAny<never>; // false
+```
+
+（*从[stack overflow](https://stackoverflow.com/questions/49927523/disallow-call-with-any/49928360#49928360)抄的。*）
+
+#### 好用的派生图谱
+
+结合派生图谱可以解释，为什么只有 any 可以满足 `0 extends 1 & any` 。
+
+联合类型的操作符 | 和交叉类型的操作符 & ，在某些情况下能合并它们的操作数返回新的类型。
+
+| 两边的操作数在同一条派生路径时，它会取更抽象的类型作为结果。
+
+```typescript
+type foo = number | 1; // number
+type bar = unknown | number; // unknown
+type jux = number | never; // number
+type aab = unknown | never; // unknown
+type qwe = any | unknown; // any ；any 也能是最抽象的
+```
+
+& 两边的操作数在同一条派生路径时，它会取更具体的类型作为结果。
+
+```typescript
+type foo = number & 1; // 1
+type bar = unknown & number; // number
+type jux = number & never; // never
+type aab = unknown & never; // never
+type qwe = any & unknown; // any
+type bbq = any & never; // never
+```
+
+如果两两边的操作数不在同一条派生路径时，| 会保留它们，结合操作符作为新的类型。
+
+``` typescript
+type foo = string | number; // string | number
+type bar = number | { x: string }; // number | { x: string }
+type jux = { x: number } | { y: string }; // { x: number } | { y: string }
+```
+
+& 的情况比较复杂，如果两边的操作数没有重叠的可能性，就会返回 never 。否则就是结合它们返回新的类型。
+
+``` typescript
+type foo = string & number; // never
+type bar = number & { x: string }; // number & { x: string }
+type jux = { x: number } & { y: string }; // { x: number } & { y: string }
+```
+
+（ *bar ??? 因为 number 能装箱么，算了，不会圆了。*）
+
+never 的语义确实能用在这种场景，有的类型不可能存在。
+
+#### 回到 IsAny
+
+`1 & T` 因为操作符 & 的性质，它只会得到类型 1 或比类型 1 更具体的类型。因此一般情况下，`0 extends 1 & T` 这个约束是无法成立的。
+
+但是 any 是特例，any 除了是最具体的类型（不考虑 never ），还能是最抽象的类型，所以 `0 extends 1 & T` 这个约束在 T 是 any 的时候可以成立。
+
+综上所述就是 IsAny 的原理。
+
+### 实参是 boolean 也会 distributive
+
+true | false 是 boolean？这个可以理解。
+
+```typescript
+type foo = true | false; // boolean
+```
+
+在这个基础上，boolean 会触发 distributive ，也是可以理解的。
+
+```typescript
+type DTest<T> = T extends true ? "fork1" : "fork2";
+
+type foo = DTest<boolean>; // "fork2" | "fork1"
+```
+
+那 number 能不能是 1 | 2 |... ？然后触发 distributive ？
+
+```typescript
+type DTest<T> = T extends 1 ? "fork1" : "fork2";
+
+type foo = DTest<number>; // "fork2"
+```
+
+不会触发 distributive 。
+
+### 实参是 never 不会 distributive ？
+
+传入条件类型的实参是 never 时。
+
+```typescript
+type DTest<T> = T extends true ? "fork1" : "fork2";
+
+type foo = DTest<never>; // never
+```
+
+never 是特例么？条件类型传入 never 就直接返回 never ？
+
+```typescript
+type DTest<T> = [T] extends [true] ? "fork1" : "fork2";
+
+type foo = DTest<never>; // "fork1"
+```
+
+拒绝 distributive ？？？不知道咋圆回去。
+
+## never 制造的麻烦
