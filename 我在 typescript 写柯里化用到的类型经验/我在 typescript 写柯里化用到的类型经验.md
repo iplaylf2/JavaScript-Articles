@@ -35,7 +35,7 @@
     - [回到 IsAny](#回到-isany)
   - [实参是 boolean 也会 distributive](#实参是-boolean-也会-distributive)
   - [实参是 never 不会 distributive ？](#实参是-never-不会-distributive-)
-- [never 制造的麻烦](#never-制造的麻烦)
+- [小心 never](#小心-never)
 
 ## 我写了个库，但本文重点不是它
 
@@ -106,7 +106,7 @@ const qux: any = x;
 
 具体的类型能够兼容抽象的版本，所以在这个例子中，never 的 x 可以赋值给不同类型的变量。
 
-虽然 never 的语义是不可到达，不可得到的类型，但它的确是上文所述的最具体的类型。而这种奇怪的属性，会在后面的类型操作中制造巨大的麻烦。
+虽然 never 的语义是不可到达，不可得到的类型，但它的确是上文所述的最具体的类型。
 
 ### unknown
 
@@ -770,4 +770,36 @@ type foo = DTest<never>; // "fork1"
 
 拒绝 distributive ？？？不知道咋圆回去。
 
-## never 制造的麻烦
+## 小心 never
+
+条件类型从接触开始，从文档开始，在实际操作中，都会经常用到 never 。never 经常被作为条件表达式中，与期望的结果相反的不期望的结果，或者说是“失败”的分支。
+
+如果失败的分支真的是不可能得到的结果，那不会有什么坏处。但是一旦一个条件类型有可能返回 never ，就可能导致后续的类型操作产生失败的结果。
+
+never 是 typescript 最具体的类型，它如果出现在条件类型表达式 extends 的左边，意味着无论右边的抽象类型是什么，never 都能满足。如果对 never 的认识不到位，就会产生预期外的效果。
+
+而提前使用 `T extends never` 排除 T 是 never ，会使得整个类型表达式变得冗长。
+
+举个不太实际的例子，假如把 IsFixedTuple 改造成 FixedTuple ，当一个类型是固定的元组时返回它本身，否则返回 never 。
+
+```typescript
+type FixedTuple<T extends unknown[]> = number extends T["length"] ? never : T;
+```
+
+这样的类型看上去似乎挺合理的，但是使用不慎的话，会出现下面的情况。
+
+```typescript
+type FixedTuple<T extends unknown[]> = number extends T["length"] ? never : T;
+
+type LengthOfFixedTuple<T extends unknown[]> = FixedTuple<T> extends unknown[]
+  ? T["length"]
+  : never;
+
+type foo = LengthOfFixedTuple<[]>; // 0
+type bar = LengthOfFixedTuple<[string, boolean?]>; // 1 | 2
+type qux = LengthOfFixedTuple<[string, ...number[]]>; // number
+```
+
+（*LengthOfFixedTuple 永远得不到 never 。*）
+
+在条件类型表达式使用 never 时，请尽量让它真的不可得到。
