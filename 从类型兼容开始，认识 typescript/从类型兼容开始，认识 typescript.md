@@ -124,7 +124,7 @@ type r2 = string & never; // type r2 = never
 
 as 运算符两边的类型，只有在它们之间存在包含的关系才能够成立。
 
-## any 呢
+### any 呢
 
 any 太特殊了，我无法用集合的语言表达。~~维恩图不会画了。~~
 
@@ -143,7 +143,7 @@ flowchart RL
   unknown --> rest2
   unknown --> rest3
 ```
-*（箭头左边的项目包含于右边的项。）*
+*（箭头左边的项包含于右边的项。）*
 
 any 并不向下兼容 never 。
 ```typescript
