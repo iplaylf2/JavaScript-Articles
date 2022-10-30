@@ -61,11 +61,15 @@ function mysteryBox(): string {
 
 我们不妨这么认为，当集合 B 是集合 A 的子集时，集合 B 的元素选取范围就与集合 A 的元素选取范围“充分重叠”。
 
+不充分重叠的时候，意味着 A 包含有不属于 B 的元素，B 也包含有不属于 A 的元素。
+
+显然，在我们的编程经验中， string 和 number 不是充分重叠的。
+
 ### unknown
 
-![img](./2-x.svg)
-
 从[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)可知，所有类型都能分配给 unknown 。我们可以将 unknown 视作所有类型的超集/父集。
+
+![img](./2-x.svg)
 
 又因为集合 number 和集合 string 都分别是集合 unknown 的子集，所以可以通过 unknown 来完成一次有意的转换。
 
@@ -76,8 +80,46 @@ function mysteryBox(): string {
 
 这似乎就能解释 `as unknown` 能发挥作用的原因。
 
+在集合论中，一个集合和它的父集进行联合，结果是它的父集。这一点在 typescript 通过 `|` 也能体现出来。
 
+```typescript
+type r1 = number | unknown; // type r1 = unknown
+type r2 = string | unknown; // type r2 = unknown
+```
+*（由于某些原因，即使是有充分重叠的可能， | 运算往往得到的是字面表达式，而不是其中的父集。这些在后文会有交代。）*
 
 ### number & string
 
-number 和 string 交集的部分，对于他们来说也是各自的“充分重叠”
+number 和 string 交叉的部分，也是能分别和 number/string 充分重叠，是否能进行 as 转换呢？
+
+```typescript
+type Chimera = number & string;
+// 编译器没有报错
+233 as Chimera as string;
+```
+
+成功了。
+
+其实在编辑器中，鼠标悬停 Chimera 的结果是 `type Chimera = never` 。
+
+number 和 string 的交叉是 never ！[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)有说明 never 可以分配给任意类型。如果从集合的角度看待，never 就是空集，空集是任何集合的子集。
+
+交叉是 never 意味着，number 和 string 没有任何相同的元素，这很符合我们的编程经验。
+
+![img](./2.1-x.svg)
+
+一个集合和它的子集进行交叉，结果是它的子集。这一点在 typescript 通过 `&` 也能体现出来。
+
+```typescript
+type r1 = number & never; // type r1 = never
+type r2 = string & never; // type r2 = never
+```
+*（当然，由于某些原因，& 运算往往得到是字面表达式。）*
+
+### as 的成立条件
+
+> TypeScript only allows type assertions which convert to a more specific or less specific version of a type.
+
+结合[文档](https://www.typescriptlang.org/zh/docs/handbook/2/everyday-types.html#type-assertions)，从集合的角度出发，我们可以得到个结论。
+
+as 运算符两边的类型，只有在它们之间存在包含的关系才能够成立。
