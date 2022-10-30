@@ -47,4 +47,37 @@ function mysteryBox(): string {
 
 ~~其实是标题有集合会比较劝退~~
 
+## 类型断言 as
 
+不知道在阅读的你是否有留意过 as 的报错，里面提到过“两种类型不能充分重叠……”
+
+```typescript
+// Conversion of type 'number' to type 'string' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.(2352)
+// 类型 "number" 到类型 "string" 的转换可能是错误的，因为两种类型不能充分重叠。如果这是有意的，请先将表达式转换为 "unknown"。ts(2352)
+233 as string;
+```
+
+如果把“充分重叠”这个词放在类型是集合的上下文中，那么就能更容易理解前面报错的含义了。
+
+我们不妨这么认为，当集合 B 是集合 A 的子集时，集合 B 的元素选取范围就与集合 A 的元素选取范围“充分重叠”。
+
+### unknown
+
+![img](./2-x.svg)
+
+从[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)可知，所有类型都能分配给 unknown 。我们可以将 unknown 视作所有类型的超集/父集。
+
+又因为集合 number 和集合 string 都分别是集合 unknown 的子集，所以可以通过 unknown 来完成一次有意的转换。
+
+```typescript
+// 编译器没有报错
+233 as unknown as string;
+```
+
+这似乎就能解释 `as unknown` 能发挥作用的原因。
+
+
+
+### number & string
+
+number 和 string 交集的部分，对于他们来说也是各自的“充分重叠”
