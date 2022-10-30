@@ -71,7 +71,7 @@ function mysteryBox(): string {
 
 ![img](./2-x.svg)
 
-又因为集合 number 和集合 string 都分别是集合 unknown 的子集，所以可以通过 unknown 来完成一次有意的转换。
+已知集合 number 和集合 string 都分别是集合 unknown 的子集，因此可以通过 unknown 来完成一次有意的转换。
 
 ```typescript
 // 编译器没有报错
