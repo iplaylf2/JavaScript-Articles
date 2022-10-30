@@ -123,3 +123,31 @@ type r2 = string & never; // type r2 = never
 结合[文档](https://www.typescriptlang.org/zh/docs/handbook/2/everyday-types.html#type-assertions)，从集合的角度出发，我们可以得到个结论。
 
 as 运算符两边的类型，只有在它们之间存在包含的关系才能够成立。
+
+## any 呢
+
+any 太特殊了，我无法用集合的语言表达。~~维恩图不会画了。~~
+
+但可以从包含途径出发，画一张图表。
+
+```mermaid
+flowchart RL
+  any --> never
+
+  number --> any
+  string --> any
+  rest1[...] --> any
+  rest2[...] --> number
+  rest3[...] --> string
+  unknown[unknown / any] --> rest1
+  unknown --> rest2
+  unknown --> rest3
+```
+*（箭头左边的项目包含于右边的项。）*
+
+any 并不向下兼容 never 。
+```typescript
+declare const foo: any;
+// 不能将类型“any”分配给类型“never”。ts(2322)
+const bar: never = foo;
+```
