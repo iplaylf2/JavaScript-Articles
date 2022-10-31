@@ -230,3 +230,4 @@ type StringNumberPair = [string, number];
 type Foo = (x: string) => void;
 ```
 
+结构化类型在分配时，也是需要向下兼容的。下面将简单地描述他们在集合中的表现。
