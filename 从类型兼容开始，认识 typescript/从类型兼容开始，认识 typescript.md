@@ -120,7 +120,7 @@ type Chimera = number & string;
 
 其实在编辑器中，鼠标悬停 Chimera 的结果是 `type Chimera = never` 。
 
-number 和 string 的交叉是 never ！[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)有说明 never 可以分配给任意类型。如果从集合的角度看待，空集是任何集合的子集，never 也是任意类型的子集，不妨认为 never 就是空集。
+number 和 string 的交叉是 never ！[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)有说明 never 可以分配给所有类型。如果从集合的角度看待，空集是所有集合的子集，never 也是所有类型的子集，不妨认为 never 就是空集。
 
 交叉是 never 意味着，number 和 string 没有任何相同的元素，这很符合我们的编程经验。
 
@@ -136,25 +136,23 @@ type r2 = string & never; // type r2 = never
 
 ### as 的成立条件
 
+类型断言（ as ）的[文档](https://www.typescriptlang.org/zh/docs/handbook/2/everyday-types.html#type-assertions)有那么一句话：
+
 > TypeScript only allows type assertions which convert to a more specific or less specific version of a type.
 
-结合[文档](https://www.typescriptlang.org/zh/docs/handbook/2/everyday-types.html#type-assertions)，从集合的角度出发，我们可以得到个结论。
-
-as 运算符两边的类型，只有在它们之间存在包含的关系才能够成立。
-
-### more specific or less specific
-
-上一节的引用出现过两个词组 **more specific** 和 **less specific** ，字面意思是更具体和更不具体，也许可以用大家更熟悉的词汇代替，更具体和更抽象。
+其中，**more specific** 和 **less specific** ，字面意思是更具体和更不具体，也许可以用大家更熟悉的词汇代替，更具体和更抽象。
 
 如此之后，引用的句子可以翻译为：
 
 > 类型断言只能把类型转化成更具体或更抽象的版本。
 
-与集合联系在一起，我们不妨认为，一个类型的子集代表他更具体的版本，一个类型的超集代表他更抽象的版本。
+结合我们的编程经验，我们不妨认为，类型更具体的版本和他的子集是等价的，类型更抽象的版本和他的超集是等价的。
 
-### any 呢
+据此可以得出个结论：as 运算符两边的类型，只有在它们之间存在包含的关系才能够成立。
 
-前面提到了 unknown 和
+### any 
+
+前面提到过所有类型的超集 unknown 和所有类型的子集 never ，那跟“所有类型”密切相关的 any 呢，如何从集合的角度看待？
 
 any 太特殊了，我无法用集合的语言表达。~~维恩图不会画了。~~
 
@@ -181,3 +179,4 @@ declare const foo: any;
 // 不能将类型“any”分配给类型“never”。ts(2322)
 const bar: never = foo;
 ```
+
