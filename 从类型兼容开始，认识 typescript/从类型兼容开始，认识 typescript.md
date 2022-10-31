@@ -86,7 +86,7 @@ function mysteryBox(): string {
 type r1 = number | unknown; // type r1 = unknown
 type r2 = string | unknown; // type r2 = unknown
 ```
-*（由于某些原因，即使是有充分重叠的可能， | 运算往往得到的是字面表达式，而不是其中的超集。这些在后文会有交代。）*
+*（由于某些原因，即使是有充分重叠的可能， | 运算往往得到的是字面表达式，而不是其中的超集类型。这些在后文会有交代。）*
 
 ### number | string
 
@@ -132,9 +132,11 @@ const bar: Chimera = "hello"; //不能向下兼容，报错了
 
 ### never
 
-其实在编辑器中，鼠标悬停 Chimera 的结果是 `type Chimera = never` 。
+其实在 number & string 的举例中，在 TypeScript 编辑器中，用鼠标悬停 Chimera 会显示 `type Chimera = never` 。
 
-number 和 string 的交叉是 never ！[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)有说明 never 可以分配给所有类型。如果从集合的角度看待，空集是所有集合的子集，never 也是所有类型的子集，不妨认为 never 就是空集。
+number 和 string 的交叉是 never ！
+
+[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)有说明 never 可以分配给所有类型。如果从集合的角度看待，空集是所有集合的子集，never 也是所有类型的子集，不妨认为 never 就是空集。
 
 交叉是 never 意味着，number 和 string 没有任何相同的元素，或者说不存在一个元素能同时具备 number 和 string 的性质。这很符合我们的编程经验。
 
@@ -146,7 +148,7 @@ number 和 string 的交叉是 never ！[文档](https://www.typescriptlang.org/
 type r1 = number & never; // type r1 = never
 type r2 = string & never; // type r2 = never
 ```
-*（当然，由于某些原因，& 运算往往得到是字面表达式。）*
+*（当然，由于某些原因，& 运算往往得到是字面表达式，即使其中有充分重叠的子集类型。）*
 
 ### as 的成立条件
 
@@ -230,7 +232,7 @@ type Foo = number[];
 
 4. 元组类型（ [Tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) ）
 
-元组类型就是有固定排列的数组类型。
+元组类型就是有固定排列的序列类型，在 typescript 中元组也属于数组的一种。
 
 ```typescript
 type StringNumberPair = [string, number];
