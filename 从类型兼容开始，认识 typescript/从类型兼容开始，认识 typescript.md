@@ -43,7 +43,7 @@ function mysteryBox(): string {
 
 从集合角度出发也有助于理解[联合类型（|）](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types)和[交叉类型（&）](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)，以及泛型使用中出现的 extends 和 infer 关键字。
 
-本文后续将围绕着集合进行展开，可是为什么本文不叫从集合开始？有的概念，其实用集合会太过抽象，反而不好理解。如协变和逆变。
+本文后续将围绕着集合进行展开，可是为什么本文不叫从集合开始？其实，有的概念用集合会太过抽象，反而不好理解。如协变和逆变。
 
 ~~其实是标题有集合会比较劝退~~
 
@@ -122,7 +122,7 @@ type Chimera = number & string;
 
 number 和 string 的交叉是 never ！[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)有说明 never 可以分配给所有类型。如果从集合的角度看待，空集是所有集合的子集，never 也是所有类型的子集，不妨认为 never 就是空集。
 
-交叉是 never 意味着，number 和 string 没有任何相同的元素，这很符合我们的编程经验。
+交叉是 never 意味着，number 和 string 没有任何相同的元素，或者说不存在一个元素能同时具备 number 和 string 的性质。这很符合我们的编程经验。
 
 ![img](./2.1-x.svg)
 
@@ -188,31 +188,45 @@ const bar: never = foo;
 
 > TypeScript 的结构化类型系统是根据 JavaScript 代码的典型写法设计的。
 
-JavaScript 广泛使用了函数表达式和对象字面量，结构化类型就是针对这点设计的，他们在字面表达上有非常相似的地方。而结构化类型的字面表达，是掌握条件类型的关键，特别是对 infer 关键字的掌握。
+JavaScript 广泛使用了函数表达式和对象字面量，结构化类型就是针对这点设计的，他们在字面表达上有非常相似的地方。而结构化类型的字面表达，是泛型、条件类型，类型推导……的基本构成。
 
 常见的结构化类型有以下几种：
 
-1. [Primitives](https://www.typescriptlang.org/zh/docs/handbook/2/everyday-types.html)
+1. 基本类型 ( [Primitives](https://www.typescriptlang.org/zh/docs/handbook/2/everyday-types.html) )
+
+基本类型就是那些平坦的字面值类型，`string` ，`number` ，`boolean` 等等。
+
+2. 记录类型（ [Record / Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
+
+记录类型就是那些用属性表达的类型。
 
 ```typescript
+type Person = { name: string; age: number };
 ```
 
-2. Record（ [Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
+也有人称之为对象类型，但是我为了消除歧义，更愿意称之为记录类型。
+
+3. 数组类型（ [Array](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
+
+数组类型就是数组的类型。
 
 ```typescript
+type Foo = number[];
 ```
 
-1. [Array](https://www.typescriptlang.org/docs/handbook/2/objects.html)
+4. 元组类型（ [Tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) ）
+
+元组类型就是有固定排列的数组类型。
 
 ```typescript
+type StringNumberPair = [string, number];
 ```
 
-4. [Tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types)
+5. 函数类型（ [Function](https://www.typescriptlang.org/docs/handbook/2/functions.html) ）
+
+函数类型就是函数的类型。
 
 ```typescript
+type Foo = (x: string) => void;
 ```
 
-5. [Function](https://www.typescriptlang.org/docs/handbook/2/functions.html)
-
-```typescript
-```
