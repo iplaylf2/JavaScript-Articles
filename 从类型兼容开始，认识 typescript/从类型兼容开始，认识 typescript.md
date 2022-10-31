@@ -1,6 +1,6 @@
 ## 向下兼容
 
-类型兼容体现在 typescript 使用过程中的方方面面。如：
+类型兼容体现在 TypeScript 使用过程中的方方面面。如：
 
 - 赋值语句中的向下兼容。
 
@@ -80,7 +80,7 @@ function mysteryBox(): string {
 
 这似乎就能解释 `as unknown` 能发挥作用的原因。
 
-在集合论中，一个集合和它的超集进行联合，结果是它的超集。这一点在 typescript 通过 `|` 也能体现出来。
+在集合论中，一个集合和它的超集进行联合，结果是它的超集。这一点在 TypeScript 通过 `|` 也能体现出来。
 
 ```typescript
 type r1 = number | unknown; // type r1 = unknown
@@ -126,7 +126,7 @@ number 和 string 的交叉是 never ！[文档](https://www.typescriptlang.org/
 
 ![img](./2.1-x.svg)
 
-一个集合和它的子集进行交叉，结果是它的子集。这一点在 typescript 通过 `&` 也能体现出来。
+一个集合和它的子集进行交叉，结果是它的子集。这一点在 TypeScript 通过 `&` 也能体现出来。
 
 ```typescript
 type r1 = number & never; // type r1 = never
@@ -181,3 +181,38 @@ const bar: never = foo;
 ```
 
 从这方面去理解 unknown、never、any 与其他类型的关系，会比记忆 n x n 的分配关系表要轻松吧。
+
+## 结构化类型
+
+重新认识 extends 之前，我们有必要了解[结构化类型](https://www.typescriptlang.org/docs/handbook/type-compatibility.html)。
+
+> TypeScript 的结构化类型系统是根据 JavaScript 代码的典型写法设计的。
+
+JavaScript 广泛使用了函数表达式和对象字面量，结构化类型就是针对这点设计的，他们在字面表达上有非常相似的地方。而结构化类型的字面表达，是掌握条件类型的关键，特别是对 infer 关键字的掌握。
+
+常见的结构化类型有以下几种：
+
+1. [Primitives](https://www.typescriptlang.org/zh/docs/handbook/2/everyday-types.html)
+
+```typescript
+```
+
+2. Record（ [Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
+
+```typescript
+```
+
+1. [Array](https://www.typescriptlang.org/docs/handbook/2/objects.html)
+
+```typescript
+```
+
+4. [Tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types)
+
+```typescript
+```
+
+5. [Function](https://www.typescriptlang.org/docs/handbook/2/functions.html)
+
+```typescript
+```
