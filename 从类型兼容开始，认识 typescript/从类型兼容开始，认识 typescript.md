@@ -173,10 +173,11 @@ flowchart RL
 ```
 *（箭头左边的项包含于右边的项。）*
 
-any 并不向下兼容 never 。
+特别的，any 并不向下兼容 never 。
 ```typescript
 declare const foo: any;
 // 不能将类型“any”分配给类型“never”。ts(2322)
 const bar: never = foo;
 ```
 
+从这方面去理解 unknown、never、any 与其他类型的关系，会比记忆 n x n 的分配关系表要轻松吧。
