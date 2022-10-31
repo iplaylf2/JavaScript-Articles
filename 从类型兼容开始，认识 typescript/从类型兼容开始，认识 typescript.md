@@ -80,17 +80,33 @@ function mysteryBox(): string {
 
 这似乎就能解释 `as unknown` 能发挥作用的原因。
 
-在集合论中，一个集合和它的父集进行联合，结果是它的父集。这一点在 typescript 通过 `|` 也能体现出来。
+在集合论中，一个集合和它的超集进行联合，结果是它的超集。这一点在 typescript 通过 `|` 也能体现出来。
 
 ```typescript
 type r1 = number | unknown; // type r1 = unknown
 type r2 = string | unknown; // type r2 = unknown
 ```
-*（由于某些原因，即使是有充分重叠的可能， | 运算往往得到的是字面表达式，而不是其中的父集。这些在后文会有交代。）*
+*（由于某些原因，即使是有充分重叠的可能， | 运算往往得到的是字面表达式，而不是其中的超集。这些在后文会有交代。）*
+
+### number | string
+
+从集合的角度出发，number 和 string 联合之后，也能与 number/string 充分重叠。
+
+如果存在这种类型，是否能进行 as 转换呢？联合类型的运算符 | 是否能用于做这种实验呢？
+
+```typescript
+type Chimera = number | string;
+// 编译器没有报错
+233 as Chimera as string;
+```
+
+成功转换！也许联合类型的运算符 | 对应着集合的联合。
 
 ### number & string
 
-number 和 string 交叉的部分，也是能分别和 number/string 充分重叠，是否能进行 as 转换呢？
+从集合的角度出发，number 和 string 交叉的部分，也能与 number/string 充分重叠。
+
+如果存在这种类型，是否能进行 as 转换呢？交叉类型的运算符 & 是否能用于做这种实验呢？
 
 ```typescript
 type Chimera = number & string;
@@ -98,11 +114,13 @@ type Chimera = number & string;
 233 as Chimera as string;
 ```
 
-成功了。
+成功转换！也许交叉类型的运算符 | 对应着集合的交叉。
+
+### never
 
 其实在编辑器中，鼠标悬停 Chimera 的结果是 `type Chimera = never` 。
 
-number 和 string 的交叉是 never ！[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)有说明 never 可以分配给任意类型。如果从集合的角度看待，never 就是空集，空集是任何集合的子集。
+number 和 string 的交叉是 never ！[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)有说明 never 可以分配给任意类型。如果从集合的角度看待，空集是任何集合的子集，never 也是任意类型的子集，不妨认为 never 就是空集。
 
 交叉是 never 意味着，number 和 string 没有任何相同的元素，这很符合我们的编程经验。
 
@@ -124,7 +142,19 @@ type r2 = string & never; // type r2 = never
 
 as 运算符两边的类型，只有在它们之间存在包含的关系才能够成立。
 
+### more specific or less specific
+
+上一节的引用出现过两个词组 **more specific** 和 **less specific** ，字面意思是更具体和更不具体，也许可以用大家更熟悉的词汇代替，更具体和更抽象。
+
+如此之后，引用的句子可以翻译为：
+
+> 类型断言只能把类型转化成更具体或更抽象的版本。
+
+与集合联系在一起，我们不妨认为，一个类型的子集代表他更具体的版本，一个类型的超集代表他更抽象的版本。
+
 ### any 呢
+
+前面提到了 unknown 和
 
 any 太特殊了，我无法用集合的语言表达。~~维恩图不会画了。~~
 
