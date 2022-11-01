@@ -88,7 +88,7 @@ function mysteryBox(): string {
 type r1 = number | unknown; // type r1 = unknown
 type r2 = string | unknown; // type r2 = unknown
 ```
-*（由于某些原因，即使是有充分重叠的可能， | 运算往往得到的是字面表达式，而不是其中的超集类型。这些在后文会有交代。）*
+*（不知为何，即使是有充分重叠的可能， | 运算往往得到的是字面表达式，而不是其中的超集类型。后文再议。）*
 
 ### number | string
 
@@ -150,7 +150,7 @@ number 和 string 的交叉是 never ！
 type r1 = number & never; // type r1 = never
 type r2 = string & never; // type r2 = never
 ```
-*（当然，由于某些原因，& 运算往往得到是字面表达式，即使其中有充分重叠的子集类型。）*
+*（当然，不知为何，& 运算往往得到是字面表达式，即使其中有充分重叠的子集类型。后文再议。）*
 
 ### as 的成立条件
 
@@ -174,7 +174,7 @@ type r2 = string & never; // type r2 = never
 
 any 太特殊了，我无法用集合的语言表达。~~维恩图不会画了。~~
 
-但可以从包含途径出发，画一张图表。
+但可以从包含途径出发画一张图表。
 
 ```mermaid
 flowchart RL
@@ -193,11 +193,13 @@ flowchart RL
 
 any 在图上出现了两次，因为它是 never 以外所有类型的子集，也是所有类型的超集。
 
-特别的，any 并不向下兼容 never 。
+特别要指出 any 并不向下兼容 never 。
 ```typescript
 declare const foo: any;
 const bar: never = foo; // 不能向下兼容，报错了
 ```
+
+any 的特殊还体现在别的方面，后文再议。
 
 ## 结构化类型
 
@@ -248,7 +250,36 @@ let foo: [string, number];
 let foo: (x: string) => void;
 ```
 
-结构化类型在分配时，也是需要向下兼容的。有时候我们能通过集合的角度去理解这种向下兼容的行为。
+结构化类型在分配时，也是需要向下兼容的。我们接下来谈谈其中几个在类型兼容的表现。
+
+*（谈论之前或许还需要一个前提，结构化类型所表达的值是不可变的、无状态的。这样可以避免过早考虑逆变的问题。）*
 
 ### 记录类型
 
+```typescript
+
+```
+
+### 数组类型
+
+```typescript
+
+```
+
+### 元组类型
+
+```typescript
+
+```
+
+## 泛型中的 extends
+
+### 泛型约束
+
+### 条件类型
+
+#### 条件类型表达式
+
+#### 条件类型的“分配律”
+
+#### infer
