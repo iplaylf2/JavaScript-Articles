@@ -125,7 +125,7 @@ const qux: number = baz; // 无报错
 const zoo: string = baz; // 无报错
 
 const foo: Chimera = 233; // 不能向下兼容，报错了
-const bar: Chimera = "hello"; //不能向下兼容，报错了
+const bar: Chimera = "hello"; // 不能向下兼容，报错了
 ```
 
 如上，成功通过 Chimera 进行了转换；作为子集的 Chimera 向下兼容了超集 number / string ；作为超集的 number/string 不能向下兼容它的子集 Chimera。
@@ -194,8 +194,7 @@ any 在图上出现了两次，因为它是 never 以外所有类型的子集，
 特别的，any 并不向下兼容 never 。
 ```typescript
 declare const foo: any;
-// 不能将类型“any”分配给类型“never”。ts(2322)
-const bar: never = foo;
+const bar: never = foo; // 不能向下兼容，报错了
 ```
 
 ## 结构化类型
