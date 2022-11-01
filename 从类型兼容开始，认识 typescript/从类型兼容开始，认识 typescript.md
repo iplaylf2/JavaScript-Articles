@@ -29,7 +29,7 @@ function mysteryBox(): string {
 
 而这些不同的形式，其实都是类型兼容在**赋值**行为上的表现，他要求发起赋值对象的类型，必须向下兼容被赋值对象的类型。
 
-在我看来，如果 B 在代码中出现的地方，都能用 A 去代替而不会编译出错，那么 A 就是向下兼容 B 。至于更准确的描述，请阅读官方文档[Type Compatibility](https://www.typescriptlang.org/docs/handbook/type-compatibility.html)。
+在我看来，如果 B 在代码中出现的地方，都能用 A 去代替而不会编译出错，那么 A 就是向下兼容 B 。至于更准确的描述，请阅读官方文档 [Type Compatibility](https://www.typescriptlang.org/docs/handbook/type-compatibility.html)。
 
 ## 集合的角度
 
@@ -71,7 +71,7 @@ function mysteryBox(): string {
 
 ![img](./2-x.svg)
 
-已知集合 number 和集合 string 都分别是集合 unknown 的子集，因此可以通过 unknown 来完成一次有意的转换。
+已知集合 number 和集合 string 都分别是集合 unknown 的子集，都与 unknown 充分重叠，因此可以通过 unknown 来完成一次有意的转换。
 
 ```typescript
 // 编译器没有报错
@@ -90,7 +90,7 @@ type r2 = string | unknown; // type r2 = unknown
 
 ### number | string
 
-从集合的角度出发，number 和 string 联合之后，也能与 number/string 充分重叠。
+从集合的角度出发，number 和 string 联合得到的类型，也能与 number/string 充分重叠。
 
 联合类型的运算符 | 是否如语义那样可以联合 number 和 string ？是否能进行 as 转换呢？是否也能体现类型向下兼容呢？
 
@@ -156,7 +156,7 @@ type r2 = string & never; // type r2 = never
 
 > TypeScript only allows type assertions which convert to a more specific or less specific version of a type.
 
-其中，**more specific** 和 **less specific** ，字面意思是更具体和更不具体，也许可以用大家更熟悉的词汇代替，更具体和更抽象。
+其中，**more specific** 和 **less specific** ，字面意思是更具体和更不具体，也许可以用大家更熟悉的词汇代替，**更具体**和**更抽象**。
 
 如此之后，引用的句子可以翻译为：
 
@@ -189,14 +189,14 @@ flowchart RL
 ```
 *（箭头左边的项包含于右边的项。）*
 
+any 在图上出现了两次，因为它是 never 以外所有类型的子集，也是所有类型的超集。
+
 特别的，any 并不向下兼容 never 。
 ```typescript
 declare const foo: any;
 // 不能将类型“any”分配给类型“never”。ts(2322)
 const bar: never = foo;
 ```
-
-从这方面去理解 unknown、never、any 与其他类型的关系，会比记忆 n x n 的分配关系表要轻松吧。
 
 ## 结构化类型
 
@@ -247,6 +247,6 @@ let foo: [string, number];
 let foo: (x: string) => void;
 ```
 
-结构化类型在分配时，也是需要向下兼容的。有时候我们也能通过集合的角度去理解这种向下兼容的行为。
+结构化类型在分配时，也是需要向下兼容的。有时候我们能通过集合的角度去理解这种向下兼容的行为。
 
 ### 记录类型
