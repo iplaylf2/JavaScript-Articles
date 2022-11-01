@@ -27,13 +27,15 @@ function mysteryBox(): string {
 }
 ```
 
-而这些不同的形式，其实都是类型兼容在**赋值**行为上的表现，他要求发起赋值对象的类型，必须向下兼容被赋值对象的类型。
+而这些不同的形式，其实都是类型兼容在**赋值**行为上的表现，他要求发起赋值对象的类型，必须**向下兼容**被赋值对象的类型。
 
 在我看来，如果 B 在代码中出现的地方，都能用 A 去代替而不会编译出错，那么 A 就是向下兼容 B 。至于更准确的描述，请阅读官方文档 [Type Compatibility](https://www.typescriptlang.org/docs/handbook/type-compatibility.html)。
 
 ## 集合的角度
 
-有一个角度能很好地理解类型的向下兼容，就是把类型视作是一个个集合。当 A 类型是 B 类型的子集时，就是 A 向下兼容 B 。
+有一个角度能很好地理解类型的向下兼容，就是把类型视为集合。
+
+把一个类型 T 视为集合 S 时，我们可以说集合 S 满足类型 T 的所有特性；而 S 的子集也将满足类型 T 的所有特性。因此 S的子集作为新的类型时必定兼容类型 T ，向下兼容也就是**子集兼容超集/父集**。
 
 ![img](./1-x.svg)
 
@@ -59,7 +61,7 @@ function mysteryBox(): string {
 
 如果把“充分重叠”这个词放在类型是集合的上下文中，那么就能更容易理解前面报错的含义了。
 
-我们不妨这么认为，当集合 B 是集合 A 的子集时，集合 B 的元素选取范围就与集合 A 的元素选取范围“充分重叠”。
+我们不妨这么认为，当集合 B 是集合 A 的子集时，集合 B 的元素选取范围就与集合 A 的元素选取范围“充分重叠”。*（如同上文维恩图所示。）*
 
 不充分重叠的时候，意味着 A 包含有不属于 B 的元素，B 也包含有不属于 A 的元素。
 
@@ -67,7 +69,7 @@ function mysteryBox(): string {
 
 ### unknown
 
-从[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)可知，所有类型都能分配给 unknown 。我们可以将 unknown 视作所有类型的超集/父集。
+从[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)可知，所有类型都能分配给 unknown 。我们可以将 unknown 视为所有类型的超集。
 
 ![img](./2-x.svg)
 
@@ -249,3 +251,4 @@ let foo: (x: string) => void;
 结构化类型在分配时，也是需要向下兼容的。有时候我们能通过集合的角度去理解这种向下兼容的行为。
 
 ### 记录类型
+
