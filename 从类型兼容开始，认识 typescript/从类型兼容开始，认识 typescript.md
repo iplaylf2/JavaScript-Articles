@@ -35,7 +35,7 @@ function mysteryBox(): string {
 
 有一个角度能很好地理解类型的向下兼容，就是把类型视为集合。
 
-把一个类型 T 视为集合 S 时，我们可以说集合 S 满足类型 T 的所有特性；而 S 的子集也将满足类型 T 的所有特性。因此 S的子集作为新的类型时必定兼容类型 T ，向下兼容也就是**子集兼容超集/父集**。
+把一个类型 T 视为集合 S 时，我们可以说集合 S 满足类型 T 的所有特性；而 S 的子集也将满足类型 T 的所有特性。因此 S 的子集作为新的类型时必定兼容类型 T ，向下兼容也就是**子集兼容超集/父集**。
 
 ![img](./1-x.svg)
 
@@ -217,18 +217,18 @@ JavaScript 广泛使用了函数表达式和对象字面量，结构化类型就
 
 2. 记录类型（ [Record / Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
 
-记录类型就是那些用属性表达的类型。字面表达例子：
+记录类型是表达属性组合的类型。字面表达的例子：
 
 ```typescript
-let foo: { name: string; age: number }; // 属性形态
-let bar: { [index in string]: number }; // 索引签名形态
+let foo: { name: string; age: number }; // 属性表达式
+let bar: { [index in string]: number }; // 索引签名表达式
 ```
 
 也有人称之为对象类型，但是我为了消除歧义，更愿意称之为记录类型。
 
 3. 数组类型（ [Array](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
 
-数组类型就是数组的类型。字面表达例子：
+数组类型就是数组的类型。字面表达的例子：
 
 ```typescript
 let foo: number[];
@@ -236,7 +236,7 @@ let foo: number[];
 
 4. 元组类型（ [Tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) ）
 
-元组类型就是有固定排列的序列类型，在 typescript 中元组也属于数组的一种。字面表达例子：
+元组类型是表达属性排列的类型，在 typescript 中元组也属于数组的一种。字面表达的例子：
 
 ```typescript
 let foo: [string, number];
@@ -244,7 +244,7 @@ let foo: [string, number];
 
 5. 函数类型（ [Function](https://www.typescriptlang.org/docs/handbook/2/functions.html) ）
 
-函数类型就是函数的类型。字面表达例子：
+函数类型就是函数的类型。字面表达的例子：
 
 ```typescript
 let foo: (x: string) => void;
@@ -255,6 +255,14 @@ let foo: (x: string) => void;
 *（谈论之前或许还需要一个前提，结构化类型所表达的值是不可变的、无状态的。这样可以避免过早考虑逆变的问题。）*
 
 ### 记录类型
+
+将类型视为集合时，记录类型的特性体现在属性组合上：
+
+- 组合中每个属性都能代表一份特性;
+- 不同名字的属性所代表的特性不会重叠；
+- 组合中的属性越多，记录类型的特性越多；
+  
+因此，
 
 ```typescript
 
