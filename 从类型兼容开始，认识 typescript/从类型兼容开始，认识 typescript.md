@@ -92,7 +92,7 @@ type r2 = string | unknown; // type r2 = unknown
 
 ### number | string
 
-从集合的角度出发，number 和 string 联合得到的类型，也能与 number/string 充分重叠。
+从集合的角度出发，number 和 string 联合得到的类型，也能与 number 、string 充分重叠。
 
 联合类型的运算符 | 是否如语义那样可以联合 number 和 string ？是否能进行 as 转换呢？是否也能体现类型向下兼容呢？
 
@@ -109,11 +109,11 @@ const qux: number = baz; // 不能向下兼容，报错了
 const zoo: string = baz; // 不能向下兼容，报错了
 ```
 
-如上，成功通过 Chimera 进行了转换；作为子集的 number / string 都向下兼容了超集 Chimera ；作为超集的 Chimera 不能向下兼容它的子集 number / string。
+如上，成功通过 Chimera 进行了转换；作为子集的 number 、string 都向下兼容了超集 Chimera ；作为超集的 Chimera 不能向下兼容它的子集 number 、string。
 
 ### number & string
 
-从集合的角度出发，number 和 string 交叉的部分，也能与 number/string 充分重叠。
+从集合的角度出发，number 和 string 交叉的部分，也能与 number 、string 充分重叠。
 
 交叉类型的运算符 & 是否如语义那样可以交叉 number 和 string ？是否能进行 as 转换呢？是否也能体现类型向下兼容呢？
 
@@ -130,7 +130,7 @@ const foo: Chimera = 233; // 不能向下兼容，报错了
 const bar: Chimera = "hello"; // 不能向下兼容，报错了
 ```
 
-如上，成功通过 Chimera 进行了转换；作为子集的 Chimera 向下兼容了超集 number / string ；作为超集的 number/string 不能向下兼容它的子集 Chimera。
+如上，成功通过 Chimera 进行了转换；作为子集的 Chimera 向下兼容了超集 number 、string ；作为超集的 number 、string 不能向下兼容它的子集 Chimera。
 
 ### never
 
