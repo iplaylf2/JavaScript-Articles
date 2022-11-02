@@ -211,9 +211,9 @@ JavaScript 广泛使用了函数表达式和对象字面量，结构化类型就
 
 常见的结构化类型有以下几种：
 
-1. 基本类型 ( [Primitives](https://www.typescriptlang.org/zh/docs/handbook/2/everyday-types.html) )
+1. 基元类型 ( [Primitives](https://www.typescriptlang.org/zh/docs/handbook/2/everyday-types.html) )
 
-基本类型就是那些平坦的字面值类型，`string` ，`number` ，`boolean` 等等。
+基元类型就是那些平坦的字面值类型，`string` ，`number` ，`boolean` 等等。
 
 2. 记录类型（ [Record / Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
 
@@ -278,11 +278,64 @@ declare let baz: { a: number; b: string };
 bar = baz; // 向下兼容
 ```
 
-两个集合交叉的部分会满足它们的所有特性，而记录类型的属性都能视为特性，那么两个记录类型交叉得到的类型将拥有它们的所有属性。而名字重复的属性的类型将会两两交叉。
+两个集合交叉的部分会满足它们的所有特性，而记录类型的属性都能视为特性，那么两个记录类型交叉得到的类型将拥有它们的所有属性。而名字重复的属性，它们的类型将会两两交叉。
 
-而文档对交叉类型的[介绍](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)，本来就是用于组合多个记录类型。
+而文档对交叉类型的[介绍](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)，运算符 & 本来就是用于组合多个记录类型。
+
+```typescript
+type Chimera = { a: unknown } & { a: number };
+
+declare let foo: Chimera;
+declare let bar: { a: number };
+
+foo = bar; // 向下兼容
+bar = foo; // 向下兼容
+```
+
+当两个集合互为子集时，两个集合相等。同样的，当两个类型相互向下兼容时，两个类型相等。~~（没考虑 any ）~~
+
+综上，`{ a: unknown } & { a: number }` 等同于 `{ a: number }` 。同名属性 a 的类型由 unknown 和 number 两两交叉而得。
+
+以下例子也能看出 `{ a: number } & { b: string }` 等同于 `{ a: number; b: string }` 。
+
+```typescript
+type Chimera = { a: number } & { b: string };
+
+declare let foo: Chimera;
+declare let bar: { a: number; b: string };
+
+foo = bar; // 向下兼容
+bar = foo; // 向下兼容
+```
 
 而一个没有属性的组合 `{}` ，是没有额外特性的记录类型，即是所有记录类型的超集。
+
+```typescript
+type Chimera = { a: number } & {}; // 编辑器里甚至直接得到 type Chimera = { a: number }
+```
+
+特别的，JavaScript 里非 null / undefined 的值，都能像 JavaScript 对象那样访问属性，如同 TypeScript 的记录类型。因此，在 TypeScript 中类型 {} 也是非 null / undefined 值的超集类型。
+
+```typescript
+type Chimera = number & {};
+
+declare let foo: Chimera;
+declare let bar: number;
+
+foo = bar;
+bar = foo;
+
+// Chimera 事实上是 number ，{} 是 number 的超集。
+
+type Chimera2 = null & {}; // type Chimera2 = never
+type Chimera3 = undefined & {}; // type Chimera3 = never
+```
+
+*（typescript-eslint 认为 {} 代表着非空的值，不符合大众预期，从而[不推荐](https://github.com/typescript-eslint/typescript-eslint/issues/2063#issuecomment-675156492)使用。）*
+
+作为这一节的总结，我尝试画一下这些类型的维恩图： {} 、{ a: number } 、{ b: string } 、{ a: number; b: string } 。
+
+
 
 ### 数组类型
 
