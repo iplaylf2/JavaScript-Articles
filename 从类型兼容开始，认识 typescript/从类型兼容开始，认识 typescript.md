@@ -273,7 +273,7 @@ declare let bar: { a: number };
 
 foo = bar; // 向下兼容
 
-declare let baz: { a: number; b: string };
+declare const baz: { a: number; b: string };
 
 bar = baz; // 向下兼容
 ```
@@ -346,8 +346,13 @@ type Chimera3 = undefined & {}; // type Chimera3 = never
 数组在对外输出元素时，数组类型的向下兼容体现在元素类型的向下兼容。
 
 ```typescript
-
+declare const foo: number[];
+const bar: unknown[] = foo; // 向下兼容
 ```
+
+number 向下兼容 unknown ，number[] 便向下兼容 unknown[] 。
+
+![img](./5-x.svg)
 
 ### 元组类型
 
