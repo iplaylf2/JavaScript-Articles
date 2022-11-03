@@ -217,37 +217,48 @@ JavaScript 广泛使用了函数表达式和对象字面量，结构化类型就
 
 2. 记录类型（ [Record / Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
 
-记录类型是表达属性组合的类型。字面表达的例子：
+记录类型是表达属性组合的类型。
 
 ```typescript
 let foo: { name: string; age: number }; // 属性表达式
 let bar: { [index in string]: number }; // 索引签名表达式
+
+foo = { name: "foo", age: 23 };
+bar = { x: 233 };
 ```
 
 也有人称之为对象类型，但是我为了消除歧义，更愿意称之为记录类型。
 
 3. 数组类型（ [Array](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
 
-数组类型就是数组的类型。字面表达的例子：
+数组类型就是数组的类型。
 
 ```typescript
 let foo: number[];
+
+foo = [1, 2, 3];
 ```
 
-4. 元组类型（ [Tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) ）
+1. 元组类型（ [Tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) ）
 
-元组类型是表达属性排列的类型，在 typescript 中元组也属于数组的一种。字面表达的例子：
+元组类型是表达属性排列的类型，在 typescript 中元组也属于数组的一种。
 
 ```typescript
-let foo: [string, number];
+let foo: [name: string, age: number];
+let bar: [string, number]; // 省略属性名的形式，也是更常见的形式。
+
+foo = ["foo", 23]; // 字面量表达的形式并不能带属性名。
+bar = ["bar", 33];
 ```
 
-5. 函数类型（ [Function](https://www.typescriptlang.org/docs/handbook/2/functions.html) ）
+1. 函数类型（ [Function](https://www.typescriptlang.org/docs/handbook/2/functions.html) ）
 
 函数类型就是函数的类型。字面表达的例子：
 
 ```typescript
 let foo: (x: string) => void;
+
+foo = (x) => console.log(x);
 ```
 
 结构化类型在分配时，也是需要向下兼容的。我们接下来谈谈其中几个在类型兼容的表现。
