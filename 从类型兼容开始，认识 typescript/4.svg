@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg2093"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   sodipodi:docname="4.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview2095"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="411.18258"
+     inkscape:cy="361.68511"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer3" />
+  <defs
+     id="defs2090">
+    <rect
+       x="237"
+       y="202"
+       width="208"
+       height="116"
+       id="rect6581" />
+  </defs>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="图层 2">
+    <ellipse
+       style="fill:none;stroke:#800000;stroke-width:0.362291"
+       id="path6642-7"
+       cx="86.493752"
+       cy="90.310577"
+       rx="31.818855"
+       ry="31.818853" />
+    <ellipse
+       style="fill:none;stroke:#808000;stroke-width:0.362291"
+       id="path6642-6"
+       cx="118.49375"
+       cy="90.310577"
+       rx="31.818855"
+       ry="31.818853" />
+    <path
+       style="fill:none;stroke:#008000;stroke-width:1.368189;stroke-dasharray:none"
+       d="m 387.16996,237.95593 c -24.69815,14.62733 -44.04393,38.18578 -52.99487,65.51245 -10.25058,30.3558 -7.51961,64.76739 7.38288,93.12873 10.2712,19.91733 26.34307,36.69572 45.61821,48.09019 5.50482,-2.68597 10.50432,-6.64813 15.32847,-10.50233 21.8386,-17.5806 37.05406,-43.10483 42.10085,-70.68583 2.44801,-11.73534 2.25433,-23.8326 1.35031,-35.72614 -3.17426,-26.8445 -15.3477,-52.68789 -34.84192,-71.53568 -7.09269,-6.99811 -14.97397,-13.22415 -23.5662,-18.28346 l -0.35355,0.002 z"
+       id="path9487"
+       transform="scale(0.26458333)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#800000;stroke:#800000;stroke-width:0.264999"
+       x="63.150085"
+       y="73.668533"
+       id="text6733"><tspan
+         sodipodi:role="line"
+         id="tspan842"
+         x="63.150085"
+         y="73.668533">{ a: number }</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#800000;stroke:#808000;stroke-width:0.264999"
+       x="111.43823"
+       y="73.435646"
+       id="text6733-4"
+       inkscape:label="text6733-4"><tspan
+         sodipodi:role="line"
+         id="tspan840"
+         x="111.43823"
+         y="73.435646">{ b: string }</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#008000;stroke:#008000;stroke-width:0.362;stroke-dasharray:none"
+       x="72.555626"
+       y="91.857689"
+       id="text9855"><tspan
+         sodipodi:role="line"
+         id="tspan838"
+         x="72.555626"
+         y="91.857689">{ a: number; b: string }</tspan></text>
+  </g>
+</svg>
