@@ -239,19 +239,19 @@ let foo: number[];
 foo = [1, 2, 3];
 ```
 
-1. 元组类型（ [Tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) ）
+4. 元组类型（ [Tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) ）
 
 元组类型是表达属性排列的类型，在 typescript 中元组也属于数组的一种。
 
 ```typescript
 let foo: [name: string, age: number];
-let bar: [string, number]; // 省略属性名的形式，也是更常见的形式。
+let bar: [string, number]; // 省略属性名的形式，也是最常见的形式。
 
-foo = ["foo", 23]; // 字面量表达的形式并不能带属性名。
+foo = ["foo", 23]; // 直到 TypeScript 4.8 ，元组类型的值是没有属性名的，属性名只能存在于类型表达式中。
 bar = ["bar", 33];
 ```
 
-1. 函数类型（ [Function](https://www.typescriptlang.org/docs/handbook/2/functions.html) ）
+5. 函数类型（ [Function](https://www.typescriptlang.org/docs/handbook/2/functions.html) ）
 
 函数类型就是函数的类型。字面表达的例子：
 
