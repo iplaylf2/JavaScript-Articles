@@ -292,6 +292,8 @@ foo = bar; // 向下兼容
 bar = foo; // 向下兼容
 ```
 
+![img](./)
+
 当两个集合互为子集时，两个集合相等。同样的，当两个类型相互向下兼容时，两个类型相等。~~（没考虑 any ）~~
 
 综上，`{ a: unknown } & { a: number }` 等同于 `{ a: number }` 。同名属性 a 的类型由 unknown 和 number 两两交叉而得。
@@ -307,6 +309,8 @@ declare let bar: { a: number; b: string };
 foo = bar; // 向下兼容
 bar = foo; // 向下兼容
 ```
+
+![img](./)
 
 而一个没有属性的组合 `{}` ，是没有额外特性的记录类型，即是所有记录类型的超集。
 
@@ -333,7 +337,13 @@ type Chimera3 = undefined & {}; // type Chimera3 = never
 
 *（ typescript-eslint 认为 {} 代表着非空的值，不是大众预期的“空对象”，从而[不推荐](https://github.com/typescript-eslint/typescript-eslint/issues/2063#issuecomment-675156492)使用。）*
 
+有两个问题留给大家思考：
+1. JavaScript 的 number 经过装箱成为 Number 对象后，能表现出 JavaScript 对象的性质。请问，在 TypeScript 中 number 和 Number 的兼容关系是怎样的？
+2. 如何定义出一个“空对象”类型，使得任何带有属性的记录类型不能向下兼容它。
+
 ### 数组类型
+
+数组在对外输出元素时，数组类型的向下兼容体现在元素类型的向下兼容。
 
 ```typescript
 
