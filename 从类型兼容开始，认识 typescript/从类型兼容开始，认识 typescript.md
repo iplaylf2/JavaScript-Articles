@@ -262,10 +262,10 @@ let foo: (x: string) => void;
 - 不同名字的属性所代表的特性不会重叠；
 - 组合中的属性越多，记录类型的特性越多；
   
-因此，两个记录类型想要存在向下兼容的关系时，存在集合间的包容关系时：
+因此，两个记录类型想要存在向下兼容的关系，想要存在集合间的包容关系时：
 
 - 子集类型必须拥有超集类型的所有同名属性。
-- 子集类型的同名属性类型必须向下兼容超集的同名属性类型。
+- 子集类型的同名属性类型必须向下兼容超集类型的同名属性类型。
 
 ```typescript
 declare let foo: { a: unknown };
@@ -280,7 +280,7 @@ bar = baz; // 向下兼容
 
 两个集合交叉的部分会满足它们的所有特性，而记录类型的属性都能视为特性，那么两个记录类型交叉得到的类型将拥有它们的所有属性。而名字重复的属性，它们的类型将会两两交叉。
 
-而文档对交叉类型的[介绍](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)，运算符 & 本来就是用于组合多个记录类型。
+在文档对交叉类型的[介绍](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)中，运算符 & 本来就是用于组合多个记录类型。
 
 ```typescript
 type Chimera = { a: unknown } & { a: number };
@@ -331,11 +331,7 @@ type Chimera2 = null & {}; // type Chimera2 = never
 type Chimera3 = undefined & {}; // type Chimera3 = never
 ```
 
-*（typescript-eslint 认为 {} 代表着非空的值，不符合大众预期，从而[不推荐](https://github.com/typescript-eslint/typescript-eslint/issues/2063#issuecomment-675156492)使用。）*
-
-作为这一节的总结，我尝试画一下这些类型的维恩图： {} 、{ a: number } 、{ b: string } 、{ a: number; b: string } 。
-
-
+*（ typescript-eslint 认为 {} 代表着非空的值，不是大众预期的“空对象”，从而[不推荐](https://github.com/typescript-eslint/typescript-eslint/issues/2063#issuecomment-675156492)使用。）*
 
 ### 数组类型
 
