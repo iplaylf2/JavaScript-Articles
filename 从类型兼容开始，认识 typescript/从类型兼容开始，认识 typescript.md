@@ -265,9 +265,9 @@ foo = [1, 2, 3];
 
 ```typescript
 let foo: [name: string, age: number];
-let bar: [string, number]; // 省略属性名的形式，也是最常见的形式。
+let bar: [string, number]; // 省略属性名的形式。
 
-foo = ["foo", 23]; // 直到 TypeScript 4.8 ，元组类型的值是没有属性名的，属性名只能存在于类型表达式中。
+foo = ["foo", 23]; // 元组类型特性在于属性的排列分布，属性名只是记号，不存在于元组值中。
 bar = ["bar", 33];
 ```
 
