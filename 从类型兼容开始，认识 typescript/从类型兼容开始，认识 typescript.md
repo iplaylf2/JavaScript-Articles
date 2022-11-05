@@ -57,17 +57,17 @@ TypeScript 的类型兼容总是向下兼容的。得到输入的 A 总是要求
 
 由此可得，**子类型向下兼容超类型如同子集包含于超集**。
 
-我们可以把前面出现过的 "some value" 类型和 string 类型画进用以表示集合关系的维恩图里。
+我们可以把前面出现过的 `"some value"` 类型和 `string` 类型画进用以表示集合关系的维恩图里。
 
 ![img](./1-x.svg)
 
-"some value" 是 string 的子集，"some value" 向下兼容 string 。
+`"some value"` 是 `string` 的子集，`"some value"` 向下兼容 `string` 。
 
-这样的集合角度，也有助于我们理解向下兼容在 as 、extends 、infer 等 TypeScript 编程符号中的表现。
+这样的集合角度，也有助于我们理解向下兼容在 `as` 、`extends` 、`infer` 等 TypeScript 编程符号中的表现。
 
 ## 类型断言 as
 
-不知道在阅读的你是否有留意过 as 的报错，里面提到过“两种类型不能充分重叠……”
+不知道在阅读的你是否有留意过 `as` 的报错，里面提到过“两种类型不能充分重叠……”
 
 ```typescript
 // Conversion of type 'number' to type 'string' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.(2352)
@@ -81,15 +81,15 @@ TypeScript 的类型兼容总是向下兼容的。得到输入的 A 总是要求
 
 不充分重叠的时候，意味着 A 包含有不属于 B 的元素，B 也包含有不属于 A 的元素。
 
-显然，在我们的编程经验中， string 和 number 不是充分重叠的。
+显然，在我们的编程经验中， `string` 和 `number` 不是充分重叠的。
 
 ### unknown
 
-从[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)可知，所有类型都能分配给 unknown 。我们可以将 unknown 视为所有类型的超集。
+从[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)可知，所有类型都能分配给 `unknown` 。我们可以将 `unknown` 视为所有类型的超集。
 
 ![img](./2-x.svg)
 
-已知集合 number 和集合 string 都分别是集合 unknown 的子集，都与 unknown 充分重叠，因此可以通过 unknown 来完成一次“有意的转换”。
+已知集合 `number` 和集合 `string` 都分别是集合 `unknown` 的子集，都与 `unknown` 充分重叠，因此可以通过 `unknown` 来完成一次“有意的转换”。
 
 ```typescript
 // 编译器没有报错
@@ -104,13 +104,13 @@ TypeScript 的类型兼容总是向下兼容的。得到输入的 A 总是要求
 type r1 = number | unknown; // type r1 = unknown
 type r2 = string | unknown; // type r2 = unknown
 ```
-*（不知为何，即使是有充分重叠的可能， | 运算往往得到的是字面表达式，而不是其中的超集类型。后文再议。）*
+*（不知为何，即使是有充分重叠的可能， `|` 运算往往得到的是字面表达式，而不是其中的超集类型。后文再议。）*
 
 ### number | string
 
-从集合的角度出发，number 和 string 联合得到的类型，也能与 number 、string 充分重叠。
+从集合的角度出发，`number` 和 `string` 联合得到的类型，也能与 `number` 、`string` 充分重叠。
 
-[联合类型](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types)的运算符 | 是否如语义那样可以联合 number 和 string ？是否能进行 as 转换呢？是否也能体现类型向下兼容呢？
+[联合类型](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types)的运算符 `|` 是否如语义那样可以联合 `number` 和 `string` ？是否能进行 `as` 转换呢？是否也能体现类型向下兼容呢？
 
 ```typescript
 type Chimera = number | string;
@@ -125,13 +125,13 @@ const qux: number = baz; // 不能向下兼容，报错了
 const zoo: string = baz; // 不能向下兼容，报错了
 ```
 
-如上，成功通过 Chimera 进行了转换；作为子集的 number 、string 都向下兼容了超集 Chimera ；作为超集的 Chimera 不能向下兼容它的子集 number 、string。
+如上，成功通过 `Chimera` 进行了转换。作为子集的 `number` 、`string` 都向下兼容了超集 `Chimera` ；作为超集的 `Chimera` 不能向下兼容它的子集 `number` 、`string` 。
 
 ### number & string
 
-从集合的角度出发，number 和 string 交叉的部分，也能与 number 、string 充分重叠。
+从集合的角度出发，`number` 和 `string` 交叉的部分，也能与 `number` 、`string` 充分重叠。
 
-[交叉类型](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)的运算符 & 是否如语义那样可以交叉 number 和 string ？是否能进行 as 转换呢？是否也能体现类型向下兼容呢？
+[交叉类型](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)的运算符 `&` 是否如语义那样可以交叉 `number` 和 `string` ？是否能进行 `as` 转换呢？是否也能体现类型向下兼容呢？
 
 ```typescript
 type Chimera = number & string;
@@ -146,17 +146,17 @@ const foo: Chimera = 233; // 不能向下兼容，报错了
 const bar: Chimera = "hello"; // 不能向下兼容，报错了
 ```
 
-如上，成功通过 Chimera 进行了转换；作为子集的 Chimera 向下兼容了超集 number 、string ；作为超集的 number 、string 不能向下兼容它的子集 Chimera。
+如上，成功通过 `Chimera` 进行了转换；作为子集的 `Chimera` 向下兼容了超集 `number` 、`string` ；作为超集的 `number` 、`string` 不能向下兼容它的子集 `Chimera` 。
 
 ### never
 
-其实在 number & string 的举例中，在 TypeScript 编辑器中，用鼠标悬停 Chimera 会显示 `type Chimera = never` 。
+其实在 `number & string` 的举例中，在 TypeScript 编辑器中，用鼠标悬停 Chimera 会显示 `type Chimera = never` 。
 
-number 和 string 的交叉是 never ！
+`number` 和 `string` 的交叉是 `never` ！
 
-[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)有说明 never 可以分配给所有类型。如果从集合的角度看待，空集是所有集合的子集，never 也是所有类型的子集，不妨认为 never 就是空集。
+[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)有说明 `never` 可以分配给所有类型。如果从集合的角度看待，空集是所有集合的子集，`never` 也是所有类型的子集，不妨认为 `never` 就是空集。
 
-交叉是 never 意味着，number 和 string 没有任何相同的元素，或者说不存在一个元素能同时具备 number 和 string 的性质。这很符合我们的编程经验。
+交叉是 `never` 意味着，`number` 和 `string` 没有任何相同的元素，或者说不存在一个元素能同时具备 number 和 string 的性质。这很符合我们的编程经验。
 
 ![img](./2.1-x.svg)
 
@@ -166,11 +166,11 @@ number 和 string 的交叉是 never ！
 type r1 = number & never; // type r1 = never
 type r2 = string & never; // type r2 = never
 ```
-*（当然，不知为何，& 运算往往得到是字面表达式，即使其中有充分重叠的子集类型。后文再议。）*
+*（当然，不知为何，`&` 运算往往得到是字面表达式，即使其中有充分重叠的子集类型。后文再议。）*
 
 ### as 的成立条件
 
-类型断言（ as ）的[文档](https://www.typescriptlang.org/zh/docs/handbook/2/everyday-types.html#type-assertions)有那么一句话：
+类型断言（ `as` ）的[文档](https://www.typescriptlang.org/zh/docs/handbook/2/everyday-types.html#type-assertions)有那么一句话：
 
 > TypeScript only allows type assertions which convert to a more specific or less specific version of a type.
 
@@ -182,13 +182,13 @@ type r2 = string & never; // type r2 = never
 
 结合我们的编程经验，我们不妨认为，*类型更具体的版本*和他的子集是等价的，*类型更抽象的版本*和他的超集是等价的。
 
-由此可得，as 运算符两边的类型，只有在它们存在集合间的包含关系才能够成立。
+由此可得，`as` 运算符两边的类型，只有在它们存在集合间的包含关系才能够成立。
 
 ### any 
 
-前面提到过所有类型的超集 unknown 和所有类型的子集 never ，那跟“所有类型”密切相关的 any 呢，如何从集合的角度看待？
+前面提到过所有类型的超集 `unknown` 和所有类型的子集 `never` ，那跟“所有类型”密切相关的 `any` 呢，如何从集合的角度看待？
 
-any 太特殊了，我无法用集合的语言表达。~~维恩图不会画了。~~
+`any` 太特殊了，我无法用集合的语言表达。~~维恩图不会画了。~~
 
 但可以从包含途径出发画一张图表。
 
@@ -207,15 +207,15 @@ flowchart RL
 ```
 *（箭头左边的项包含于右边的项。）*
 
-any 在图上出现了两次，因为它是 never 以外所有类型的子集，也是所有类型的超集。
+`any` 在图上出现了两次，因为它是 `never` 以外所有类型的子集，也是所有类型的超集。
 
-特别要指出 any 并不向下兼容 never 。
+特别要指出 `any` 并不向下兼容 `never` 。
 ```typescript
 declare const foo: any;
 const bar: never = foo; // 不能向下兼容，报错了
 ```
 
-any 的特殊还体现在别的方面，后文再议。
+`any` 的特殊还体现在别的方面，后文再议。
 
 ## 结构化类型
 
@@ -257,7 +257,7 @@ foo = [1, 2, 3];
 
 4. 元组类型（ [Tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) ）
 
-元组是一系列属性的排列，在 typescript 中元组也属于数组的一种。
+元组是一系列属性的排列，在 TypeScript 中元组也属于数组的一种。
 
 ```typescript
 let foo: [name: string, age: number];
@@ -298,6 +298,9 @@ declare const baz: { a: number; b: string };
 bar = baz; // 向下兼容
 ```
 
+- `{ a: number }` 拥有 `{ a: unknown }` 同名属性 a ，同名属性类型 `number` 向下兼容 `unknown` ，因此 `{ a: number }` 向下兼容 `{ a: unknown }` 。
+- `{ a: number; b: string }` 拥有 `{ a: unknown }` 同名属性 a ，同名属性类型相同，相同类型相互向下兼容，因此 `{ a: number; b: string }` 向下兼容 `{ a: number }` 。
+
 两个集合交叉得到的集合，是它们的共同子集。当这些集合代表记录类型时，意味着两个记录类型交叉得到的共同子类型，拥有它们的一切属性。而子类型中名字重复的属性，它们的类型将两两交叉。
 
 在文档对交叉类型的[介绍](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)中，运算符 & 本来就是用于组合多个记录类型。
@@ -316,9 +319,7 @@ bar = foo; // 向下兼容
 
 当两个集合互为子集时，两个集合相等。同样的，当两个类型相互向下兼容时，两个类型相等。~~（没考虑 any ）~~
 
-综上，`{ a: unknown } & { a: number }` 等同于 `{ a: number }` 。同名属性 a 的类型由 unknown 和 number 两两交叉而得。
-
-以下例子也能看出 `{ a: number } & { b: string }` 等同于 `{ a: number; b: string }` 。
+综上，`{ a: unknown } & { a: number }` 等同于 `{ a: number }` 。同名属性 a 的类型由 `unknown` 和 `number` 两两交叉而得。如下：
 
 ```typescript
 type Chimera = { a: number } & { b: string };
@@ -332,13 +333,13 @@ bar = foo; // 向下兼容
 
 ![img](./4-x.svg)
 
-{} 是一个没有任何属性的组合，显然他的类型会被任何记录类型向下兼容，是所有记录类型的超类型。
+`{}` 是一个没有任何属性的组合，显然他的类型会被任何记录类型向下兼容，是所有记录类型的超类型。
 
 ```typescript
 type Chimera = { a: number } & {}; // 编辑器里甚至直接得到 type Chimera = { a: number }
 ```
 
-特别的，JavaScript 里非 null / undefined 的值，都能像 JavaScript 对象那样访问属性，如同 TypeScript 的记录类型。因此，在 TypeScript 中类型 {} 也是非 null / undefined 值的超集类型。
+特别的，JavaScript 里非 `null` / `undefined` 的值，都能像 JavaScript 对象那样访问属性，如同 TypeScript 的记录类型。因此，在 TypeScript 中类型 `{}` 也是非 `null` / `undefined` 值的超集类型。
 
 ```typescript
 type Chimera = number & {};
@@ -355,10 +356,10 @@ type Chimera2 = null & {}; // type Chimera2 = never
 type Chimera3 = undefined & {}; // type Chimera3 = never
 ```
 
-*（ typescript-eslint 认为 {} 代表着非空的值，不是大众预期的“空对象”，从而[不推荐](https://github.com/typescript-eslint/typescript-eslint/issues/2063#issuecomment-675156492)使用。）*
+*（ typescript-eslint 认为 `{}` 代表着非空的值，不是大众预期的“空对象”，从而[不推荐](https://github.com/typescript-eslint/typescript-eslint/issues/2063#issuecomment-675156492)使用。）*
 
 有两个问题留给大家思考：
-1. JavaScript 的 number 经过装箱成为 Number 对象后，能表现出 JavaScript 对象的性质。请问，在 TypeScript 中 number 和 Number 的兼容关系是怎样的？
+1. JavaScript 的 `number` 经过装箱成为 `Number` 对象后，能表现出 JavaScript 对象的性质。请问，在 TypeScript 中 `number` 和 `Number` 的兼容关系是怎样的？
 2. 如何定义出一个“空对象”类型，使得任何带有属性的记录类型不能向下兼容它。
 
 ### 数组类型
@@ -370,7 +371,9 @@ declare const foo: number[];
 const bar: unknown[] = foo; // 向下兼容
 ```
 
-number 向下兼容 unknown ，number[] 便向下兼容 unknown[] 。
+- `number` 向下兼容 `unknown` ，`number[]` 便向下兼容 `unknown[]` 。
+
+`unknown[]` 同样是所有数组类型的超类型。
 
 ![img](./5-x.svg)
 
@@ -393,6 +396,9 @@ declare const baz: [number, string];
 bar = baz; // 不能向下兼容，报错了
 ```
 
+- `[unknown]` 和 `[number]` 同样是只有一个属性的排列，在相同位置上 `number` 向下兼容 `unknown` ，因此 `[number]` 向下兼容 `[unknown]` 。
+- `[number, string]` 和 `[number]` 的属性排列结构不同，两个元素的排列和一个元素的排列明显不同，因此 `[number, string]` 不能向下兼容 `[number]` 。
+
 > 子类型的属性排列结构与超类型完全对应。
 
 上述条件之所以不是“每个属性一一对应”，是因为元组类型支持 rest 表达式，需要用更广义的表达。如：
@@ -409,6 +415,24 @@ foo = baz; // 向下兼容
 declare const qux: [number, boolean, string];
 foo = qux; // 向下兼容
 ```
+
+属性的排列结构显然是相斥的，因此两个结构不同的元组类型进行交叉会得到 `never` 。而相同结构的元组类型进行交叉，每个对应位置的属性将两两交叉。
+
+```typescript
+type Chimera = [unknown] & [number];
+
+declare let foo: Chimera;
+declare let bar: [number];
+
+foo = bar; // 向下兼容
+bar = foo; // 向下兼容
+
+type Chimera1 = [number] & [number, string]; // type Chimera1 = never
+```
+
+可见 `[unknown] & [number]` 等同于 `[number]` 。
+
+`[]` 是一个没有任何属性的排列，与记录类型的超集 `{}` 不同，他与其他元组类型的交叉是 `never` 。如果要找到所有元组的共同超类型，他应该是 `[...unknown[]]` ，简化可得 `unknown[]` 。
 
 ## 泛型中的 extends
 
