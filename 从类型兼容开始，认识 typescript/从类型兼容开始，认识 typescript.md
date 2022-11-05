@@ -20,25 +20,25 @@
 
 ## 向下兼容
 
-类型兼容体现在 TypeScript 使用过程中的方方面面。如：
+类型兼容在 TypeScript 编程中无处不在。如：
 
-- 赋值语句中的向下兼容。
+- 赋值表达式中，右值输出到左值需要类型兼容。
 
 ```typescript
 const foo: "some value" = "some value";
 const bar: string = foo;
 ```
 
-- 函数传参时的向下兼容
+- 函数调用表达式中，实参输出到形参需要类型兼容。
 
 ```typescript
-declare function log(x: string): void;
+declare function log(x: string /*形参*/): void;
 
 const foo: "some value" = "some value";
-log(foo);
+log(foo /*实参*/);
 ```
 
-- 函数返回时的向下兼容。
+- 函数定义中，输出的返回值需要兼容已定义的返回类型。
 
 ```typescript
 function mysteryBox(): string {
@@ -47,27 +47,23 @@ function mysteryBox(): string {
 }
 ```
 
-而这些不同的形式，其实都是类型兼容在**赋值**行为上的表现，他要求发起赋值对象的类型，必须**向下兼容**被赋值对象的类型。
-
-在我看来，如果 B 在代码中出现的地方，都能用 A 去代替而不会编译出错，那么 A 就是向下兼容 B 。至于更准确的描述，请阅读官方文档 [Type Compatibility](https://www.typescriptlang.org/docs/handbook/type-compatibility.html)。
+TypeScript 的类型兼容总是向下兼容的。得到输入的 A 总是要求**输出**的 B 拥有 A 类型的一切特性，以致于 A 能表现出的特性在实际使用中不会缺失，从而保证程序正确。
 
 ## 集合的角度
 
-有一个角度能很好地理解类型的向下兼容，就是把类型视为集合。
+从集合的角度出发能让我们更好地理解向下兼容。
 
-把一个类型 T 视为集合 S 时，我们可以说集合 S 满足类型 T 的所有特性；而 S 的子集也将满足类型 T 的所有特性。因此 S 的子集作为新的类型时必定兼容类型 T ，向下兼容也就是**子集兼容超集/父集**。
+当我们把类型 T 视为集合 S 时，S 由全部的满足 T 一切特性的元素组成，S 的每一个元素都满足 T ，S 的每一个子集都满足 T 。此时将 S 的任一子集视为新的类型 T1 ，T1 拥有 T 的一切特性，T1 向下兼容 T 。同样的，将能够向下兼容 T 的任一类型视为新的集合 S1 ，S1 满足 T ，被 S 包含，S1 是 S 的子集。
+
+由此可得，**子类型向下兼容超类型如同子集包含于超集**。
+
+我们可以把前面出现过的 "some value" 类型和 string 类型画进用以表示集合关系的维恩图里。
 
 ![img](./1-x.svg)
 
-- "some value" 向下兼容 string
-- "some value" 向下兼容 "some value"
-- string 向下兼容 string
+"some value" 是 string 的子集，"some value" 向下兼容 string 。
 
-从集合角度出发也有助于理解[联合类型（|）](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types)和[交叉类型（&）](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)，以及泛型使用中出现的 extends 和 infer 关键字。
-
-本文后续将围绕着集合进行展开，可是为什么本文不叫从集合开始？其实，有的概念用集合会太过抽象，反而不好理解。如协变和逆变。
-
-~~其实是标题有集合会比较劝退~~
+这样的集合角度，也有助于我们理解向下兼容在 as 、extends 、infer 等 TypeScript 编程符号中的表现。
 
 ## 类型断言 as
 
@@ -93,7 +89,7 @@ function mysteryBox(): string {
 
 ![img](./2-x.svg)
 
-已知集合 number 和集合 string 都分别是集合 unknown 的子集，都与 unknown 充分重叠，因此可以通过 unknown 来完成一次有意的转换。
+已知集合 number 和集合 string 都分别是集合 unknown 的子集，都与 unknown 充分重叠，因此可以通过 unknown 来完成一次“有意的转换”。
 
 ```typescript
 // 编译器没有报错
@@ -184,9 +180,9 @@ type r2 = string & never; // type r2 = never
 
 > 类型断言只能把类型转化成更具体或更抽象的版本。
 
-结合我们的编程经验，我们不妨认为，类型更具体的版本和他的子集是等价的，类型更抽象的版本和他的超集是等价的。
+结合我们的编程经验，我们不妨认为，*类型更具体的版本*和他的子集是等价的，*类型更抽象的版本*和他的超集是等价的。
 
-据此可以得出个结论：as 运算符两边的类型，只有在它们之间存在包含的关系才能够成立。
+由此可得，as 运算符两边的类型，只有在它们存在集合间的包含关系才能够成立。
 
 ### any 
 
@@ -237,7 +233,7 @@ JavaScript 广泛使用了函数表达式和对象字面量，结构化类型就
 
 2. 记录类型（ [Record / Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
 
-记录类型是表达属性组合的类型。
+记录是一系列属性的组合。
 
 ```typescript
 let foo: { name: string; age: number }; // 属性表达式
@@ -261,7 +257,7 @@ foo = [1, 2, 3];
 
 4. 元组类型（ [Tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) ）
 
-元组类型是表达属性排列的类型，在 typescript 中元组也属于数组的一种。
+元组是一系列属性的排列，在 typescript 中元组也属于数组的一种。
 
 ```typescript
 let foo: [name: string, age: number];
@@ -386,6 +382,8 @@ number 向下兼容 unknown ，number[] 便向下兼容 unknown[] 。
 ![img](./5-x.svg)
 
 ### 元组类型
+
+元组类型的排列特性意味着，子集类型想要向下兼容超集类型，
 
 ```typescript
 
