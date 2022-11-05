@@ -394,6 +394,7 @@ bar = baz; // 不能向下兼容，报错了
 ```
 
 [^1]: 之所以不是“每个属性一一对应”，是因为元组类型支持 rest 表达式，需要用更广义的表达。如：
+
 ```typescript
 declare let foo: [...unknown[], string];
 
