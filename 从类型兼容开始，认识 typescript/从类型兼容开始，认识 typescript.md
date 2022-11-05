@@ -110,7 +110,7 @@ type r2 = string | unknown; // type r2 = unknown
 
 从集合的角度出发，number 和 string 联合得到的类型，也能与 number 、string 充分重叠。
 
-联合类型的运算符 | 是否如语义那样可以联合 number 和 string ？是否能进行 as 转换呢？是否也能体现类型向下兼容呢？
+[联合类型](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types)的运算符 | 是否如语义那样可以联合 number 和 string ？是否能进行 as 转换呢？是否也能体现类型向下兼容呢？
 
 ```typescript
 type Chimera = number | string;
@@ -131,7 +131,7 @@ const zoo: string = baz; // 不能向下兼容，报错了
 
 从集合的角度出发，number 和 string 交叉的部分，也能与 number 、string 充分重叠。
 
-交叉类型的运算符 & 是否如语义那样可以交叉 number 和 string ？是否能进行 as 转换呢？是否也能体现类型向下兼容呢？
+[交叉类型](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)的运算符 & 是否如语义那样可以交叉 number 和 string ？是否能进行 as 转换呢？是否也能体现类型向下兼容呢？
 
 ```typescript
 type Chimera = number & string;
@@ -283,7 +283,7 @@ foo = (x) => console.log(x);
 
 ### 记录类型
 
-记录类型通过属性名对外输出属性，两个记录类型若是存在向下兼容关系：
+记录通过属性名对外输出属性，两个记录类型若是存在向下兼容关系：
 - 子类型拥有超类型的一切同名属性。
 - 子类型的同名属性一一向下兼容超类型的同名属性。
 
@@ -376,10 +376,35 @@ number 向下兼容 unknown ，number[] 便向下兼容 unknown[] 。
 
 ### 元组类型
 
-元组类型的排列特性意味着，子集类型想要向下兼容超集类型，
+元组通过排列顺序输出属性，两个元组类型若是存在向下兼容关系：
+- 子类型的属性排列结构与超类型完全对应。[^1]
+- 子类型同位置属性的类型一一向下兼容超类型同位置属性的类型。
+
+*（元组类型和记录类型似乎像排列和组合那般对称。）*
 
 ```typescript
+declare let foo: [unknown];
+declare let bar: [number];
 
+foo = bar; // 向下兼容
+
+declare const baz: [number, string];
+
+bar = baz; // 不能向下兼容，报错了
+```
+
+[^1]: 之所以不是“每个属性一一对应”，是因为元组类型支持 rest 表达式，需要用更广义的表达。如：
+```typescript
+declare let foo: [...unknown[], string];
+
+declare const bar: [number, string];
+foo = bar; // 向下兼容
+
+declare const baz: [string];
+foo = baz; // 向下兼容
+
+declare const qux: [number, boolean, string];
+foo = qux; // 向下兼容
 ```
 
 ## 泛型中的 extends
