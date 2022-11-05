@@ -434,6 +434,16 @@ type Chimera1 = [number] & [number, string]; // type Chimera1 = never
 
 `[]` 是一个没有任何属性的排列，与记录类型的超集 `{}` 不同，他与其他元组类型的交叉是 `never` 。如果要找到所有元组的共同超类型，他应该是 `[...unknown[]]` ，简化可得 `unknown[]` 。
 
+```typescript
+type Chimera = [number] & unknown[];
+
+declare let foo: Chimera;
+declare let bar: [number];
+
+foo = bar; // 向下兼容
+bar = foo; // 向下兼容
+```
+
 ## 泛型中的 extends
 
 ### 泛型约束
