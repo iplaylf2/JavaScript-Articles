@@ -464,9 +464,9 @@ declare const bar: { length: number; value: number };
 const qux: { length: number; value: number } = foo(bar);
 ```
 
-- 在 `foo` 的泛型参数列表中，类型 `T` 的泛型约束是 `{ length: number }`，使得输出到 `T` 的类型必须向下兼容 `{ length: number }` 。
-- 类型 `{ length: number, value: number }` 向下兼容 `{ length: number }` ，因此可以 `bar` 可以作为 `foo` 的参数传入。
-- 在 `foo` 函数定义的上下文中，`T` 向下兼容 `{ length: number }` ，因此类型是 `T` 的 `x` 参数，可以在 `foo` 中输出 `length` 属性。
+- 在 `foo` 的泛型参数列表中，类型 `T` 的泛型约束是 `{ length: number }`。使得输出到 `T` 的类型必须向下兼容 `{ length: number }` 。
+- 记录类型 `{ length: number, value: number }` 向下兼容 `{ length: number }` 。因此可以 `bar` 可以作为 `foo` 的参数传入。
+- 在 `foo` 函数定义的上下文中，`T` 向下兼容 `{ length: number }` 。因此类型是 `T` 的 `x` 参数，可以在 `foo` 中输出 `length` 属性。
 - 而 `T` 的实际类型在 `foo` 函数定义的上下文中不会发生变化。因此 `foo(bar)` 输出的 `T` 就是由 `bar` 输出的类型，也就是 `{ length: number; value: number }` 。
 
 ### 条件类型
