@@ -63,7 +63,7 @@ TypeScript 的类型兼容总是向下兼容的。得到输入的 A 总是要求
 
 `"some value"` 是 `string` 的子集，`"some value"` 向下兼容 `string` 。
 
-这样的集合角度，也有助于我们理解向下兼容在 `as` 、`extends` 、`infer` 等 TypeScript 编程符号中的表现。
+理解类型兼容是理解 `as` 、`extends` 、`infer` 等符号的第一步。
 
 ## 类型断言 as
 
