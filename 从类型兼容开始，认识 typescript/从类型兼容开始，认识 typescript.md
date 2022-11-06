@@ -22,15 +22,13 @@
 
 类型兼容在 TypeScript 编程中无处不在。如：
 
-- 赋值表达式中，右值输出到左值需要类型兼容。
-
+- 赋值表达式中，右值输出到左值需要类型兼容。如下：
 ```typescript
 const foo: "some value" = "some value";
 const bar: string = foo;
 ```
 
-- 函数调用表达式中，实参输出到形参需要类型兼容。
-
+- 函数调用表达式中，实参输出到形参需要类型兼容。如下：
 ```typescript
 declare function log(x: string /*形参*/): void;
 
@@ -38,8 +36,7 @@ const foo: "some value" = "some value";
 log(foo /*实参*/);
 ```
 
-- 函数定义中，输出的返回值需要兼容已定义的返回类型。
-
+- 函数定义中，输出的返回值需要兼容已定义的返回类型。如下：
 ```typescript
 function mysteryBox(): string {
   const foo: "some value" = "some value";
@@ -67,8 +64,7 @@ TypeScript 的类型兼容总是向下兼容的。得到输入的 A 总是要求
 
 ## 类型断言 as
 
-不知道在阅读的你是否有留意过 `as` 的报错，里面提到过“两种类型不能充分重叠……”
-
+不知道在阅读的你是否有留意过 `as` 的报错，里面提到过“两种类型不能充分重叠……”如下：
 ```typescript
 // Conversion of type 'number' to type 'string' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.(2352)
 // 类型 "number" 到类型 "string" 的转换可能是错误的，因为两种类型不能充分重叠。如果这是有意的，请先将表达式转换为 "unknown"。ts(2352)
@@ -89,8 +85,7 @@ TypeScript 的类型兼容总是向下兼容的。得到输入的 A 总是要求
 
 ![img](./2-x.svg)
 
-已知集合 `number` 和集合 `string` 都分别是集合 `unknown` 的子集，都与 `unknown` 充分重叠，因此可以通过 `unknown` 来完成一次“有意的转换”。
-
+已知集合 `number` 和集合 `string` 都分别是集合 `unknown` 的子集，都与 `unknown` 充分重叠，因此可以通过 `unknown` 来完成一次“有意的转换”。如下：
 ```typescript
 // 编译器没有报错
 233 as unknown as string;
@@ -98,8 +93,7 @@ TypeScript 的类型兼容总是向下兼容的。得到输入的 A 总是要求
 
 这似乎就能解释 `as unknown` 能发挥作用的原因。
 
-在集合论中，一个集合和它的超集进行联合，结果是它的超集。这一点在 TypeScript 通过 `|` 也能体现出来。
-
+在集合论中，一个集合和它的超集进行联合，结果是它的超集。这一点在 TypeScript 通过 `|` 也能体现出来。如下：
 ```typescript
 type r1 = number | unknown; // type r1 = unknown
 type r2 = string | unknown; // type r2 = unknown
@@ -111,7 +105,6 @@ type r2 = string | unknown; // type r2 = unknown
 从集合的角度出发，`number` 和 `string` 联合得到的类型，也能与 `number` 、`string` 充分重叠。
 
 [联合类型](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types)的运算符 `|` 是否如语义那样可以联合 `number` 和 `string` ？是否能进行 `as` 转换呢？是否也能体现类型向下兼容呢？
-
 ```typescript
 type Chimera = number | string;
 
@@ -132,7 +125,6 @@ const zoo: string = baz; // 不能向下兼容，报错了
 从集合的角度出发，`number` 和 `string` 交叉的部分，也能与 `number` 、`string` 充分重叠。
 
 [交叉类型](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)的运算符 `&` 是否如语义那样可以交叉 `number` 和 `string` ？是否能进行 `as` 转换呢？是否也能体现类型向下兼容呢？
-
 ```typescript
 type Chimera = number & string;
 
@@ -160,8 +152,7 @@ const bar: Chimera = "hello"; // 不能向下兼容，报错了
 
 ![img](./2.1-x.svg)
 
-一个集合和它的子集进行交叉，结果是它的子集。这一点在 TypeScript 通过 `&` 也能体现出来。
-
+一个集合和它的子集进行交叉，结果是它的子集。这一点在 TypeScript 通过 `&` 也能体现出来。如下：
 ```typescript
 type r1 = number & never; // type r1 = never
 type r2 = string & never; // type r2 = never
@@ -209,7 +200,7 @@ flowchart RL
 
 `any` 在图上出现了两次，因为它是 `never` 以外所有类型的子集，也是所有类型的超集。
 
-特别要指出 `any` 并不向下兼容 `never` 。
+特别要指出 `any` 并不向下兼容 `never` 。如下：
 ```typescript
 declare const foo: any;
 const bar: never = foo; // 不能向下兼容，报错了
@@ -233,8 +224,7 @@ JavaScript 广泛使用了函数表达式和对象字面量，结构化类型就
 
 2. 记录类型（ [Record / Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
 
-记录是一系列属性的组合。
-
+记录是一系列属性的组合。如下：
 ```typescript
 let foo: { name: string; age: number }; // 属性表达式
 let bar: { [index in string]: number }; // 索引签名表达式
@@ -247,8 +237,7 @@ bar = { x: 233 };
 
 3. 数组类型（ [Array](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
 
-数组类型就是数组的类型。
-
+数组类型就是数组的类型。如下：
 ```typescript
 let foo: number[];
 
@@ -257,8 +246,7 @@ foo = [1, 2, 3];
 
 4. 元组类型（ [Tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) ）
 
-元组是一系列属性的排列，在 TypeScript 中元组也属于数组的一种。
-
+元组是一系列属性的排列，在 TypeScript 中元组也属于数组的一种。如下：
 ```typescript
 let foo: [name: string, age: number];
 let bar: [string, number]; // 省略属性名的形式。
@@ -269,8 +257,7 @@ bar = ["bar", 33];
 
 5. 函数类型（ [Function](https://www.typescriptlang.org/docs/handbook/2/functions.html) ）
 
-函数类型就是函数的类型。字面表达的例子：
-
+函数类型就是函数的类型。如下：
 ```typescript
 let foo: (x: string) => void;
 
@@ -303,8 +290,7 @@ bar = baz; // 向下兼容
 
 两个集合交叉得到的集合，是它们的共同子集。当这些集合代表记录类型时，意味着两个记录类型交叉得到的共同子类型，拥有它们的一切属性。而子类型中名字重复的属性，它们的类型将两两交叉。
 
-在文档对交叉类型的[介绍](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)中，运算符 & 本来就是用于组合多个记录类型。
-
+在文档对交叉类型的[介绍](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)中，运算符 & 本来就是用于组合多个记录类型。如下：
 ```typescript
 type Chimera = { a: unknown } & { a: number };
 
@@ -320,7 +306,6 @@ bar = foo; // 向下兼容
 当两个集合互为子集时，两个集合相等。同样的，当两个类型相互向下兼容时，两个类型相等。~~（没考虑 any ）~~
 
 综上，`{ a: unknown } & { a: number }` 等同于 `{ a: number }` 。同名属性 `a` 的类型由 `unknown` 和 `number` 两两交叉而得。如下：
-
 ```typescript
 type Chimera = { a: number } & { b: string };
 
@@ -333,14 +318,12 @@ bar = foo; // 向下兼容
 
 ![img](./4-x.svg)
 
-`{}` 是一个没有任何属性的组合，显然他的类型会被任何记录类型向下兼容，是所有记录类型的超类型。
-
+`{}` 是一个没有任何属性的组合，显然他的类型会被任何记录类型向下兼容，是所有记录类型的超类型。如下：
 ```typescript
 type Chimera = { a: number } & {}; // 编辑器里甚至直接得到 type Chimera = { a: number }
 ```
 
-特别的，JavaScript 里非 `null` / `undefined` 的值，都能像 JavaScript 对象那样访问属性，如同 TypeScript 的记录类型。因此，在 TypeScript 中类型 `{}` 也是非 `null` / `undefined` 值的超集类型。
-
+特别的，JavaScript 里非 `null` / `undefined` 的值，都能像 JavaScript 对象那样访问属性，如同 TypeScript 的记录类型。因此，在 TypeScript 中类型 `{}` 也是非 `null` / `undefined` 值的超集类型。如下：
 ```typescript
 type Chimera = number & {};
 
@@ -364,8 +347,7 @@ type Chimera3 = undefined & {}; // type Chimera3 = never
 
 ### 数组类型
 
-数组对外输出元素，数组类型的向下兼容体现在元素类型的向下兼容。
-
+数组对外输出元素，数组类型的向下兼容体现在元素类型的向下兼容。如下：
 ```typescript
 declare const foo: number[];
 const bar: unknown[] = foo; // 向下兼容
@@ -403,8 +385,7 @@ bar = baz; // 不能向下兼容，报错了
 
 > 子类型的属性排列结构与超类型完全对应。
 
-上述条件之所以不是“每个属性一一对应”，是因为元组类型支持 rest 表达式，需要用更广义的表达。如：
-
+上述条件之所以不是“每个属性一一对应”，是因为元组类型支持 rest 表达式，需要用更广义的表达。如下：
 ```typescript
 declare let foo: [...unknown[], string];
 
@@ -418,8 +399,7 @@ declare const qux: [number, boolean, string];
 foo = qux; // 向下兼容
 ```
 
-属性的排列结构显然是相斥的，因此两个结构不同的元组类型进行交叉会得到 `never` 。而相同结构的元组类型进行交叉，每个对应位置的属性将两两交叉。
-
+属性的排列结构显然是相斥的，因此两个结构不同的元组类型进行交叉会得到 `never` 。而相同结构的元组类型进行交叉，每个对应位置的属性将两两交叉。如下：
 ```typescript
 type Chimera = [unknown] & [number];
 
@@ -434,8 +414,7 @@ type Chimera1 = [number] & [number, string]; // type Chimera1 = never
 
 可见 `[unknown] & [number]` 等同于 `[number]` 。
 
-`[]` 是一个没有任何属性的排列，与记录类型的超集 `{}` 不同，他与其他元组类型的交叉是 `never` 。如果要找到所有元组的共同超类型，他应该是 `[...unknown[]]` ，简化可得 `unknown[]` 。
-
+`[]` 是一个没有任何属性的排列，与记录类型的超集 `{}` 不同，他与其他元组类型的交叉是 `never` 。如果要找到所有元组的共同超类型，他应该是 `[...unknown[]]` ，简化可得 `unknown[]` 。如下：
 ```typescript
 type Chimera = [number] & unknown[];
 
@@ -452,8 +431,7 @@ bar = foo; // 向下兼容
 
 ### 泛型约束
 
-在泛型函数或泛型类型中，泛型参数列表中的 `extends` 可以用于约束泛型参数的类型，使得输出到泛型参数的类型必须向下兼容 `extends` 所约束的类型。这种约束被称为[泛型约束](https://www.typescriptlang.org/docs/handbook/2/generics.html#generic-constraints)。
-
+在泛型函数或泛型类型中，泛型参数列表中的 `extends` 可以用于约束泛型参数的类型，使得输出到泛型参数的类型必须向下兼容 `extends` 所约束的类型。这种约束被称为[泛型约束](https://www.typescriptlang.org/docs/handbook/2/generics.html#generic-constraints)。如下：
 ```typescript
 function foo<T extends { length: number }>(x: T): T {
   const baz: number = x.length;
@@ -471,8 +449,7 @@ const qux: { length: number; value: number } = foo(bar);
 
 ### 条件类型
 
-[条件类型](https://www.typescriptlang.org/zh/docs/handbook/2/conditional-types.html)一般出现在泛型函数或泛型类型中，是构造新类型的另一种手段。他的表达式与[条件表达式](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Conditional_Operator)的形式很像，只是条件部分被固定为 `extends` 断言，当 `extends` 左右两边的向下兼容成立，就计算并返回第一条分支，反之第二条。
-
+[条件类型](https://www.typescriptlang.org/zh/docs/handbook/2/conditional-types.html)一般出现在泛型函数或泛型类型中，是构造新类型的另一种手段。他的表达式与[条件表达式](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Conditional_Operator)的形式很像，只是条件部分被固定为 `extends` 断言，当 `extends` 左右两边的向下兼容成立，就计算并返回第一条分支，反之第二条。如下：
 ```typescript
 type BelongToNumber<T> = T extends number ? true : false;
 
@@ -483,14 +460,13 @@ type Bar = BelongToNumber<string>; // type Bar = false
 - 类型 `1` 是 `number` 的子类型，因此 `BelongToNumber<1>` 得到第一条分支的结果 `true`。
 - 类型 `string` 不向下兼容 `number` ，因此 `BelongToNumber<string>` 得到第二条分支的结果 `false`。
 
-`(A extends B ? first : second)` 如此形式的表达式，我为了方便讲述称之为*条件类型表达式*。
+`(A extends B ? first : second)` 如此形式的表达式，我为了方便讲述称之为*条件类型表达式*。而且我还称 `A` 为条件类型表达式子类型，称 `B` 为条件类型表达式超类型。
 
 ### 条件类型的“分配律”
 
-当我们把联合类型作为参数传入条件类型，而他的泛型参数在条件类型表达式的 `extends` 的左边出现过，条件类型就有可能呈现[“分配律”](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types)。
+当我们把联合类型作为参数传入条件类型，而他的泛型参数在条件类型表达式子类型出现过，条件类型就有可能呈现[“分配律”](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types)。
 
-如 `BelongToNumber<A | B>` 就会按照 `BelongToNumber<A> | BelongToNumber<B>` 的方式进行解释。
-
+如 `BelongToNumber<A | B>` 就会按照 `BelongToNumber<A> | BelongToNumber<B>` 的方式进行解释：
 ```typescript
 type BelongToNumber<T> = T extends number ? true : false;
 
@@ -498,12 +474,11 @@ type Foo = BelongToNumber<1 | string>; // type Foo = boolean
 type Bar = true | false; // type Bar = boolean
 ```
 
-- 泛型参数 `T` 在条件类型表达式的 `extends` 的左边出现过。
+- 泛型参数 `T` 在条件类型表达式子类型出现过。
 - `BelongToNumber<1 | string>` 按照 `BelongToNumber<1> | BelongToNumber<string>` 的方式进行解释。
 - `boolean` 只有两种取值可能 `true` 或 `false` ，将他们视为集合，`boolean` 是 `true` 和 `false` 的合集。因此 `true | false` 会得到 `boolean` 。
 
-分配律就是你们想的那种分配律，如乘法分配律， `(A + B) × C = A × C + B × C` 。乃至于，`T<A | B, C | D>` 有可能得到 `T<A, C> | T<A, D> | T<B, C> | T<B, D>`。
-
+分配律就是你们想的那种分配律，如乘法分配律， `(A + B) × C = A × C + B × C` 。乃至于，`T<A | B, C | D>` 有可能得到 `T<A, C> | T<A, D> | T<B, C> | T<B, D>`。如下：
 ```typescript
 type Orthrus<A, B> = A extends unknown
   ? B extends unknown
@@ -515,11 +490,10 @@ type Foo = Orthrus<"A" | "B", "C" | "D">; // type Foo = ["A", "C"] | ["A", "D"] 
 ```
 
 - 条件类型表达式允许嵌套表达。
-- 泛型参数 `A` 和 `B` 都在条件类型表达式的 `extends` 的左边出现过。
+- 泛型参数 `A` 和 `B` 都在条件类型表达式子类型出现过。
 - Orthrus<"A" | "B", "C" | "D"> 呈现了“分配律”。
 
-如果只有参数 `A` 在条件类型表达式的 `extends` 的左边出现过呢？
-
+如果只有参数 `A` 在条件类型表达式子类型出现过呢：
 ```typescript
 type Orthrus<A, B> = A extends unknown ? [A, B] : never;
 
@@ -528,7 +502,7 @@ type Foo = Orthrus<"A" | "B", "C" | "D">; // type Foo = ["A", "C" | "D"] | ["B",
 
 ### 抑制条件类型的“分配律”
 
-有些时候我们并不希望条件类型呈现“分配律”，此时可以使用某些结构化类型将泛型参数“固化”，使其在条件类型表达式的 `extends` 的左边失去联合类型的形态，从而导致“分配律”失效。如下：
+有些时候我们并不希望条件类型呈现“分配律”，此时可以使用某些结构化类型将泛型参数“固化”，使其在条件类型表达式子类型失去联合类型的形态，从而导致“分配律”失效。如下：
 
 ```typescript
 type BelongToNumber2<T> = [T] extends [number] ? true : false; 
@@ -542,3 +516,10 @@ type Baz = BelongToNumber2<1 | string>; // type Baz = false
 使用元组类型来抑制是最简洁的表达。
 
 ### infer
+
+条件类型最神奇的组件就是 `infer` ，他的语义是推断，能帮助我们推断出结构化类型的组成元素的类型。
+
+`infer` 只能在条件类型表达式超类型上出现，能替代超类型的字面表达式中的类型，作为想要推断的部分。当条件类型表达式的向下兼容关系成立，就能在其第一条分支上使用推断得到的类型。如下：
+
+```typescript
+```
