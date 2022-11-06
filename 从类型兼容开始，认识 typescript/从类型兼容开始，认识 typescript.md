@@ -18,6 +18,8 @@
   - [抑制条件类型的“分配律”](#抑制条件类型的分配律)
   - [infer](#infer)
   - [infer ... extends ...](#infer--extends-)
+- [关于类型体操](#关于类型体操)
+- [一些经验之谈](#一些经验之谈)
 
 ## 向下兼容
 
@@ -522,10 +524,10 @@ type Baz = BelongToNumber2<1 | string>; // type Baz = false
 
 `infer` 只能在*条件类型表达式超类型*上出现，能替代超类型的字面表达式中的类型，作为想要推断的部分。当条件类型表达式的向下兼容关系成立，就能在其第一条分支上使用推断得到的类型。如下：
 ```typescript
-type Foo<T> = T extends { a: infer X } ? X : unknown;
+type Foo<T> = T extends { a: infer X } ? X : never;
 type foo = Foo<{ a: number; b: string }>; // type foo = number
 
-type Bar<T> = T extends [infer X, string] ? X : unknown;
+type Bar<T> = T extends [infer X, string] ? X : never;
 type bar = Bar<[number, string]>; // type bar = number
 ```
 
@@ -537,12 +539,22 @@ type bar = Bar<[number, string]>; // type bar = number
 
 而 `infer` 确实支持后缀泛型约束，如下：
 ```typescript
-type Orthrus<T> = T extends { a: infer X extends number } ? X : unknown;
+type Orthrus<T> = T extends { a: infer X extends number } ? X : never;
 
 type Foo = Orthrus<{ a: number; b: string }>; // type Foo = number
-type Bar = Orthrus<{ a: boolean; b: string }>; // type Bar = unknown
+type Bar = Orthrus<{ a: boolean; b: string }>; // type Bar = never
 ```
 
 - 条件类型表达式超类型是 `{ a: infer X extends number }` 意味着，子类型部分需要向下兼容 `{ a: number }` ，才能完成 `infer` 的推断，才能计算并返回第一条分支。
 - `{ a: number; b: string }` 向下兼容 `{ a: number }` ，因此 `X` 推断为 `{ a: number; b: string }` 中属性 `a` 的类型 `number` ，然后在第一条分支返回 `X` 作为结果，最后 `Foo` 得到 `number` 。
-- `{ a: boolean; b: string }` 不能向下兼容 `{ a: number }`，因此在第二条分支返回 `unknown` 作为结果，最后 `Bar` 得到 `unknown` 。
+- `{ a: boolean; b: string }` 不能向下兼容 `{ a: number }`，因此在第二条分支返回 `never` 作为结果，最后 `Bar` 得到 `never` 。
+
+## 关于类型体操
+
+我上面已经讲了 TypeScript 非常大的一部分跟类型操作相关的内容，掌握这些已经可以对泛型进行复合的应用，如嵌套的、递归的条件类型等。如此一来，就能写出花里胡哨的、人们口中的类型体操了吧。所以我上面算是类型体操的分解动作？会不会感觉很普通？
+
+把复杂的东西变成一个个小玩意去看待，他就会失去晦涩和神秘感吧。
+
+## 一些经验之谈
+
+关于条件类型，我还有一些想法不吐不快。
