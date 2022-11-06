@@ -20,6 +20,7 @@
   - [infer ... extends ...](#infer--extends-)
 - [关于类型体操](#关于类型体操)
 - [一些经验之谈](#一些经验之谈)
+  - [为什么条件类型表达式“无用”的分支总是返回 never ？](#为什么条件类型表达式无用的分支总是返回-never-)
 
 ## 向下兼容
 
@@ -558,3 +559,18 @@ type Bar = Orthrus<{ a: boolean; b: string }>; // type Bar = never
 ## 一些经验之谈
 
 关于条件类型，我还有一些想法不吐不快。
+
+### 为什么条件类型表达式“无用”的分支总是返回 never ？
+
+为什么条件类型表达式“无用”的分支总是返回 `never` ？上文关于 `infer` 的举例也是这样，返回 `unknown` 表示未知的类型可以吗？
+
+因为条件类型的“分布律”呀。如果条件类型呈现“分布律”就会对结果做联合运算（ `|` ），而任何类型与 `never` 联合，如同任何集合与空集合并，等到的是该类型本身。如果不是刻意避免，条件类型很容易就带有“分布律”性质，此时对无用的分支返回 `never` 是一个不容易出错的选择。
+
+值得一提的是，[Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html) 就有一些条件类型利用了 `never` 完成对类型的“缩小/具体化”。如下：
+```typescript
+type Exclude<T, U> = T extends U ? never : T;
+type Extract<T, U> = T extends U ? T : never;
+```
+
+
+
