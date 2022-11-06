@@ -11,7 +11,7 @@
   - [记录类型](#记录类型)
   - [数组类型](#数组类型)
   - [元组类型](#元组类型)
-- [泛型中的 extends](#泛型中的-extends)
+- [extends](#extends)
   - [泛型约束](#泛型约束)
   - [条件类型](#条件类型)
     - [条件类型表达式](#条件类型表达式)
@@ -298,8 +298,8 @@ declare const baz: { a: number; b: string };
 bar = baz; // 向下兼容
 ```
 
-- `{ a: number }` 拥有 `{ a: unknown }` 同名属性 a ，同名属性类型 `number` 向下兼容 `unknown` ，因此 `{ a: number }` 向下兼容 `{ a: unknown }` 。
-- `{ a: number; b: string }` 拥有 `{ a: unknown }` 同名属性 a ，同名属性类型相同，相同类型相互向下兼容，因此 `{ a: number; b: string }` 向下兼容 `{ a: number }` 。
+- `{ a: number }` 拥有 `{ a: unknown }` 同名属性 `a` ，同名属性类型 `number` 向下兼容 `unknown` ，因此 `{ a: number }` 向下兼容 `{ a: unknown }` 。
+- `{ a: number; b: string }` 拥有 `{ a: unknown }` 同名属性 `a` ，同名属性类型相同，相同类型相互向下兼容，因此 `{ a: number; b: string }` 向下兼容 `{ a: number }` 。
 
 两个集合交叉得到的集合，是它们的共同子集。当这些集合代表记录类型时，意味着两个记录类型交叉得到的共同子类型，拥有它们的一切属性。而子类型中名字重复的属性，它们的类型将两两交叉。
 
@@ -319,7 +319,7 @@ bar = foo; // 向下兼容
 
 当两个集合互为子集时，两个集合相等。同样的，当两个类型相互向下兼容时，两个类型相等。~~（没考虑 any ）~~
 
-综上，`{ a: unknown } & { a: number }` 等同于 `{ a: number }` 。同名属性 a 的类型由 `unknown` 和 `number` 两两交叉而得。如下：
+综上，`{ a: unknown } & { a: number }` 等同于 `{ a: number }` 。同名属性 `a` 的类型由 `unknown` 和 `number` 两两交叉而得。如下：
 
 ```typescript
 type Chimera = { a: number } & { b: string };
@@ -446,9 +446,28 @@ foo = bar; // 向下兼容
 bar = foo; // 向下兼容
 ```
 
-## 泛型中的 extends
+## extends
+
+在 TypeScript 中，有好几种表达式使用了 `extends` 这个关键字，而且具体作用各不相同。但他们都有相似的地方，如果 `extends` 左右两边都是类型，左边的类型将向下兼容右边的类型。
 
 ### 泛型约束
+
+在泛型函数或泛型类型中，泛型参数列表中的 `extends` 可以用于约束泛型参数的类型，使得输出到泛型参数的类型必须向下兼容 `extends` 所约束的类型。这种约束被称为[泛型约束](https://www.typescriptlang.org/docs/handbook/2/generics.html#generic-constraints)。
+
+```typescript
+function foo<T extends { length: number }>(x: T): T {
+  const baz: number = x.length;
+  return x;
+}
+
+declare const bar: { length: number; value: number };
+const qux: { length: number; value: number } = foo(bar);
+```
+
+- 在 `foo` 的泛型参数列表中，类型 `T` 的泛型约束是 `{ length: number }`，使得输出到 `T` 的类型必须向下兼容 `{ length: number }` 。
+- 类型 `{ length: number, value: number }` 向下兼容 `{ length: number }` ，因此可以 `bar` 可以作为 `foo` 的参数传入。
+- 在 `foo` 函数定义的上下文中，`T` 向下兼容 `{ length: number }` ，因此类型是 `T` 的 `x` 参数，可以在 `foo` 中输出 `length` 属性。
+- 而 `T` 的实际类型在 `foo` 函数定义的上下文中不会发生变化。因此 `foo(bar)` 输出的 `T` 就是由 `bar` 输出的类型，也就是 `{ length: number; value: number }` 。
 
 ### 条件类型
 
