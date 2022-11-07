@@ -32,7 +32,7 @@
 
 ## 向下兼容
 
-类型兼容在 TypeScript 编程中无处不在。如：
+类型兼容在 TypeScript 编程中无处不在。
 
 - 赋值表达式中，右值输出到左值需要类型兼容。如下：
 ```typescript
@@ -62,7 +62,7 @@ TypeScript 的类型兼容总是向下兼容的。得到输入的 A 总是要求
 
 从集合的角度出发能让我们更好地理解向下兼容。
 
-当我们把类型 T 视为集合 S 时，S 由全部的满足 T 一切特性的元素组成，S 的每一个元素都满足 T ，S 的每一个子集都满足 T 。此时将 S 的任一子集视为新的类型 T1 ，T1 拥有 T 的一切特性，T1 向下兼容 T 。同样的，将能够向下兼容 T 的任一类型视为新的集合 S1 ，S1 满足 T ，被 S 包含，S1 是 S 的子集。
+当我们把类型 T 视为集合 S 时，S 由全部的满足 T 一切特性的元素组成，S 的每一个元素都满足 T ，S 的每一个子集都满足 T 。此时将 S 的任一子集视为新的类型 T1 ，T1 拥有 T 的一切特性，T1 向下兼容 T 。同样的，将能够向下兼容 T 的任一类型视为新的集合 S1 ，S1 满足 T ，S1 包含于 S ，S1 是 S 的子集。
 
 由此可得，**子类型向下兼容超类型如同子集包含于超集**。
 
@@ -102,7 +102,6 @@ TypeScript 的类型兼容总是向下兼容的。得到输入的 A 总是要求
 // 编译器没有报错
 233 as unknown as string;
 ```
-
 这似乎就能解释 `as unknown` 能发挥作用的原因。
 
 在集合论中，一个集合和它的超集进行联合，结果是它的超集。这一点在 TypeScript 通过 `|` 也能体现出来。如下：
@@ -110,7 +109,6 @@ TypeScript 的类型兼容总是向下兼容的。得到输入的 A 总是要求
 type r1 = number | unknown; // type r1 = unknown
 type r2 = string | unknown; // type r2 = unknown
 ```
-*（不知为何，即使是有充分重叠的可能， `|` 运算往往得到的是字面表达式，而不是其中的超集类型。后文再议。）*
 
 ### number | string
 
@@ -129,7 +127,6 @@ declare const baz: Chimera;
 const qux: number = baz; // 不能向下兼容，报错了
 const zoo: string = baz; // 不能向下兼容，报错了
 ```
-
 如上，成功通过 `Chimera` 进行了转换。作为子集的 `number` 、`string` 都向下兼容了超集 `Chimera` ；作为超集的 `Chimera` 不能向下兼容它的子集 `number` 、`string` 。
 
 ### number & string
@@ -149,7 +146,6 @@ const zoo: string = baz; // 无报错
 const foo: Chimera = 233; // 不能向下兼容，报错了
 const bar: Chimera = "hello"; // 不能向下兼容，报错了
 ```
-
 如上，成功通过 `Chimera` 进行了转换；作为子集的 `Chimera` 向下兼容了超集 `number` 、`string` ；作为超集的 `number` 、`string` 不能向下兼容它的子集 `Chimera` 。
 
 ### never
@@ -169,7 +165,6 @@ const bar: Chimera = "hello"; // 不能向下兼容，报错了
 type r1 = number & never; // type r1 = never
 type r2 = string & never; // type r2 = never
 ```
-*（当然，不知为何，`&` 运算往往得到是字面表达式，即使其中有充分重叠的子集类型。后文再议。）*
 
 ### as 的成立条件
 
@@ -296,13 +291,14 @@ declare const baz: { a: number; b: string };
 
 bar = baz; // 向下兼容
 ```
-
 - `{ a: number }` 拥有 `{ a: unknown }` 同名属性 `a` ，同名属性类型 `number` 向下兼容 `unknown` ，因此 `{ a: number }` 向下兼容 `{ a: unknown }` 。
 - `{ a: number; b: string }` 拥有 `{ a: unknown }` 同名属性 `a` ，同名属性类型相同，相同类型相互向下兼容，因此 `{ a: number; b: string }` 向下兼容 `{ a: number }` 。
 
 两个集合交叉得到的集合，是它们的共同子集。当这些集合代表记录类型时，意味着两个记录类型交叉得到的共同子类型，拥有它们的一切属性。而子类型中名字重复的属性，它们的类型将两两交叉。
 
-在文档对交叉类型的[介绍](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)中，运算符 & 本来就是用于组合多个记录类型。如下：
+在文档对交叉类型的[介绍](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)中，运算符 & 本来就是用于组合多个记录类型。
+
+我们可以看一个简单的例子：
 ```typescript
 type Chimera = { a: unknown } & { a: number };
 
@@ -312,12 +308,12 @@ declare let bar: { a: number };
 foo = bar; // 向下兼容
 bar = foo; // 向下兼容
 ```
+- 同名属性 `a` 的类型由 `unknown` 和 `number` 两两交叉而得。
+- 当两个集合互为子集时，两个集合相等。同样的，**当两个类型相互向下兼容时，两个类型相等**。因此，`{ a: unknown } & { a: number }` 等同于 `{ a: number }` 。
 
 ![img](./3-x.svg)
 
-当两个集合互为子集时，两个集合相等。同样的，当两个类型相互向下兼容时，两个类型相等。~~（没考虑 any ）~~
-
-综上，`{ a: unknown } & { a: number }` 等同于 `{ a: number }` 。同名属性 `a` 的类型由 `unknown` 和 `number` 两两交叉而得。如下：
+以下例子可见 `{ a: number } & { b: string }` 与 `{ a: number; b: string }` 相等：
 ```typescript
 type Chimera = { a: number } & { b: string };
 
@@ -350,7 +346,6 @@ bar = foo;
 type Chimera2 = null & {}; // type Chimera2 = never
 type Chimera3 = undefined & {}; // type Chimera3 = never
 ```
-
 *（ typescript-eslint 认为 `{}` 代表着非空的值，不是大众预期的“空对象”，从而[不推荐](https://github.com/typescript-eslint/typescript-eslint/issues/2063#issuecomment-675156492)使用。）*
 
 有两个问题留给大家思考：
@@ -364,7 +359,6 @@ type Chimera3 = undefined & {}; // type Chimera3 = never
 declare const foo: number[];
 const bar: unknown[] = foo; // 向下兼容
 ```
-
 - `number` 向下兼容 `unknown` ，`number[]` 便向下兼容 `unknown[]` 。
 
 `unknown[]` 同样是所有数组类型的超类型。
@@ -379,6 +373,7 @@ const bar: unknown[] = foo; // 向下兼容
 
 *（元组类型和记录类型似乎像排列和组合那般对称。）*
 
+我们可以看一个简单的例子：
 ```typescript
 declare let foo: [unknown];
 declare let bar: [number];
@@ -389,7 +384,6 @@ declare const baz: [number, string];
 
 bar = baz; // 不能向下兼容，报错了
 ```
-
 - `[unknown]` 和 `[number]` 同样是只有一个属性的排列，在相同位置上 `number` 向下兼容 `unknown` ，因此 `[number]` 向下兼容 `[unknown]` 。
 - `[number, string]` 和 `[number]` 的属性排列结构不同，两个元素的排列和一个元素的排列明显不同，因此 `[number, string]` 不能向下兼容 `[number]` 。
 
@@ -423,8 +417,7 @@ bar = foo; // 向下兼容
 
 type Chimera1 = [number] & [number, string]; // type Chimera1 = never
 ```
-
-可见 `[unknown] & [number]` 等同于 `[number]` 。
+- 可见， `[unknown] & [number]` 等同于 `[number]` 。
 
 `[]` 是一个没有任何属性的排列，与记录类型的超集 `{}` 不同，他与其他元组类型的交叉是 `never` 。如果要找到所有元组的共同超类型，他应该是 `[...unknown[]]` ，简化可得 `unknown[]` 。如下：
 ```typescript
@@ -453,7 +446,6 @@ function foo<T extends { length: number }>(x: T): T {
 declare const bar: { length: number; value: number };
 const qux: { length: number; value: number } = foo(bar);
 ```
-
 - 在 `foo` 的泛型参数列表中，类型 `T` 的泛型约束是 `{ length: number }`。使得输出到 `T` 的类型必须向下兼容 `{ length: number }` 。
 - 记录类型 `{ length: number, value: number }` 向下兼容 `{ length: number }` 。因此可以 `bar` 可以作为 `foo` 的参数传入。
 - 在 `foo` 函数定义的上下文中，`T` 向下兼容 `{ length: number }` 。因此类型是 `T` 的 `x` 参数，可以在 `foo` 中输出 `length` 属性。
@@ -485,7 +477,6 @@ type BelongToNumber<T> = T extends number ? true : false;
 type Foo = BelongToNumber<1 | string>; // type Foo = boolean
 type Bar = true | false; // type Bar = boolean
 ```
-
 - 泛型参数 `T` 在条件类型表达式子类型出现过。
 - `BelongToNumber<1 | string>` 按照 `BelongToNumber<1> | BelongToNumber<string>` 的方式进行解释。
 - `boolean` 只有两种取值可能 `true` 或 `false` ，将他们视为集合，`boolean` 是 `true` 和 `false` 的合集。因此 `true | false` 会得到 `boolean` 。
@@ -500,7 +491,6 @@ type Orthrus<A, B> = A extends unknown
 
 type Foo = Orthrus<"A" | "B", "C" | "D">; // type Foo = ["A", "C"] | ["A", "D"] | ["B", "C"] | ["B", "D"]
 ```
-
 - 条件类型表达式允许嵌套表达。
 - 泛型参数 `A` 和 `B` 都在条件类型表达式子类型出现过。
 - Orthrus<"A" | "B", "C" | "D"> 呈现了“分配律”。
@@ -553,7 +543,6 @@ type Orthrus<T> = T extends { a: infer X extends number } ? X : never;
 type Foo = Orthrus<{ a: number; b: string }>; // type Foo = number
 type Bar = Orthrus<{ a: boolean; b: string }>; // type Bar = never
 ```
-
 - 条件类型表达式超类型是 `{ a: infer X extends number }` 意味着，子类型部分需要向下兼容 `{ a: number }` ，才能完成 `infer` 的推断，才能计算并返回第一条分支。
 - `{ a: number; b: string }` 向下兼容 `{ a: number }` ，因此 `X` 推断为 `{ a: number; b: string }` 中属性 `a` 的类型 `number` ，然后在第一条分支返回 `X` 作为结果，最后 `Foo` 得到 `number` 。
 - `{ a: boolean; b: string }` 不能向下兼容 `{ a: number }`，因此在第二条分支返回 `never` 作为结果，最后 `Bar` 得到 `never` 。
