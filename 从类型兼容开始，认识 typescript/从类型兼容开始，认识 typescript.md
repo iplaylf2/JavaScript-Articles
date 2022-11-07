@@ -19,12 +19,12 @@
   - [infer](#infer)
   - [infer ... extends ...](#infer--extends-)
 - [函数类型的向下兼容](#函数类型的向下兼容)
-  - [协变](#协变)
-  - [逆变](#逆变)
+  - [in 和 out](#in-和-out)
+  - [逆变不止发生在函数类型](#逆变不止发生在函数类型)
 - [接下来](#接下来)
 - [一些经验之谈](#一些经验之谈)
   - [为什么条件类型表达式“无用”的分支总是返回 never ？](#为什么条件类型表达式无用的分支总是返回-never-)
-  - [当一些特殊的类型输出到条件类型的泛型参数](#当一些特殊的类型输出到条件类型的泛型参数)
+  - [当一些特殊的类型遇到条件类型“分布律”](#当一些特殊的类型遇到条件类型分布律)
     - [never](#never-1)
     - [any](#any-1)
     - [any 也许能表现得更好](#any-也许能表现得更好)
@@ -176,7 +176,7 @@ type r2 = string & never; // type r2 = never
 
 如此之后，引用的句子可以翻译为：
 
-> 类型断言只能把类型转化成更具体或更抽象的版本。
+> 类型断言只能把类型转换成更具体或更抽象的版本。
 
 结合我们的编程经验，我们不妨认为，*类型更具体的版本*和他的子集是等价的，*类型更抽象的版本*和他的超集是等价的。
 
@@ -460,7 +460,7 @@ type BelongToNumber<T> = T extends number ? true : false;
 type Foo = BelongToNumber<1>; // type Foo = true
 type Bar = BelongToNumber<string>; // type Bar = false
 ```
-`BelongToNumber` 就属于条件类型，他需要传入参数才能具化成某个结构化类型。
+`BelongToNumber<T>` 就属于条件类型，他需要传入参数才能具化成某个结构化类型。
 - 类型 `1` 是 `number` 的子类型，因此 `BelongToNumber<1>` 得到第一条分支的结果 `true`。
 - 类型 `string` 不向下兼容 `number` ，因此 `BelongToNumber<string>` 得到第二条分支的结果 `false`。
 
@@ -549,15 +549,46 @@ type Bar = Orthrus<{ a: boolean; b: string }>; // type Bar = never
 
 ## 函数类型的向下兼容
 
-之前我避而不谈函数类型在类型兼容方面的表现，其目的也是避免过早让大家面对逆变。如今，本文已经谈完类型兼容在 `as` 、`extends` 、`infer` 上的表现，可以开始谈谈函数类型了。
+之前我避而不谈函数类型在类型兼容方面的表现，其目的也是避免过早让大家面对逆变。如今本文已经谈完类型兼容在 `as` 、`extends` 、`infer` 上的表现，可以开始谈谈函数类型了。
 
-### 协变
+函数类型在 TypeScript 中无疑是向下兼容的，但是他的“类型参数”会表现出两种相反的类型转换方向，一个是向下转换的**协变**，一个是向上转换的**逆变**。如下：
+```typescript
+declare let foo: (x: number) => unknown;
 
-### 逆变
+declare const bar: (x: unknown) => number;
+foo = bar; // 向下兼容
+```
+- `foo` 的类型有两个“类型参数”，一个是参数列表中 `x` 的类型 `number` ，一个是返回类型 `unknown` 。
+- `bar` 的类型有两个“类型参数”，一个是参数列表中 `x` 的类型 `unknown` ，一个是返回类型 `number` 。
+- `bar` 的类型向下兼容 `foo` 的类型。
+- `bar` 的类型在分配给 `foo` 的类型时，`x` 的类型 `unknown` 向上转换成 `number` ，这就是逆变。
+- `bar` 的类型在分配给 `foo` 的类型时，返回类型 `number` 向下转换成 `unknown` ，这就是协变。
+
+如果把函数类型抽象出泛型类型的形式，那么协变和逆变的行为会更清晰：
+```typescript
+type Pipe<In, Out> = (x: In) => Out;
+
+declare let foo: Pipe<number, unknown>;
+
+declare const bar: Pipe<unknown, number>;
+foo = bar; // 向下兼容
+```
+- `Pipe<unknown, number>` 向下兼容 `Pipe<number, unknown>` 。
+- `Pipe<unknown, number>` 在分配给 `Pipe<number, unknown>` 时，`In` 泛型参数完成了从 `unknown` 到 `number` 的逆变，`Out` 泛型参数完成了从 `number` 到 `unknown` 协变。 
+
+在类型分配时，只有对参数列表上的类型参数进行逆变，对返回值的类型参数进行逆变，函数类型才能向下兼容。
+
+可是这个规则是怎么来的呢？我很难用三言两语去解释，只能简单地说一下自己的观点，如果看不懂网上还有很多资料。
+
+……
+
+### in 和 out
+
+### 逆变不止发生在函数类型
 
 ## 接下来
 
-其实到这里，本文已经讲了 TypeScript 非常大的一部分跟类型操作相关的内容。接下来读者可以去了解如何对泛型类型进行复合的运用，如嵌套的、递归的条件类型等。这些内容也能通过练习、工作中，坚持做好类型约束的过程中慢慢掌握。篇幅有限，不再展开。
+其实到这里，本文已经讲了 TypeScript 非常大的一部分跟类型操作相关的内容。接下来读者可以去了解如何对泛型类型进行复合的运用，如嵌套的、递归的条件类型等。这些内容也能通过练习或者工作中、坚持做好类型约束的过程中慢慢掌握。篇幅有限，不再展开。
 
 ## 一些经验之谈
 
@@ -575,7 +606,7 @@ type Exclude<T, U> = T extends U ? never : T;
 type Extract<T, U> = T extends U ? T : never;
 ```
 
-### 当一些特殊的类型输出到条件类型的泛型参数
+### 当一些特殊的类型遇到条件类型“分布律”
 
 #### never
 
