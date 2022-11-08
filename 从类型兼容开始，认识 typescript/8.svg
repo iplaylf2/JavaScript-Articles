@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg9338"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   sodipodi:docname="8.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview9340"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1"
+     inkscape:cx="397.5"
+     inkscape:cy="562.5"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs9335" />
+  <g
+     inkscape:label="图层 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';fill:#808000;stroke:#800000;stroke-width:0.264999"
+       x="72.231247"
+       y="91.810417"
+       id="text9461"><tspan
+         sodipodi:role="line"
+         id="tspan9459"
+         style="stroke-width:0.265;fill:#808000;stroke:#800000"
+         x="72.231247"
+         y="91.810417">Pipe&lt;number, unknown&gt;</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';fill:#808000;stroke:#808000;stroke-width:0.264999"
+       x="71.995605"
+       y="123.03126"
+       id="text9465"><tspan
+         sodipodi:role="line"
+         id="tspan9463"
+         style="stroke-width:0.265;fill:#808000;stroke:#808000"
+         x="71.995605"
+         y="123.03126">Pipe&lt;unknown, number&gt;</tspan></text>
+    <rect
+       style="fill:none;stroke:#008000;stroke-width:0.264999"
+       id="rect9467"
+       width="78.845833"
+       height="14.816667"
+       x="67.46875"
+       y="82.814583" />
+    <rect
+       style="fill:none;stroke:#008000;stroke-width:0.264999"
+       id="rect9573"
+       width="79.110825"
+       height="15.875"
+       x="67.33625"
+       y="114.56458" />
+    <path
+       style="fill:none;stroke:#008000;stroke-width:0.264999"
+       d="M 47.889583,90.255991 38.89375,102.39375 47.360416,101.6 l -1.058333,22.9666 7.9375,-3.08977 -2.645834,-20.406 6.614584,2.11667 z"
+       id="path9575" />
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';fill:#008000;stroke:#008000;stroke-width:0.264999"
+       x="48.683331"
+       y="108.07127"
+       id="text9579"><tspan
+         sodipodi:role="line"
+         id="tspan9577"
+         style="stroke-width:0.265"
+         x="48.683331"
+         y="108.07127">向下兼容</tspan></text>
+    <rect
+       style="fill:none;stroke:#008080;stroke-width:0.264999"
+       id="rect9581"
+       width="21.43125"
+       height="6.1795354"
+       x="88.370834"
+       y="87.166222" />
+    <rect
+       style="fill:none;stroke:#008080;stroke-width:0.264999"
+       id="rect9583"
+       width="24.474163"
+       height="6.1795354"
+       x="88.238327"
+       y="118.38706" />
+    <path
+       style="fill:none;stroke:#008080;stroke-width:0.264999"
+       d="m 99.08646,93.345756 -6.746878,9.888394 h 6.746875 v 9.74293 l 7.805213,1.5875 -3.43959,-11.33043 h 6.4825 z"
+       id="path9585" />
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';fill:#008080;stroke:#008080;stroke-width:0.264999"
+       x="100.93025"
+       y="108.07954"
+       id="text9643"><tspan
+         sodipodi:role="line"
+         id="tspan9641"
+         style="stroke-width:0.265"
+         x="100.93025"
+         y="108.07954">逆变</tspan></text>
+    <rect
+       style="fill:none;stroke:#000080;stroke-width:0.264999"
+       id="rect9649"
+       width="25.405666"
+       height="8.2162771"
+       x="111.65417"
+       y="86.114777" />
+    <rect
+       style="fill:none;stroke:#000080;stroke-width:0.264999"
+       id="rect9661"
+       width="28.02257"
+       height="6.1795373"
+       x="115.09374"
+       y="118.38706" />
+    <path
+       style="fill:none;stroke:#000080;stroke-width:0.264999"
+       d="m 124.357,94.331053 -4.23617,8.889317 h 4.23617 v 11.21171 l 4.74803,3.95498 -1.31128,-14.14123 3.96875,-1.02546 z"
+       id="path9663" />
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';fill:#000080;stroke:#000080;stroke-width:0.264999"
+       x="126.35103"
+       y="108.07954"
+       id="text9667"><tspan
+         sodipodi:role="line"
+         id="tspan9665"
+         style="fill:#000080;stroke-width:0.265"
+         x="126.35103"
+         y="108.07954">协变</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#800080;stroke:#800080;stroke-width:0.264999"
+       x="47.003738"
+       y="149.25534"
+       id="text9825"><tspan
+         sodipodi:role="line"
+         id="tspan9827"
+         x="47.003738"
+         y="149.25534">type Pipe&lt;In, Out&gt; = (x: In) =&gt; Out</tspan></text>
+  </g>
+</svg>

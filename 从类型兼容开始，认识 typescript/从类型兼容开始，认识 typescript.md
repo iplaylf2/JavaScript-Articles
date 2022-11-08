@@ -19,8 +19,8 @@
   - [infer](#infer)
   - [infer ... extends ...](#infer--extends-)
 - [函数类型的向下兼容](#函数类型的向下兼容)
-  - [in 和 out](#in-和-out)
   - [逆变不止发生在函数类型](#逆变不止发生在函数类型)
+  - [in 和 out](#in-和-out)
 - [接下来](#接下来)
 - [一些经验之谈](#一些经验之谈)
   - [为什么条件类型表达式“无用”的分支总是返回 never ？](#为什么条件类型表达式无用的分支总是返回-never-)
@@ -558,11 +558,10 @@ declare let foo: (x: number) => unknown;
 declare const bar: (x: unknown) => number;
 foo = bar; // 向下兼容
 ```
-- `foo` 的类型有两个“类型参数”，一个是参数列表中 `x` 的类型 `number` ，一个是返回类型 `unknown` 。
-- `bar` 的类型有两个“类型参数”，一个是参数列表中 `x` 的类型 `unknown` ，一个是返回类型 `number` 。
-- `bar` 的类型向下兼容 `foo` 的类型。
-- `bar` 的类型在分配给 `foo` 的类型时，`x` 的类型 `unknown` 向上转换成 `number` ，这就是逆变。
-- `bar` 的类型在分配给 `foo` 的类型时，返回类型 `number` 向下转换成 `unknown` ，这就是协变。
+![img](./7-x.svg)
+- `(x: unknown) => number` 向下兼容 ` (x: number) => unknown`
+- 函数参数中，`x` 的类型 `unknown` 向着子类型 `number` 的方向，也就是向上转换，发生了逆变。
+- 函数返回类型 `number` 向着超类型 `unknown` 的方向，也就是向下转换，发生了协变。
 
 如果把函数类型抽象出泛型类型的形式，那么协变和逆变的行为会更清晰：
 ```typescript
@@ -573,18 +572,20 @@ declare let foo: Pipe<number, unknown>;
 declare const bar: Pipe<unknown, number>;
 foo = bar; // 向下兼容
 ```
+![img](./8-x.svg)
 - `Pipe<unknown, number>` 向下兼容 `Pipe<number, unknown>` 。
-- `Pipe<unknown, number>` 在分配给 `Pipe<number, unknown>` 时，`In` 泛型参数完成了从 `unknown` 到 `number` 的逆变，`Out` 泛型参数完成了从 `number` 到 `unknown` 协变。 
+- `In` 泛型参数发生了从 `unknown` 到 `number` 的逆变。
+- `Out` 泛型参数发生了从 `number` 到 `unknown` 的协变。 
 
-在类型分配时，只有对参数列表上的类型参数进行逆变，对返回值的类型参数进行协变，函数类型才能向下兼容。
+在类型分配时，只有对参数列表上的类型参数进行逆变、对返回值的类型参数进行协变，函数类型才能向下兼容。
 
-可是这个规则是怎么来的呢？我很难用三言两语去解释，只能简单地说一下自己的观点，如果看不懂网上还有很多资料。
+为什么向下兼容要求函数类型上不同部位的类型分别进行逆变和协变呢？答案是，因为类型分配的方向。如下:
 
 ……
 
-### in 和 out
-
 ### 逆变不止发生在函数类型
+
+### in 和 out
 
 ## 接下来
 
