@@ -79,9 +79,9 @@ function mysteryBox(): number {
 
 为什么 `as unknown` 可以发挥作用？我们可以先分析一下 `unknown` 类型。
 
-从[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)可知，所有类型都能分配给 `unknown` 。这等同于所有类型都能向下兼容 `unknown` 。
+从[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)可知，任何类型都能分配给 `unknown` 。这等同于任何类型都能向下兼容 `unknown` 。
 
-因为所有类型都向下兼容 `unknown` ，**`unknown` 是所有类型的超类型！** （也是超集。）
+因为任何类型都向下兼容 `unknown` ，所以 **`unknown` 是任何类型的超类型！** （也是超集。）
 
 已知，`number` 是 `unknown` 的子集，与 `unknown` 充分重叠；`string` 是 `unknown` 的子集，与 `unknown` 充分重叠。
 
@@ -155,7 +155,153 @@ const zoo: string = baz; // 无报错
 
 > 类型断言只能把类型转换成更具体或更抽象的版本。
 
-结合我们的编程经验，我们不妨认为，*类型更具体的版本* 和他的子集是等价的，*类型更抽象的版本* 和他的超集是等价的。
+结合前文，我们不妨认为，*类型更具体的版本* 和他的子类型是等价的，*类型更抽象的版本* 和他的超类型是等价的。
 
 由此可得，`as` 运算符两边的类型，只有在它们存在集合间的包含关系才能够成立。
 
+### never
+
+在 `type Chimera = number & string` 的举例中，TypeScript 会将其推导成 `type Chimera = never` ：
+- `number` 和 `string` 的交集是 `never` ！？
+- `as never` 难道和 `as unknown` 一样，能用于通用的类型转换？
+
+从[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)可知，`never` 可以分配给任何类型。这等同于 `never` 能向下兼容任何类型。
+
+因为 `never` 能向下兼容任何类型，所以 **`never` 是任何类型的子类型！** 在集合论中，空集是任何集合的子集。我们不妨认为 `never` 和空集是等价的。
+
+因此，`number` 和 `string` 的交集是 `never` 时，意味着 `number` 和 `string` 没有任何相同的元素。或者说不存在一个元素能同时具备 `number` 和 `string` 的特性。这很符合我们的编程经验。
+
+如果用维恩图表示 `number` ，`string` ，`unknown` ，`never` 之间的关系，则是这样的：
+![img](./2.1-x.svg)
+- `number` & `string` 为 `never` 。
+- `number` 和 `string` 都是 `unknown` 的子集。
+
+### & 和 | 以及超集和子集
+
+如果我们让 `never` 和 `number` 再次相交，如同一个集合和它的超集相交。根据集合的性质，得到的交集就会是该集合本身。如下：
+```typescript
+type foo = never & number; // type foo = never
+type bar = never & string; // type bar = never
+```
+- `&` 表现出求交集的运算。
+- `never` 与任何类型相交都会得到 `never` 。
+
+而一个集合和它的子集合并，得到的并集就是该集合本身。如下：
+```typescript
+type foo = unknown | number; // type foo = unknown
+type bar = unknown | string; // type bar = unknown
+```
+- `|` 表现出求交集的运算。
+- `unknown` 与任何类型合并都会得到 `unknown` 。
+
+同样的：
+```typescript
+type foo = never | number; // type foo = number
+type bar = unknown & string; // type bar = string
+```
+
+如果结合了上文维恩图的包含关系，那么就能更容易理解 `&` 和 `|` 在类型上的运算。
+
+### any
+
+前面提及过任何类型的超集 `unknown` 和任何类型的子集 `never` ，那另一个跟任何类型密切相关的 `any` 呢？如何从集合的角度去看待他与其他类型的包含关系。
+
+`any` 太特殊了，我无法用集合的语言表达。~~维恩图不会画了。~~
+
+但我可以从包含途径出发，画出以下图表：
+```mermaid
+flowchart RL
+  any --> never
+
+  number --> any
+  string --> any
+  rest1[...] --> any
+  rest2[...] --> number
+  rest3[...] --> string
+  unknown[unknown / any] --> rest1
+  unknown --> rest2
+  unknown --> rest3
+```
+- 箭头左边的项包含于右边的项。
+- `any` 在 TypeScript 中可以兼容 `never` 以外所有的类型，我们不妨认为他是 `never` 以外所有类型的子集，同时也是所有类型的超集。因此上图有两个 `any` 。
+
+## 结构化类型
+
+重新认识 extends 之前，我们有必要了解[结构化类型](https://www.typescriptlang.org/docs/handbook/type-compatibility.html)。
+
+> TypeScript 的结构化类型系统是根据 JavaScript 代码的典型写法设计的。
+
+JavaScript 广泛使用了函数表达式和对象字面量，结构化类型就是针对这点设计的，他们在字面表达上有非常相似的地方。
+
+而结构化类型的字面表达，与泛型类型、条件类型，类型推导等类型操作关系密切。
+
+常见的结构化类型有以下几种。
+
+1. 基元类型 ( [Primitives](https://www.typescriptlang.org/zh/docs/handbook/2/everyday-types.html) )
+
+基元类型就是那些平坦的字面值类型，`string` ，`number` ，`boolean` 等等。
+
+2. 记录类型（ [Record / Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
+
+记录是一系列属性的组合。如下：
+```typescript
+let foo: { name: string; age: number }; // 属性表达式
+let bar: { [index in string]: number }; // 索引签名表达式
+
+foo = { name: "foo", age: 23 };
+bar = { x: 233 };
+```
+
+也有人称之为对象类型，但是我为了消除歧义，更愿意称之为记录类型。
+
+3. 数组类型（ [Array](https://www.typescriptlang.org/docs/handbook/2/objects.html) ）
+
+数组类型就是数组的类型。如下：
+```typescript
+let foo: number[];
+
+foo = [1, 2, 3];
+```
+
+4. 元组类型（ [Tuple](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) ）
+
+元组是一系列属性的排列，在 TypeScript 中元组也属于数组的一种。如下：
+```typescript
+let foo: [name: string, age: number];
+let bar: [string, number]; // 省略属性名的形式。
+
+foo = ["foo", 23]; // 元组类型特性在于属性的排列分布，属性名只是记号，不存在于元组值中。
+bar = ["bar", 33];
+```
+
+5. 函数类型（ [Function](https://www.typescriptlang.org/docs/handbook/2/functions.html) ）
+
+函数类型就是函数的类型。如下：
+```typescript
+let foo: (x: string) => void;
+
+foo = (x) => console.log(x);
+```
+
+结构化类型在分配时，也是需要向下兼容的。我们接下来谈谈其中几个在类型兼容方面的表现。
+
+*（谈论之前或许还需要一个前提，结构化类型所表达的值是不可变的、无状态的。这样可以避免过早考虑逆变的问题。）*
+
+### 记录类型
+
+记录通过属性名对外输出属性。直观上，两个记录类型若是存在向下兼容关系：
+- 子类型拥有超类型的一切同名属性。
+- 子类型的同名属性一一向下兼容超类型的同名属性。
+
+```typescript
+declare let foo: { a: number; b: string };
+declare let bar: { a: number };
+declare let baz: { a: unknown };
+
+baz = bar = foo; // 无报错
+
+foo = bar = baz; // 不能向下兼容，报错了
+```
+- `{ a: number }` 拥有 `{ a: unknown }` 同名属性 `a` ，同名属性类型 `number` 向下兼容 `unknown` ，因此 `{ a: number }` 向下兼容 `{ a: unknown }` 。
+- `{ a: number; b: string }` 拥有 `{ a: number }` 的同名属性 `a` ，同名属性类型相同，类型相同将相互向下兼容。因此 `{ a: number; b: string }` 向下兼容 `{ a: number }` 。
+- 反之，则无法成立。
