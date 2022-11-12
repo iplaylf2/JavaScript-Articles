@@ -25,6 +25,10 @@
   - [泛型约束](#泛型约束)
   - [条件类型](#条件类型)
   - [条件类型的分配律](#条件类型的分配律)
+  - [抑制条件类型的分配律](#抑制条件类型的分配律)
+  - [`infer`](#infer)
+  - [`infer ... extends ...`](#infer--extends-)
+- [函数类型的向下兼容](#函数类型的向下兼容)
 
 ## 类型兼容
 
@@ -507,7 +511,7 @@ function bar<T extends { a: number }>(x: T): void {
 
 bar(foo);
 ```
-- 上文中的泛型约束是，输出到 `T` 的类型必须向下兼容 `{ a: number }` 。
+- 上文中的泛型约束是 `T extends { a: number }` ，输出到 `T` 的类型必须向下兼容 `{ a: number }` 。
 - `{ a: number; b: string }` 向下兼容 `{ a: number }` ，因此实参 `bar` 的类型向下兼容形参 `x` 的类型 `T` ，可以合法传入。
 - 在函数定义的上下文中，`T` 向下兼容 `{ a: number }` ，因此类型是 `T` 的参数 `x` 可以合法输出属性 `a` 。
 
@@ -530,7 +534,7 @@ type Bar = BelongToNumber<string>; // type Bar = false
 
 ### 条件类型的分配律
 
-当我们把联合类型作为泛型参数传入条件类型时，只要他的泛型参数出现在、条件类型表达式的子类型上，条件类型就会呈现出[分配律](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types)。
+当我们把联合类型作为泛型参数传入条件类型时，只要他的泛型参数直接出现在*条件类型表达式的子类型*上，条件类型就会呈现出[分配律](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types)。
 
 分配律，简单地说 `BelongToNumber<A | B>` 就会按照 `BelongToNumber<A> | BelongToNumber<B>` 的方式进行解释。
 
@@ -541,7 +545,7 @@ type BelongToNumber<T> = T extends number ? true : false;
 type Foo = BelongToNumber<1 | string>; // type Foo = boolean
 type Bar = true | false; // type Bar = boolean
 ```
-- 泛型参数 `T` 出现在条件类型表达式的子类型上。
+- 泛型参数 `T` 直接出现在条件类型表达式的子类型上。
 - `BelongToNumber<1 | string>` 按照 `BelongToNumber<1> | BelongToNumber<string>` 的方式进行解释。
 - `boolean` 只有两种取值可能 `true` 或 `false` ，将他们视为集合时，`boolean` 是 `true` 和 `false` 的合集。因此 `true | false` 会得到 `boolean` 。
 
@@ -558,12 +562,73 @@ type Orthrus<A, B> = A extends unknown
 type Foo = Orthrus<"A" | "B", "C" | "D">; // type Foo = ["A", "C"] | ["A", "D"] | ["B", "C"] | ["B", "D"]
 ```
 - 条件类型表达式允许嵌套表达。
-- 泛型参数 `A` 和 `B` 都出现在条件类型表达式的子类型上。
+- 泛型参数 `A` 和 `B` 都直接出现在条件类型表达式的子类型上。
 - `Orthrus<"A" | "B", "C" | "D">` 呈现了分配律。
 
-如果只有泛型参数 `A` 出现在条件类型表达式的子类型上呢？如下：
+如果只有泛型参数 `A` 直接出现在条件类型表达式的子类型上呢？如下：
 ```typescript
 type Orthrus<A, B> = A extends unknown ? [A, B] : never;
 
 type Foo = Orthrus<"A" | "B", "C" | "D">; // type Foo = ["A", "C" | "D"] | ["B", "C" | "D"]
 ```
+
+### 抑制条件类型的分配律
+
+有些时候我们并不希望条件类型呈现分配律。当泛型参数需要出现在条件类型表达式的子类型上时，可以将其类型参数在该位置上构造成其他类型，使其不再直接出现，从而导致分配律失效。
+
+如下：
+```typescript
+type BelongToNumber2<T> = T | number extends number ? true : false;
+// type BelongToNumber2<T> = [T] extends [number] ? true : false;
+// type BelongToNumber2<T> = T[] extends number[] ? true : false;
+// type BelongToNumber2<T> = { x: T } extends { x: number } ? true : false;
+
+type Foo = BelongToNumber2<1>; // type Foo = true
+type Bar = BelongToNumber2<string>; // type Bar = false
+type Baz = BelongToNumber2<1 | string>; // type Baz = false
+type Qux = BelongToNumber2<1 | 2>; // type Qux = true
+```
+- 泛型参数 `T` 在条件类型表达式的子类型上被构造成其他类型，不再直接出现。
+- 以上条件类型 `BelongToNumber2<T>` 的几种构造方式，都能抑制条件类型的分配律，使其将泛型参数完整地往内传递。
+
+通过构造成元组类型来抑制条件类型的分布律是最简单直接的方式，也是官方文档所推崇的方式。
+
+### `infer`
+
+条件类型最神奇的组件就是 `infer` ，他的语义是推断，能帮助我们推断出结构化类型的组成元素的类型。
+
+`infer` 只能出现在*条件类型表达式的超类型*上，能替代超类型的字面表达式中的类型，作为想要推断的部分。当条件类型表达式的向下兼容关系成立，就能在其第一条分支上使用推断得到的类型。
+
+如下：
+```typescript
+type Foo<T> = T extends { a: infer X } ? X : never;
+type foo = Foo<{ a: number; b: string }>; // type foo = number
+
+type Bar<T> = T extends [infer X, string] ? X : never;
+type bar = Bar<[number, string]>; // type bar = number
+```
+
+当你意识到结构化类型的字面表达是条件类型中的构成之一，意识到 `infer` 推断的是结构化类型的字面表达中被其取代的类型，就能迅速地掌握 `infer` 这个关键字。
+
+### `infer ... extends ...`
+
+我们不难看出用 `infer X` 推断类型的时候，其实还隐含了一条信息，就是 `X extends unknown` 的泛型约束。只有 `X` 是 `unknown` 的子类型而不是别的具体类型的子类型，`X` 才能替代条件类型表达式的超类型的字面表达式中的任意类型。
+
+而 `infer` 确实支持后缀的泛型约束。
+
+如下：
+```typescript
+type Orthrus<T> = T extends { a: infer X extends number } ? X : never;
+
+type Foo = Orthrus<{ a: number; b: string }>; // type Foo = number
+type Bar = Orthrus<{ a: boolean; b: string }>; // type Bar = never
+```
+- 条件类型表达式的超类型是 `{ a: infer X extends number }` 。意味着，子类型部分需要向下兼容 `{ a: number }` ，才能完成 `infer` 的推断，才能计算并返回第一条分支。
+- `{ a: number; b: string }` 向下兼容 `{ a: number }` ，因此 `X` 推断为 `{ a: number; b: string }` 中属性 `a` 的类型 `number` ，然后在第一条分支返回 `X` 作为结果，最后 `Foo` 得到 `number` 。
+- `{ a: boolean; b: string }` 不能向下兼容 `{ a: number }`，因此在第二条分支返回 `never` 作为结果，最后 `Bar` 得到 `never` 。
+
+## 函数类型的向下兼容
+
+之前我避而不谈函数类型在类型兼容方面的表现，其目的是避免过早让大家面对逆变。如今本文已经谈完类型兼容在 `as` 、`extends` 、`infer` 上的表现，可以开始谈谈函数类型了。
+
+函数类型在 TypeScript 中无疑是向下兼容的，但是他的“类型参数”会表现出两种相反的类型转换方向，一个是向下转换的**协变**，一个是向上转换的**逆变**。
