@@ -28,7 +28,7 @@
   - [抑制条件类型的分配律](#抑制条件类型的分配律)
   - [`infer`](#infer)
   - [`infer ... extends ...`](#infer--extends-)
-- [函数类型的向下兼容](#函数类型的向下兼容)
+- [泛型类型的类型兼容](#泛型类型的类型兼容)
 
 ## 类型兼容
 
@@ -515,7 +515,7 @@ bar(foo);
 - `{ a: number; b: string }` 向下兼容 `{ a: number }` ，因此实参 `bar` 的类型向下兼容形参 `x` 的类型 `T` ，可以合法传入。
 - 因为泛型约束，所以在函数定义的上下文中，`T` 确定向下兼容 `{ a: number }` ，所以类型是 `T` 的参数 `x` 可以合法输出属性 `a` 。
 
-泛型约束除了带来了参数的类型限制，还为当前上下文带来了参数的超类型信息。
+泛型约束除了带来了泛型参数的类型限制，还为当前上下文带来了泛型参数的超类型信息。
 
 ### 条件类型
 
@@ -538,7 +538,7 @@ type Bar = BelongToNumber<string>; // type Bar = false
 
 当我们把联合类型作为泛型参数传入条件类型时，只要他的泛型参数直接出现在*条件类型表达式的子类型*上，条件类型就会呈现出[分配律](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types)。
 
-分配律，简单地说 `BelongToNumber<A | B>` 就会按照 `BelongToNumber<A> | BelongToNumber<B>` 的方式进行解释。
+分配律，简单地说就是，条件类型 `T<A | B>` 会按照 `T<A> | T<B>` 的方式进行解释。
 
 如下：
 ```typescript
@@ -573,6 +573,7 @@ type Orthrus<A, B> = A extends unknown ? [A, B] : never;
 
 type Foo = Orthrus<"A" | "B", "C" | "D">; // type Foo = ["A", "C" | "D"] | ["B", "C" | "D"]
 ```
+- 同样呈现出了分配律。
 
 ### 抑制条件类型的分配律
 
@@ -592,6 +593,7 @@ type Qux = BelongToNumber2<1 | 2>; // type Qux = true
 ```
 - 泛型参数 `T` 在条件类型表达式的子类型上被构造成其他类型，不再直接出现。
 - 以上条件类型 `BelongToNumber2<T>` 的几种构造方式，都能抑制条件类型的分配律，使其将泛型参数完整地往内传递。
+- 而改造了子类型部分的类型后，需要对超类型部分进行对应的改造，使其表达出原来的类型兼容关系。
 
 通过构造成元组类型来抑制条件类型的分布律是最简单直接的方式，也是官方文档所推崇的方式。
 
@@ -629,8 +631,4 @@ type Bar = Orthrus<{ a: boolean; b: string }>; // type Bar = never
 - `{ a: number; b: string }` 向下兼容 `{ a: number }` ，因此 `X` 推断为 `{ a: number; b: string }` 中属性 `a` 的类型 `number` ，然后在第一条分支返回 `X` 作为结果，最后 `Foo` 得到 `number` 。
 - `{ a: boolean; b: string }` 不能向下兼容 `{ a: number }`，因此在第二条分支返回 `never` 作为结果，最后 `Bar` 得到 `never` 。
 
-## 函数类型的向下兼容
-
-之前我避而不谈函数类型在类型兼容方面的表现，其目的是避免过早让大家面对逆变。如今本文已经谈完类型兼容在 `as` 、`extends` 、`infer` 上的表现，可以开始谈谈函数类型了。
-
-函数类型在 TypeScript 中无疑是向下兼容的，但是他的“类型参数”会表现出两种相反的类型转换方向，一个是向下转换的**协变**，一个是向上转换的**逆变**。
+## 泛型类型的类型兼容
