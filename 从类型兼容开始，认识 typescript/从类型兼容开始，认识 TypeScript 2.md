@@ -23,6 +23,8 @@
     - [`[]`](#-1)
 - [extends](#extends)
   - [泛型约束](#泛型约束)
+  - [条件类型](#条件类型)
+  - [条件类型的分配律](#条件类型的分配律)
 
 ## 类型兼容
 
@@ -509,3 +511,59 @@ bar(foo);
 - `{ a: number; b: string }` 向下兼容 `{ a: number }` ，因此实参 `bar` 的类型向下兼容形参 `x` 的类型 `T` ，可以合法传入。
 - 在函数定义的上下文中，`T` 向下兼容 `{ a: number }` ，因此类型是 `T` 的参数 `x` 可以合法输出属性 `a` 。
 
+### 条件类型
+
+[条件类型](https://www.typescriptlang.org/zh/docs/handbook/2/conditional-types.html)一般出现在泛型函数或泛型类型中，是构造新类型的一种手段。他的表达式与[条件表达式](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Conditional_Operator)的形式很像，只是条件部分被固定为 `extends` 断言，当 `extends` 左右两边的向下兼容成立，就计算并返回第一条分支，反之则第二条分支。
+
+如下：
+```typescript
+type BelongToNumber<T> = T extends number ? true : false;
+
+type Foo = BelongToNumber<1>; // type Foo = true
+type Bar = BelongToNumber<string>; // type Bar = false
+```
+- `BelongToNumber<T>` 就是条件类型，他需要传入泛型参数才能具化成特定的结构化类型。
+- 类型 `1` 向下兼容 `number` ，因此 `BelongToNumber<1>` 得到第一条分支的结果 `true`。
+- 类型 `string` 不向下兼容 `number` ，因此 `BelongToNumber<string>` 得到第二条分支的结果 `false`。
+
+`(A extends B ? first : second)` 如此形式的表达式，我为了方便讲述称之为*条件类型表达式*。并且称 `A` 为*条件类型表达式的子类型*，称 `B` 为*条件类型表达式的超类型*。
+
+### 条件类型的分配律
+
+当我们把联合类型作为泛型参数传入条件类型时，只要他的泛型参数出现在、条件类型表达式的子类型上，条件类型就会呈现出[分配律](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types)。
+
+分配律，简单地说 `BelongToNumber<A | B>` 就会按照 `BelongToNumber<A> | BelongToNumber<B>` 的方式进行解释。
+
+如下：
+```typescript
+type BelongToNumber<T> = T extends number ? true : false;
+
+type Foo = BelongToNumber<1 | string>; // type Foo = boolean
+type Bar = true | false; // type Bar = boolean
+```
+- 泛型参数 `T` 出现在条件类型表达式的子类型上。
+- `BelongToNumber<1 | string>` 按照 `BelongToNumber<1> | BelongToNumber<string>` 的方式进行解释。
+- `boolean` 只有两种取值可能 `true` 或 `false` ，将他们视为集合时，`boolean` 是 `true` 和 `false` 的合集。因此 `true | false` 会得到 `boolean` 。
+
+分配律就是你们想的那种分配律，如乘法分配律， `(A + B) × C = A × C + B × C` 。乃至于，条件类型 `T<A | B, C | D>` 有可能得到 `T<A, C> | T<A, D> | T<B, C> | T<B, D>` 。
+
+如下：
+```typescript
+type Orthrus<A, B> = A extends unknown
+  ? B extends unknown
+    ? [A, B]
+    : never
+  : never;
+
+type Foo = Orthrus<"A" | "B", "C" | "D">; // type Foo = ["A", "C"] | ["A", "D"] | ["B", "C"] | ["B", "D"]
+```
+- 条件类型表达式允许嵌套表达。
+- 泛型参数 `A` 和 `B` 都出现在条件类型表达式的子类型上。
+- `Orthrus<"A" | "B", "C" | "D">` 呈现了分配律。
+
+如果只有泛型参数 `A` 出现在条件类型表达式的子类型上呢？如下：
+```typescript
+type Orthrus<A, B> = A extends unknown ? [A, B] : never;
+
+type Foo = Orthrus<"A" | "B", "C" | "D">; // type Foo = ["A", "C" | "D"] | ["B", "C" | "D"]
+```
