@@ -103,10 +103,10 @@ TypeScript 提供了[联合类型](https://www.typescriptlang.org/docs/handbook/
 ```typescript
 type Chimera = number | string;
 
-233 as Chimera as string; // 无报错
+233 as Chimera as string;
 
-const foo: Chimera = 233; // 无报错
-const bar: Chimera = "hello"; // 无报错
+const foo: Chimera = 233;
+const bar: Chimera = "hello";
 
 declare const baz: Chimera;
 const qux: number = baz; // 不能向下兼容，报错了
@@ -128,14 +128,14 @@ TypeScript 提供了[交叉类型](https://www.typescriptlang.org/docs/handbook/
 ```typescript
 type Chimera = number & string;
 
-233 as Chimera as string; // 无报错
+233 as Chimera as string;
 
 const foo: Chimera = 233; // 不能向下兼容，报错了
 const bar: Chimera = "hello"; // 不能向下兼容，报错了
 
 declare const baz: Chimera;
-const qux: number = baz; // 无报错
-const zoo: string = baz; // 无报错
+const qux: number = baz;
+const zoo: string = baz;
 ```
 - `Chimera` 代替 `233 as unknown as string` 中的 `unknown` 发挥作用了。
 - `number` 和 `string` 都不能向下兼容 `Chimera` 。
@@ -298,10 +298,70 @@ declare let foo: { a: number; b: string };
 declare let bar: { a: number };
 declare let baz: { a: unknown };
 
-baz = bar = foo; // 无报错
+baz = bar = foo;
 
 foo = bar = baz; // 不能向下兼容，报错了
 ```
 - `{ a: number }` 拥有 `{ a: unknown }` 同名属性 `a` ，同名属性类型 `number` 向下兼容 `unknown` ，因此 `{ a: number }` 向下兼容 `{ a: unknown }` 。
 - `{ a: number; b: string }` 拥有 `{ a: number }` 的同名属性 `a` ，同名属性类型相同，类型相同将相互向下兼容。因此 `{ a: number; b: string }` 向下兼容 `{ a: number }` 。
 - 反之，则无法成立。
+
+#### 记录类型的交集
+
+两个集合的交集是它们的共同子集。当这些集合代表记录类型时，意味着两个记录类型相交得到的共同子类型，拥有它们的一切属性。而子类型中名字重复的属性，它们的类型将两两相交。
+
+在文档对交叉类型的[介绍](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)中，运算符 `&` 本来就是用于组合多个记录类型。
+
+我们可以看一个简单的例子：
+```typescript
+type Chimera = { a: unknown; b: string } & { a: number };
+
+declare let foo: { a: number; b: string };
+declare let bar: Chimera;
+
+foo = bar; // 向下兼容
+bar = foo; // 向下兼容
+```
+- `Chimera` 拥有 `{ a: unknown; b: string }` 和 `{ a: number }` 的一切属性 `a` 和 `b` 。
+- 同名属性 `a` 的类型由 `unknown` 和 `number` 两两相交而得。
+- 综上，`Chimera` 至少拥有 `a: number` 和 `b: string` 两个属性，将向下兼容 `{ a: number; b: string }` 。
+
+当两个集合互为子集时，两个集合相等。同样的，**当两个类型互为子类型时，也就是相互向下兼容时，两个类型相等**。
+
+因此 `{ a: unknown; b: string } & { a: number }` 等同于 `{ a: number; b: string }` 。
+
+#### {}
+
+`{}` 是一个没有任何属性的组合，显然他的类型会被任何记录类型向下兼容，是所有记录类型的超类型。
+
+举一些简单的例子：
+```typescript
+declare let foo: { a: number };
+declare let bar: { b: string };
+declare let baz: {};
+
+baz = foo;
+baz = bar;
+
+foo = baz; // 不能向下兼容，报错了
+bar = baz; // 不能向下兼容，报错了
+```
+
+特别的，JavaScript 里非 `null` / `undefined` 的值，都能像 JavaScript 对象那样访问属性，如同 TypeScript 的记录类型。反映在 TypeScript 中，类型 `{}` 是非 `null` / `undefined` 值类型的超类型。
+
+举一些简单的例子：
+```typescript
+type foo = {} & null; // type foo = never
+type bar = {} & undefined; // type bar = never
+
+type baz = {} & number; // type baz = number
+type qux = {} & string; // type qux = string
+```
+- 通过求交集的方式，得出 `{}` 与 `null` / `undefined` 没有包含关系。
+- 通过求交集的方式，得出 `{}` 是 `number` / `string` 的超集、超类型。
+
+*（ typescript-eslint 认为 `{}` 代表着非空的值，不是大众预期的“空对象”，从而[不推荐](https://github.com/typescript-eslint/typescript-eslint/issues/2063#issuecomment-675156492)使用。）*
+
+有两个问题留给大家思考：
+1. JavaScript 的 `number` 经过装箱成为 `Number` 对象后，能表现出 JavaScript 对象的性质。请问，在 TypeScript 中 `number` 和 `Number` 的兼容关系是怎样的？
+2. 如何定义出一个“空对象”类型，使得任何带有属性的记录类型不能向下兼容它。
