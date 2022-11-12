@@ -17,6 +17,12 @@
     - [记录类型的交集](#记录类型的交集)
     - [`{}`](#)
   - [数组类型](#数组类型)
+  - [元组类型](#元组类型)
+    - [rest](#rest)
+    - [元组类型的交集](#元组类型的交集)
+    - [`[]`](#-1)
+- [extends](#extends)
+  - [泛型约束](#泛型约束)
 
 ## 类型兼容
 
@@ -243,7 +249,7 @@ flowchart RL
   unknown --> rest3
 ```
 - 箭头左边的项包含于右边的项。
-- `any` 在 TypeScript 中可以兼容 `never` 以外所有的类型，我们不妨认为他是 `never` 以外所有类型的子集，同时也是所有类型的超集。因此上图有两个 `any` 。
+- `any` 在 TypeScript 中可以兼容 `never` 以外任何的类型，我们不妨认为他是 `never` 以外任何类型的子集，同时也是任何类型的超集。因此上图有两个 `any` 。
 
 ## 结构化类型
 
@@ -313,6 +319,7 @@ foo = (x) => console.log(x);
 - 子类型拥有超类型的一切同名属性。
 - 子类型的同名属性一一向下兼容超类型的同名属性。
 
+如下：
 ```typescript
 declare let foo: { a: number; b: string };
 declare let bar: { a: number };
@@ -323,24 +330,24 @@ baz = bar = foo;
 foo = bar = baz; // 不能向下兼容，报错了
 ```
 - `{ a: number }` 拥有 `{ a: unknown }` 同名属性 `a` ，同名属性类型 `number` 向下兼容 `unknown` ，因此 `{ a: number }` 向下兼容 `{ a: unknown }` 。
-- `{ a: number; b: string }` 拥有 `{ a: number }` 的同名属性 `a` ，同名属性类型相同，类型相同将相互向下兼容。因此 `{ a: number; b: string }` 向下兼容 `{ a: number }` 。
+- `{ a: number; b: string }` 拥有 `{ a: number }` 的同名属性 `a` ，同名属性类型相同，类型相同即相互向下兼容。因此 `{ a: number; b: string }` 向下兼容 `{ a: number }` 。
 - 反之则不能向下兼容。
 
 #### 记录类型的交集
 
-两个集合的交集是它们的共同子集。当这些集合代表记录类型时，意味着两个记录类型相交得到的共同子类型，拥有它们的一切属性。而子类型中名字重复的属性，它们的类型将两两相交。
+两个集合的交集是它们的共同子集。当这些集合代表记录类型时，意味着两个记录类型相交得到的共同子类型，拥有它们的一切属性。而子类型中名字重复的属性，它们的类型将两两相交，以致于能同时向下兼容两个超类型的对应属性。
 
 在文档对交叉类型的[介绍](https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types)中，运算符 `&` 本来就是用于组合多个记录类型。
 
-我们可以看一个简单的例子：
+如下：
 ```typescript
 type Chimera = { a: unknown; b: string } & { a: number };
 
 declare let foo: { a: number; b: string };
 declare let bar: Chimera;
 
-foo = bar;
 bar = foo;
+foo = bar;
 ```
 - `Chimera` 拥有 `{ a: unknown; b: string }` 和 `{ a: number }` 的一切属性 `a` 和 `b` 。
 - 同名属性 `a` 的类型由 `unknown` 和 `number` 两两相交而得。
@@ -357,9 +364,9 @@ bar = foo;
 
 #### `{}`
 
-`{}` 是一个没有任何属性的组合，显然他的类型会被任何记录类型向下兼容，是所有记录类型的超类型。
+`{}` 是一个没有任何属性的组合，显然他的类型会被任何记录类型向下兼容，是任何记录类型的超类型。
 
-举一些简单的例子：
+如下：
 ```typescript
 declare let foo: { a: number };
 declare let bar: { b: string };
@@ -367,14 +374,11 @@ declare let baz: {};
 
 baz = foo;
 baz = bar;
-
-foo = baz; // 不能向下兼容，报错了
-bar = baz; // 不能向下兼容，报错了
 ```
 
 特别的，JavaScript 里非 `null` / `undefined` 的值，都能像 JavaScript 对象那样访问属性。反映在 TypeScript 中，类型 `{}` 是非 `null` / `undefined` 值类型的超类型。
 
-举一些简单的例子：
+如下：
 ```typescript
 type foo = {} & null; // type foo = never
 type bar = {} & undefined; // type bar = never
@@ -407,3 +411,101 @@ foo = bar; // 不能向下兼容，报错了
 特别的 `unknown` 是任何类型的超类型，`unknown[]` 即是任何数组类型的超类型。
 
 ![img](./5-x.svg)
+
+### 元组类型
+
+元组通过排列顺序输出属性。直观上，两个元组类型若是存在向下兼容关系：
+- 子类型的属性排列结构与超类型完全对应。
+- 子类型与超类型排列对应的属性，其类型一一向下兼容。
+
+如下：
+```typescript
+declare let foo: [number, string];
+declare let bar: [number];
+declare let baz: [unknown];
+
+bar = foo; // 不能向下兼容，报错了
+baz = bar;
+
+foo = bar; // 不能向下兼容，报错了
+bar = baz; // 不能向下兼容，报错了
+```
+- `[number, string]` 和 `[number]` 的属性排列结构不同，因此不能向下兼容。
+- `[number]` 和 `[unknown]` 是相同的排列，`number` 向下兼容排列对应的 `unknown` ，因此 `[number]` 向下兼容 `[unknown]` 。
+
+相关维恩图：
+
+![img](./6-x.svg)
+
+#### rest
+
+元组类型支持 rest 表达式，存在包含关系的两个元组类型，其属性数量不一定是相等的。
+
+如下：
+```typescript
+declare const foo: [number, boolean, string];
+declare const bar: [number, string];
+declare const baz: [string];
+declare let qux: [...unknown[], string];
+
+qux = foo;
+qux = bar;
+qux = baz;
+```
+- `[number, boolean, string]` ，`[number, string]` 和 `[string]` 之间并不存在包含关系。
+- 但是他们都向下兼容 `[...unknown[], string]` 。而 `[...unknown[], string]` 并没有固定的属性数量。
+
+#### 元组类型的交集
+
+属性的排列结构显然是相斥的，而结构不同的两个元组类型的交集确实是 `never` ，是空集。如果结构相同的两个元组类型相交，每个对应的属性类型将两两相交，以致于能同时向下兼容两个超类型的对应属性。
+
+如下：
+```typescript
+type Chimera1 = [number, string] & [unknown]; // Chimera = never
+type Chimera2 = [number] & [unknown];
+
+declare let foo: Chimera2;
+declare let bar: [number];
+
+bar = foo;
+foo = bar;
+```
+- `[number, string]` 与 `[unknown]` 不相交，排列结构相斥。
+- `[number] & [unknown]` 等同于 `[number]` 。
+
+#### `[]`
+
+`[]` 是一个没有任何属性的排列，与记录类型的共同超类型 `{}` 不同，元组类型的共同超类型不是 `[]` 。元组类型的共同超类型应该是 `[...unknown[]]` ，简化可得 `unknown[]` 。
+
+如下：
+```typescript
+declare let foo: [number, string];
+declare let bar: [number];
+declare let baz: unknown[];
+
+baz = foo;
+baz = bar;
+```
+
+## extends
+
+在 TypeScript 中，有好几种表达式使用了 `extends` 这个关键字，而且具体作用各不相同。但他们都有相似的地方，如果 `extends` 左右两边都是类型，左边的类型将向下兼容右边的类型。
+
+### 泛型约束
+
+在泛型函数或泛型类型中，泛型参数列表中的 `extends` 可以约束泛型参数的类型，使得输出到泛型参数的类型必须向下兼容 `extends` 所约束的类型。这种约束被称为[泛型约束](https://www.typescriptlang.org/docs/handbook/2/generics.html#generic-constraints)。
+
+如下：
+```typescript
+declare const foo: { a: number; b: string };
+
+function bar<T extends { a: number }>(x: T): void {
+  const baz: number = x.a;
+}
+
+bar(foo);
+```
+- 上文中的泛型约束是，输出到 `T` 的类型必须向下兼容 `{ a: number }` 。
+- `{ a: number; b: string }` 向下兼容 `{ a: number }` ，因此实参 `bar` 的类型向下兼容形参 `x` 的类型 `T` ，可以合法传入。
+- 在函数定义的上下文中，`T` 向下兼容 `{ a: number }` ，因此类型是 `T` 的参数 `x` 可以合法输出属性 `a` 。
+
