@@ -24,15 +24,15 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.4142136"
-     inkscape:cx="410.47549"
-     inkscape:cy="360.97801"
+     inkscape:zoom="1"
+     inkscape:cx="380.5"
+     inkscape:cy="365.5"
      inkscape:window-width="1920"
      inkscape:window-height="1001"
      inkscape:window-x="-9"
      inkscape:window-y="-9"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer3" />
+     inkscape:current-layer="layer1" />
   <defs
      id="defs2090">
     <rect
@@ -47,82 +47,59 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:none;stroke:#000000;stroke-width:0.527813"
+       style="fill:none;stroke:#000000;stroke-width:0.63944;stroke-dasharray:none"
        id="rect6525"
-       width="127.47218"
-       height="127.47219"
-       x="35.353951"
-       y="24.722399" />
+       width="127.36057"
+       height="127.36056"
+       x="35.319721"
+       y="24.319719" />
     <text
        xml:space="preserve"
-       style="font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';fill:#000000;stroke:#000000;stroke-width:0.264999"
-       x="92.483292"
-       y="31.220833"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:monospace;-inkscape-font-specification:'monospace, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke:#000000;stroke-width:0.264999"
+       x="84.220535"
+       y="42.633244"
        id="text6587"><tspan
          sodipodi:role="line"
          id="tspan6585"
-         style="stroke-width:0.265"
-         x="92.483292"
-         y="31.220833">unknown</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:monospace;-inkscape-font-specification:'monospace, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+         x="84.220535"
+         y="42.633244">unknown</tspan></text>
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="图层 2">
-    <ellipse
-       style="fill:none;stroke:#800000;stroke-width:0.362291"
+    <circle
+       style="fill:none;stroke:#800000;stroke-width:0.637235;stroke-dasharray:none"
        id="path6642-7"
-       cx="86.493752"
-       cy="90.310577"
-       rx="31.818855"
-       ry="31.818853" />
-    <ellipse
-       style="fill:none;stroke:#808000;stroke-width:0.362291"
+       cx="83"
+       cy="88"
+       r="31.681383" />
+    <circle
+       style="fill:none;stroke:#808000;stroke-width:0.637235;stroke-dasharray:none"
        id="path6642-6"
-       cx="118.49375"
-       cy="90.310577"
-       rx="31.818855"
-       ry="31.818853" />
+       cx="115"
+       cy="88"
+       r="31.681383" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#800000;stroke:#800000;stroke-width:0.264999"
-       x="71.381989"
-       y="72.495827"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:monospace;-inkscape-font-specification:'monospace, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#800000;stroke:#800000;stroke-width:0.264999"
+       x="58.772141"
+       y="74.758293"
        id="text6733"><tspan
          sodipodi:role="line"
-         id="tspan7517"
-         x="71.381989"
-         y="72.495827">string</tspan></text>
+         id="tspan1117"
+         x="58.772141"
+         y="74.758293">number</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#800000;stroke:#808000;stroke-width:0.264999"
-       x="117.23798"
-       y="73.202759"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:monospace;-inkscape-font-specification:'monospace, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#800000;stroke:#808000;stroke-width:0.264999"
+       x="113.81854"
+       y="74.077888"
        id="text6733-4"><tspan
          sodipodi:role="line"
-         id="tspan7546"
-         x="117.23798"
-         y="73.202759">number</tspan></text>
-    <path
-       style="fill:none;stroke:#008000;stroke-width:1.368189;stroke-dasharray:none"
-       d="m 387.16996,237.95593 c -24.69815,14.62733 -44.04393,38.18578 -52.99487,65.51245 -10.25058,30.3558 -7.51961,64.76739 7.38288,93.12873 10.2712,19.91733 26.34307,36.69572 45.61821,48.09019 5.50482,-2.68597 10.50432,-6.64813 15.32847,-10.50233 21.8386,-17.5806 37.05406,-43.10483 42.10085,-70.68583 2.44801,-11.73534 2.25433,-23.8326 1.35031,-35.72614 -3.17426,-26.8445 -15.3477,-52.68789 -34.84192,-71.53568 -7.09269,-6.99811 -14.97397,-13.22415 -23.5662,-18.28346 l -0.35355,0.002 z"
-       id="path9487"
-       transform="scale(0.26458333)" />
-    <text
-       xml:space="preserve"
-       style="font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';fill:#008000;stroke:#008000;stroke-width:0.362;stroke-dasharray:none"
-       x="94.666862"
-       y="84.938255"
-       id="text9855"><tspan
-         sodipodi:role="line"
-         id="tspan9853"
-         style="stroke-width:0.362"
-         x="94.666862"
-         y="84.938255">never</tspan><tspan
-         sodipodi:role="line"
-         style="stroke-width:0.362"
-         x="94.666862"
-         y="91.993805"
-         id="tspan9857" /></text>
+         id="tspan1119"
+         x="113.81854"
+         y="74.077888">string</tspan></text>
   </g>
 </svg>
