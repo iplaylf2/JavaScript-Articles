@@ -1,3 +1,23 @@
+- [类型兼容](#类型兼容)
+  - [向下兼容](#向下兼容)
+- [集合的角度](#集合的角度)
+  - [维恩图](#维恩图)
+  - [认识 `as` 、`extends` 、`infer`](#认识-as-extends-infer)
+- [类型断言 `as`](#类型断言-as)
+  - [充分重叠](#充分重叠)
+  - [`unknown`](#unknown)
+  - [`number | string`](#number--string)
+  - [`number & string`](#number--string-1)
+  - [`as` 的成立条件](#as-的成立条件)
+  - [`never`](#never)
+  - [`&` 和 `|` 以及超集和子集](#-和--以及超集和子集)
+  - [`any`](#any)
+- [结构化类型](#结构化类型)
+  - [记录类型](#记录类型)
+    - [记录类型的交集](#记录类型的交集)
+    - [`{}`](#)
+  - [数组类型](#数组类型)
+
 ## 类型兼容
 
 在 TypeScript 编程中，类型兼容是最基础的一道检查机制，一旦代码中出现类型不兼容的表达式，编译就会失败。
@@ -51,7 +71,7 @@ function mysteryBox(): number {
 
 本文将从类型兼容的角度，辅以集合的概念，重新认识 `as` 、`extends` 、`infer` 等 TypeScript 符号。
 
-## 类型断言 as
+## 类型断言 `as`
 
 不知道在阅读的你是否有留意过 `as` 的报错，里面提到过“两种类型不能充分重叠……”如下：
 ```typescript
@@ -70,7 +90,7 @@ function mysteryBox(): number {
 
 显然，在我们的编程经验中， `number` 和 `string` 不是充分重叠的。这是导致 `233 as string` 报错的直接原因。
 
-### unknown
+### `unknown`
 
 同时，上文的报错提示我们，“如果这是有意的，请先将表达式转换为 "unknown"。”
 ```typescript
@@ -93,7 +113,7 @@ function mysteryBox(): number {
 - `number` 是 `unknown` 的子集，与 `unknown` 充分重叠。
 - `string` 是 `unknown` 的子集，与 `unknown` 充分重叠。
 
-### number | string
+### `number | string`
 
 如果将 `number` 和 `string` 的合集视为一个类型，该类型也能与 `number` 或 `string` 充分重叠。那么，该类型能否代替 `233 as unknown as string` 中的 `unknown` 发挥作用？在此之前，如何构造出这个类型呢？
 
@@ -118,7 +138,7 @@ const zoo: string = baz; // 不能向下兼容，报错了
 
 由此可得 ~~（cai）~~ ，**`|` 运算符可以联合两个类型，得到他们的合集。** 同时也是他们的共同超类型。而且，在 `as` 表达式中，只要一边是超类型就能使其合法。
 
-### number & string
+### `number & string`
 
 同样的，如果将 `number` 和 `string` 的交集视为一个类型，该类型也能与 `number` 或 `string` 充分重叠。那么，该类型能否代替 `233 as unknown as string` 中的 `unknown` 发挥作用？在此之前，如何构造出这个类型呢？
 
@@ -143,7 +163,7 @@ const zoo: string = baz;
 
 由此可得，**`&` 运算符可以交叉两个类型，得到他们的交集。** 同时也是他们的共同子类型。而且，在 `as` 表达式中，只要一边是子类型就能使其合法。
 
-### as 的成立条件
+### `as` 的成立条件
 
 类型断言（ `as` ）的[文档](https://www.typescriptlang.org/zh/docs/handbook/2/everyday-types.html#type-assertions)有那么一句话：
 
@@ -159,7 +179,7 @@ const zoo: string = baz;
 
 由此可得，`as` 运算符两边的类型，只有在它们存在集合间的包含关系才能够成立。
 
-### never
+### `never`
 
 在 `type Chimera = number & string` 的举例中，TypeScript 会将其推导成 `type Chimera = never` ：
 - `number` 和 `string` 的交集是 `never` ！？
@@ -176,7 +196,7 @@ const zoo: string = baz;
 - `number` & `string` 为 `never` 。
 - `number` 和 `string` 都是 `unknown` 的子集。
 
-### & 和 | 以及超集和子集
+### `&` 和 `|` 以及超集和子集
 
 如果我们让 `never` 和 `number` 再次相交，如同一个集合和它的超集相交。根据集合的性质，得到的交集就会是该集合本身。如下：
 ```typescript
@@ -202,7 +222,7 @@ type bar = unknown & string; // type bar = string
 
 如果结合了上文维恩图的包含关系，那么就能更容易理解 `&` 和 `|` 在类型上的运算。
 
-### any
+### `any`
 
 前面提及过任何类型的超集 `unknown` 和任何类型的子集 `never` ，那另一个跟任何类型密切相关的 `any` 呢？如何从集合的角度去看待他与其他类型的包含关系。
 
@@ -304,7 +324,7 @@ foo = bar = baz; // 不能向下兼容，报错了
 ```
 - `{ a: number }` 拥有 `{ a: unknown }` 同名属性 `a` ，同名属性类型 `number` 向下兼容 `unknown` ，因此 `{ a: number }` 向下兼容 `{ a: unknown }` 。
 - `{ a: number; b: string }` 拥有 `{ a: number }` 的同名属性 `a` ，同名属性类型相同，类型相同将相互向下兼容。因此 `{ a: number; b: string }` 向下兼容 `{ a: number }` 。
-- 反之，则无法成立。
+- 反之则不能向下兼容。
 
 #### 记录类型的交集
 
@@ -319,8 +339,8 @@ type Chimera = { a: unknown; b: string } & { a: number };
 declare let foo: { a: number; b: string };
 declare let bar: Chimera;
 
-foo = bar; // 向下兼容
-bar = foo; // 向下兼容
+foo = bar;
+bar = foo;
 ```
 - `Chimera` 拥有 `{ a: unknown; b: string }` 和 `{ a: number }` 的一切属性 `a` 和 `b` 。
 - 同名属性 `a` 的类型由 `unknown` 和 `number` 两两相交而得。
@@ -335,7 +355,7 @@ bar = foo; // 向下兼容
 ![img](./3-x.svg)
 ![img](./4-x.svg)
 
-#### {}
+#### `{}`
 
 `{}` 是一个没有任何属性的组合，显然他的类型会被任何记录类型向下兼容，是所有记录类型的超类型。
 
@@ -370,3 +390,20 @@ type qux = {} & string; // type qux = string
 有两个问题留给大家思考：
 1. JavaScript 的 `number` 经过装箱成为 `Number` 对象后，能表现出 JavaScript 对象的性质。请问，在 TypeScript 中 `number` 和 `Number` 的兼容关系是怎样的？
 2. 如何定义出一个“空对象”类型，使得任何带有属性的记录类型不能向下兼容它。
+
+### 数组类型
+
+数组对外输出元素，数组类型的向下兼容体现在元素类型的向下兼容。如下：
+```typescript
+declare let foo: number[];
+declare let bar: unknown[];
+
+bar = foo;
+foo = bar; // 不能向下兼容，报错了
+```
+- `number` 向下兼容 `unknown` ，`number[]` 便向下兼容 `unknown[]` 。
+- 反之则不能向下兼容。
+
+特别的 `unknown` 是任何类型的超类型，`unknown[]` 即是任何数组类型的超类型。
+
+![img](./5-x.svg)
