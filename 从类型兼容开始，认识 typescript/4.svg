@@ -24,9 +24,9 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.4142136"
-     inkscape:cx="411.18258"
-     inkscape:cy="361.68511"
+     inkscape:zoom="1"
+     inkscape:cx="399.5"
+     inkscape:cy="330.5"
      inkscape:window-width="1920"
      inkscape:window-height="1001"
      inkscape:window-x="-9"
@@ -46,55 +46,57 @@
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="图层 2">
-    <ellipse
-       style="fill:none;stroke:#800000;stroke-width:0.362291"
+    <circle
+       style="fill:none;stroke:#800000;stroke-width:0.637235;stroke-dasharray:none"
        id="path6642-7"
-       cx="86.493752"
-       cy="90.310577"
-       rx="31.818855"
-       ry="31.818853" />
-    <ellipse
-       style="fill:none;stroke:#808000;stroke-width:0.362291"
+       cx="83"
+       cy="88"
+       r="31.681383" />
+    <circle
+       style="fill:none;stroke:#808000;stroke-width:0.637235;stroke-dasharray:none"
        id="path6642-6"
-       cx="118.49375"
-       cy="90.310577"
-       rx="31.818855"
-       ry="31.818853" />
-    <path
-       style="fill:none;stroke:#008000;stroke-width:1.368189;stroke-dasharray:none"
-       d="m 387.16996,237.95593 c -24.69815,14.62733 -44.04393,38.18578 -52.99487,65.51245 -10.25058,30.3558 -7.51961,64.76739 7.38288,93.12873 10.2712,19.91733 26.34307,36.69572 45.61821,48.09019 5.50482,-2.68597 10.50432,-6.64813 15.32847,-10.50233 21.8386,-17.5806 37.05406,-43.10483 42.10085,-70.68583 2.44801,-11.73534 2.25433,-23.8326 1.35031,-35.72614 -3.17426,-26.8445 -15.3477,-52.68789 -34.84192,-71.53568 -7.09269,-6.99811 -14.97397,-13.22415 -23.5662,-18.28346 l -0.35355,0.002 z"
-       id="path9487"
-       transform="scale(0.26458333)" />
+       cx="115"
+       cy="88"
+       r="31.681383" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#800000;stroke:#800000;stroke-width:0.264999"
-       x="63.150085"
-       y="73.668533"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:monospace;-inkscape-font-specification:'monospace, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#800000;stroke:#800000;stroke-width:0.264999"
+       x="42.10339"
+       y="74.263924"
        id="text6733"><tspan
          sodipodi:role="line"
-         id="tspan842"
-         x="63.150085"
-         y="73.668533">{ a: number }</tspan></text>
+         id="tspan8245"
+         x="42.10339"
+         y="74.263924">{a: number}</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#800000;stroke:#808000;stroke-width:0.264999"
-       x="111.43823"
-       y="73.435646"
-       id="text6733-4"
-       inkscape:label="text6733-4"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:monospace;-inkscape-font-specification:'monospace, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#800000;stroke:#808000;stroke-width:0.264999"
+       x="105.08729"
+       y="74.077888"
+       id="text6733-4"><tspan
          sodipodi:role="line"
-         id="tspan840"
-         x="111.43823"
-         y="73.435646">{ b: string }</tspan></text>
+         id="tspan8247"
+         x="105.08729"
+         y="74.077888">{b: string}</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="图层 3"
+     style="stroke:#008000">
+    <path
+       style="fill:none;stroke:#008000;stroke-width:0.652157;stroke-dasharray:none"
+       d="M 98.911039,60.549046 C 90.45457,65.796132 84.322732,74.88497 83.505838,84.87483 c -1.212467,10.936853 3.742783,22.28204 12.689994,28.75587 0.937568,0.56066 1.799464,1.60474 2.863148,1.80838 10.61821,-6.11441 16.81355,-18.738321 15.42209,-30.84093 -0.93532,-9.873684 -6.99427,-18.954182 -15.463831,-24.051738 z"
+       id="path6351" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;font-family:'Microsoft YaHei UI';-inkscape-font-specification:'Microsoft YaHei UI, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#008000;stroke:#008000;stroke-width:0.362;stroke-dasharray:none"
-       x="72.555626"
-       y="91.857689"
-       id="text9855"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:monospace;-inkscape-font-specification:'monospace, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#008000;stroke:#008000;stroke-width:0.265;stroke-dasharray:none"
+       x="52.434341"
+       y="89.497002"
+       id="text6459"><tspan
          sodipodi:role="line"
-         id="tspan838"
-         x="72.555626"
-         y="91.857689">{ a: number; b: string }</tspan></text>
+         id="tspan8249"
+         x="52.434341"
+         y="89.497002">{a: number; b: string}</tspan></text>
   </g>
 </svg>

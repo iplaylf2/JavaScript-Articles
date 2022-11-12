@@ -330,6 +330,11 @@ bar = foo; // 向下兼容
 
 因此 `{ a: unknown; b: string } & { a: number }` 等同于 `{ a: number; b: string }` 。
 
+相关维恩图：
+
+![img](./3-x.svg)
+![img](./4-x.svg)
+
 #### {}
 
 `{}` 是一个没有任何属性的组合，显然他的类型会被任何记录类型向下兼容，是所有记录类型的超类型。
@@ -347,7 +352,7 @@ foo = baz; // 不能向下兼容，报错了
 bar = baz; // 不能向下兼容，报错了
 ```
 
-特别的，JavaScript 里非 `null` / `undefined` 的值，都能像 JavaScript 对象那样访问属性，如同 TypeScript 的记录类型。反映在 TypeScript 中，类型 `{}` 是非 `null` / `undefined` 值类型的超类型。
+特别的，JavaScript 里非 `null` / `undefined` 的值，都能像 JavaScript 对象那样访问属性。反映在 TypeScript 中，类型 `{}` 是非 `null` / `undefined` 值类型的超类型。
 
 举一些简单的例子：
 ```typescript
@@ -360,7 +365,7 @@ type qux = {} & string; // type qux = string
 - 通过求交集的方式，得出 `{}` 与 `null` / `undefined` 没有包含关系。
 - 通过求交集的方式，得出 `{}` 是 `number` / `string` 的超集、超类型。
 
-*（ typescript-eslint 认为 `{}` 代表着非空的值，不是大众预期的“空对象”，从而[不推荐](https://github.com/typescript-eslint/typescript-eslint/issues/2063#issuecomment-675156492)使用。）*
+*（ typescript-eslint 认为 `{}` 代表着非空的值，不是大众预期的“空对象”，从而[不推荐使用](https://github.com/typescript-eslint/typescript-eslint/issues/2063#issuecomment-675156492)。）*
 
 有两个问题留给大家思考：
 1. JavaScript 的 `number` 经过装箱成为 `Number` 对象后，能表现出 JavaScript 对象的性质。请问，在 TypeScript 中 `number` 和 `Number` 的兼容关系是怎样的？
