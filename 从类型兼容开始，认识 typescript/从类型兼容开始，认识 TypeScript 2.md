@@ -30,6 +30,9 @@
   - [`infer ... extends ...`](#infer--extends-)
 - [泛型类型与类型兼容](#泛型类型与类型兼容)
 - [函数类型与类型兼容](#函数类型与类型兼容)
+  - [函数类型的类型参数](#函数类型的类型参数)
+  - [逆变](#逆变)
+  - [协变](#协变)
 
 ## 类型兼容
 
@@ -49,7 +52,7 @@ const foo: 233 = 233;
 log(foo /*实参*/);
 ```
 
-- 函数表达式中，输出的返回值类型需要兼容函数返回类型。如下：
+- 函数表达式中，函数体输出的类型需要兼容返回值类型。如下：
 ```typescript
 function mysteryBox(): number {
   const foo: 233 = 233;
@@ -322,7 +325,7 @@ foo = (x) => console.log(x);
 
 ### 记录类型
 
-记录通过属性名对外输出属性。直观上，两个记录类型若是存在向下兼容关系：
+记录通过属性名对外输出属性。直观上，两个记录类型若要存在兼容关系：
 - 子类型拥有超类型的一切同名属性。
 - 子类型的同名属性一一向下兼容超类型的同名属性。
 
@@ -421,7 +424,7 @@ foo = bar; // 不能向下兼容，报错了
 
 ### 元组类型
 
-元组通过排列顺序输出属性。直观上，两个元组类型若是存在向下兼容关系：
+元组通过排列顺序输出属性。直观上，两个元组类型若要存在兼容关系：
 - 子类型的属性排列结构与超类型完全对应。
 - 子类型与超类型排列对应的属性，其类型一一向下兼容。
 
@@ -459,7 +462,7 @@ qux = foo;
 qux = bar;
 qux = baz;
 ```
-- `[number, boolean, string]` ，`[number, string]` 和 `[string]` 之间并不存在包含关系。
+- `[number, boolean, string]` ，`[number, string]` 和 `[string]` 之间并不存在兼容关系。
 - 但是他们都向下兼容 `[...unknown[], string]` 。而 `[...unknown[], string]` 并没有固定的属性数量。
 
 #### 元组类型的交集
@@ -602,7 +605,7 @@ type Qux = BelongToNumber2<1 | 2>; // type Qux = true
 
 条件类型最神奇的组件就是 `infer` ，他的语义是推断，能帮助我们推断出结构化类型的组成元素的类型。
 
-`infer` 只能出现在*条件类型表达式的超类型*上，能作为超类型的字面表达式中的类型，并借此推断子类型的字面表达式中对应的类型。当条件类型表达式的向下兼容关系成立，就能在其第一条分支上使用推断得到的类型。
+`infer` 只能出现在*条件类型表达式的超类型*上，能作为超类型的字面表达式中的类型，并借此推断子类型的字面表达式中对应的类型。当条件类型表达式的兼容关系成立，就能在其第一条分支上使用推断得到的类型。
 
 如下：
 ```typescript
@@ -669,7 +672,7 @@ bar = baz; // 不能向下兼容，报错了
 
 可以举一个反例，使得 `T<number>` 不能向下兼容 `T<unknown>` 。如下：
 ```typescript
-type MysteryBox<T> = { trap: (x: T) => unknown };
+type MysteryBox<T> = { func: (x: T) => unknown };
 
 declare let foo: MysteryBox<number>;
 declare let bar: MysteryBox<unknown>;
@@ -680,4 +683,61 @@ foo = bar;
 - `MysteryBox<number>` 不能向下兼容 `MysteryBox<unknown>` ，是因为 `(x: number) => unknown` 不能向下兼容 `(x: unknown) => unknown` 。
 - `MysteryBox<unknown>` 向下兼容 `MysteryBox<number>` ，是因为 `(x: unknown) => unknown` 向下兼容 `(x: number) => unknown` 。
 
+可见泛型参数之间能够向下兼容，不代表泛型类型计算出来的类型能够向下兼容。
+
 ## 函数类型与类型兼容
+
+函数类型的向下兼容似乎有些奇怪呢。仅从函数参数来看，上文参数 `x` 的类型 `unknown` 能兼容对应位置的 `number` 。这是因为该类型参数是逆变的。
+
+### 函数类型的类型参数
+
+类型参数是抽象的，当我们需要分析结构化类型中某个元素的类型，可以将该类型当作是一个参数，名曰类型参数。就像泛型参数做的那样。
+
+函数类型的类型参数可以分为两种，一种位于函数参数列表作为参数类型，一种位于返回值签名作为返回值类型。
+
+用泛型类型辅助说明会更清晰，如下：
+```typescript
+type MysteryBox<In, Out> = (x: In) => Out;
+
+type Foo = MysteryBox<number, unknown>; // type Foo = (x: number) => unknown
+```
+- `MysteryBox<In, Out>` 的泛型参数 `In` 对应位于函数参数列表的类型参数；泛型参数 `Out` 对应位于返回值签名的类型参数。
+- 与 `MysteryBox<In, Out>` 对应的 `(x: number) => unknown` ，位于函数参数列表的类型参数的实际类型是 `number`；位于返回值签名的类型参数的实际类型是 `unknown` 。
+
+### 逆变
+
+在函数类型中，位于函数参数列表的类型参数，他的类型分配方向，与函数类型本身的类型分配方向相反，这种表现被称为是逆变的。
+
+如下：
+```typescript
+declare let foo: (x: unknown) => unknown;
+declare let bar: (x: number) => unknown;
+declare let baz: 233;
+
+bar = foo;
+
+bar(baz);
+```
+- 沿着参数输入的方向，参数类型 `233` 分配给 `number` 分配给 `unknown` 。类型的合法分配依旧要满足向下兼容。
+- 沿着函数赋值的方向，函数类型 `(x: unknown) => unknown` 分配给 `(x: number) => unknown` 。合法的分配，表现出了向下兼容。
+
+如此看来，类型依旧是向下兼容的。只不过，位于函数参数列表的类型参数是逆变的，随着函数类型的分配方向，他允许向着子类型的方向进行转换。
+
+### 协变
+
+在函数类型中，位于返回值签名的类型参数，他的类型分配方向，与函数类型本身的类型分配方向一致，这种表现被称为是协变的。
+
+如下：
+```typescript
+declare let foo: () => 233;
+declare let bar: () => number;
+declare let baz: unknown;
+
+bar = foo;
+baz = bar();
+```
+- 沿着返回值输出的方向，参数类型 `233` 分配给 `number` 分配给 `unknown` 。类型分配满足向下兼容。
+- 沿着函数赋值的方向，函数类型 `() => 233` 分配给 `() => number` 。合法的分配，表现出了向下兼容。
+
+直观的，位于返回值签名的类型参数是协变的，随着函数类型的分配方向，他允许向着超类型的方向进行转换。
+
