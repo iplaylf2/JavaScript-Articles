@@ -601,24 +601,35 @@ type Qux = BelongToNumber2<1 | 2>; // type Qux = true
 
 条件类型最神奇的组件就是 `infer` ，他的语义是推断，能帮助我们推断出结构化类型的组成元素的类型。
 
-`infer` 只能出现在*条件类型表达式的超类型*上，能替代超类型的字面表达式中的类型，作为想要推断的部分。当条件类型表达式的向下兼容关系成立，就能在其第一条分支上使用推断得到的类型。
+`infer` 只能出现在*条件类型表达式的超类型*上，能作为超类型的字面表达式中的类型，并借此推断子类型的字面表达式中对应的类型。当条件类型表达式的向下兼容关系成立，就能在其第一条分支上使用推断得到的类型。
 
 如下：
 ```typescript
-type Foo<T> = T extends { a: infer X } ? X : never;
-type foo = Foo<{ a: number; b: string }>; // type foo = number
+type Orthrus1<T> = T extends { a: infer X } ? X : never;
+type Foo = Orthrus1<{ a: number; b: string }>; // type Foo = number
+type Bar = Orthrus1<{ b: string }>; // type Bar = never
 
-type Bar<T> = T extends [infer X, string] ? X : never;
-type bar = Bar<[number, string]>; // type bar = number
+type Orthrus2<T> = T extends [infer X, string] ? X : never;
+type Baz = Orthrus2<[number, string]>; // type Baz = number
+type Qux = Orthrus2<[number]>; // type Qux = never
 ```
+在条件类型 `Orthrus1<T>` 中：
+- `T extends { a: infer X }` 表示，当 `T` 是 `{ a: unknown}` 的子类型时，`X` 将被推断为类型 `T` 字面表达式中所对应的属性 `a` 的类型。
+- 当输出到泛型参数 `T` 的类型是 `{ a: number; b: string }` 时，`X` 被推断为 `{ a: number; b: string }` 所对应的属性 `a` 的类型 `number` 。同时也是满足了条件类型的断言，计算并返回第一条分支。
+- 当输出到泛型参数 `T` 的类型是 `{ b: string }` 时，`{ b:string}` 不能向下兼容 `{ a: unknown}` 。条件类型表达式的断言不成立，因此直接计算并返回第二条分支。
+
+在条件类型 `Orthrus2<T>` 中：
+- `T extends [infer X, string]` 表示，当 `T` 是 `[unknown, string]` 的子类型时，`X` 将被推断为类型 `T` 字面表达式中所对应的位置的类型。
+- 当输出到泛型参数 `T` 的类型是 `[number, string]` 时，`X` 被推断为 `[number, string]` 所对应的位置的类型 `number` 。同时也是满足了条件类型的断言，计算并返回第一条分支。
+- 当输出到泛型参数 `T` 的类型是 `[number]` 时，`[number]` 不能向下兼容 `[unknown, string]` 。条件类型表达式的断言不成立，因此直接计算并返回第二条分支。
 
 当你意识到结构化类型的字面表达是条件类型中的构成之一，意识到 `infer` 推断的是结构化类型的字面表达中被其取代的类型，就能迅速地掌握 `infer` 这个关键字。
 
 ### `infer ... extends ...`
 
-我们不难看出用 `infer X` 推断类型的时候，其实还隐含了一条信息，就是 `X extends unknown` 的泛型约束。只有 `X` 是 `unknown` 的子类型而不是别的具体类型的子类型，`X` 才能替代条件类型表达式的超类型的字面表达式中的任意类型。
+我们不难看出用 `infer X` 推断类型的时候，其实还隐含了一条泛型约束，那就是 `X extends unknown` 。只有 `X` 是 `unknown` 的子类型而不是别的具体类型的子类型，`X` 才能替代条件类型表达式的超类型的字面表达式中的任意类型。
 
-而 `infer` 确实支持后缀的泛型约束。
+而 `infer` 也支持显式的泛型约束。不仅约束条件类型表达式的向下兼容断言，还为当前上下文提供被推断类型的超类型信息。
 
 如下：
 ```typescript
@@ -628,7 +639,11 @@ type Foo = Orthrus<{ a: number; b: string }>; // type Foo = number
 type Bar = Orthrus<{ a: boolean; b: string }>; // type Bar = never
 ```
 - 条件类型表达式的超类型是 `{ a: infer X extends number }` 。意味着，子类型部分需要向下兼容 `{ a: number }` ，才能完成 `infer` 的推断，才能计算并返回第一条分支。
-- `{ a: number; b: string }` 向下兼容 `{ a: number }` ，因此 `X` 推断为 `{ a: number; b: string }` 中属性 `a` 的类型 `number` ，然后在第一条分支返回 `X` 作为结果，最后 `Foo` 得到 `number` 。
+- `{ a: number; b: string }` 向下兼容 `{ a: number }` ，因此 `X` 被推断为 `{ a: number; b: string }` 中属性 `a` 的类型 `number` ，然后在第一条分支返回 `X` 作为结果，最后 `Foo` 得到 `number` 。
 - `{ a: boolean; b: string }` 不能向下兼容 `{ a: number }`，因此在第二条分支返回 `never` 作为结果，最后 `Bar` 得到 `never` 。
+
+> 还为当前上下文提供被推断类型的超类型信息。
+
+这属于技巧类的应用，此处不赘述。
 
 ## 泛型类型的类型兼容
