@@ -28,7 +28,7 @@
   - [抑制条件类型的分配律](#抑制条件类型的分配律)
   - [`infer`](#infer)
   - [`infer ... extends ...`](#infer--extends-)
-- [泛型类型的类型兼容](#泛型类型的类型兼容)
+- [泛型类型与类型兼容](#泛型类型与类型兼容)
 
 ## 类型兼容
 
@@ -512,7 +512,7 @@ function bar<T extends { a: number }>(x: T): void {
 bar(foo);
 ```
 - 上文中的泛型约束是 `T extends { a: number }` ，输出到 `T` 的类型必须向下兼容 `{ a: number }` 。
-- `{ a: number; b: string }` 向下兼容 `{ a: number }` ，因此实参 `bar` 的类型向下兼容形参 `x` 的类型 `T` ，可以合法传入。
+- `{ a: number; b: string }` 向下兼容 `{ a: number }` ，因此实参 `bar` 的类型向下兼容形参 `x` 的类型 `T` ，可以合法输入。
 - 因为泛型约束，所以在函数定义的上下文中，`T` 确定向下兼容 `{ a: number }` ，所以类型是 `T` 的参数 `x` 可以合法输出属性 `a` 。
 
 泛型约束除了带来了泛型参数的类型限制，还为当前上下文带来了泛型参数的超类型信息。
@@ -528,7 +528,7 @@ type BelongToNumber<T> = T extends number ? true : false;
 type Foo = BelongToNumber<1>; // type Foo = true
 type Bar = BelongToNumber<string>; // type Bar = false
 ```
-- `BelongToNumber<T>` 就是条件类型，他需要传入泛型参数才能具化成特定的结构化类型。
+- `BelongToNumber<T>` 就是条件类型，他需要输入具体的泛型参数才能具化成特定的结构化类型。
 - 类型 `1` 向下兼容 `number` ，因此 `BelongToNumber<1>` 得到第一条分支的结果 `true`。
 - 类型 `string` 不向下兼容 `number` ，因此 `BelongToNumber<string>` 得到第二条分支的结果 `false`。
 
@@ -536,7 +536,7 @@ type Bar = BelongToNumber<string>; // type Bar = false
 
 ### 条件类型的分配律
 
-当我们把联合类型作为泛型参数传入条件类型时，只要他的泛型参数直接出现在*条件类型表达式的子类型*上，条件类型就会呈现出[分配律](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types)。
+当我们把联合类型作为泛型参数输入条件类型时，只要他的泛型参数直接出现在*条件类型表达式的子类型*上，条件类型就会呈现出[分配律](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types)。
 
 分配律，简单地说就是，条件类型 `T<A | B>` 会按照 `T<A> | T<B>` 的方式进行解释。
 
@@ -592,7 +592,7 @@ type Baz = BelongToNumber2<1 | string>; // type Baz = false
 type Qux = BelongToNumber2<1 | 2>; // type Qux = true
 ```
 - 泛型参数 `T` 在条件类型表达式的子类型上被构造成其他类型，不再直接出现。
-- 以上条件类型 `BelongToNumber2<T>` 的几种构造方式，都能抑制条件类型的分配律，使其将泛型参数完整地往内传递。
+- 以上条件类型 `BelongToNumber2<T>` 的几种构造方式，都能抑制条件类型的分配律，使其将泛型参数完整地输入。
 - 而改造了子类型部分的类型后，需要对超类型部分进行对应的改造，使其表达出原来的类型兼容关系。
 
 通过构造成元组类型来抑制条件类型的分布律是最简单直接的方式，也是官方文档所推崇的方式。
@@ -646,4 +646,5 @@ type Bar = Orthrus<{ a: boolean; b: string }>; // type Bar = never
 
 这属于技巧类的应用，此处不赘述。
 
-## 泛型类型的类型兼容
+## 泛型类型与类型兼容
+
