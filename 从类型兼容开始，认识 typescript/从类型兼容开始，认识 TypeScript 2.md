@@ -30,9 +30,10 @@
   - [`infer ... extends ...`](#infer--extends-)
 - [泛型类型与类型兼容](#泛型类型与类型兼容)
 - [函数类型与类型兼容](#函数类型与类型兼容)
-  - [函数类型的类型参数](#函数类型的类型参数)
+  - [类型参数](#类型参数)
   - [逆变](#逆变)
   - [协变](#协变)
+  - [不严格的结构化类型](#不严格的结构化类型)
 
 ## 类型兼容
 
@@ -687,9 +688,9 @@ foo = bar;
 
 ## 函数类型与类型兼容
 
-函数类型的向下兼容似乎有些奇怪呢。仅从函数参数来看，上文参数 `x` 的类型 `unknown` 能兼容对应位置的 `number` 。这是因为该类型参数是逆变的。
+函数类型的向下兼容似乎有些奇怪呢。仅从函数参数来看，上文参数 `x` 的类型 `unknown` 能兼容对应位置的 `number` ，不同于向下兼容。这是因为该类型参数是逆变的。
 
-### 函数类型的类型参数
+### 类型参数
 
 类型参数是抽象的，当我们需要分析结构化类型中某个元素的类型，可以将该类型当作是一个参数，名曰类型参数。就像泛型参数做的那样。
 
@@ -721,7 +722,7 @@ bar(baz);
 - 沿着参数输入的方向，参数类型 `233` 分配给 `number` 分配给 `unknown` 。类型的合法分配依旧要满足向下兼容。
 - 沿着函数赋值的方向，函数类型 `(x: unknown) => unknown` 分配给 `(x: number) => unknown` 。合法的分配，表现出了向下兼容。
 
-如此看来，类型依旧是向下兼容的。只不过，位于函数参数列表的类型参数是逆变的，随着函数类型的分配方向，他允许向着子类型的方向进行转换。
+如此看来，类型依旧是向下兼容的。只不过，位于函数参数列表的类型参数是逆变的，随着函数类型的分配方向，他允许向着子类型的方向进行转换/分配。
 
 ### 协变
 
@@ -739,5 +740,50 @@ baz = bar();
 - 沿着返回值输出的方向，参数类型 `233` 分配给 `number` 分配给 `unknown` 。类型分配满足向下兼容。
 - 沿着函数赋值的方向，函数类型 `() => 233` 分配给 `() => number` 。合法的分配，表现出了向下兼容。
 
-直观的，位于返回值签名的类型参数是协变的，随着函数类型的分配方向，他允许向着超类型的方向进行转换。
+直观的，位于返回值签名的类型参数是协变的，随着函数类型的分配方向，他允许向着超类型的方向进行转换/分配。
 
+### 不严格的结构化类型
+
+上文我们谈论过的那些不平坦的结构化类型，如记录类型，数组类型，元组类型。他们的类型参数实际上在上文被认为是协变的。
+
+但这需要一个前提：
+> 结构化类型所表达的值是不可变的、无状态的。
+
+现实世界的 TypeScript 编程，可变的、有状态的结构化类型才是常态，此时的协变会带来隐藏的陷阱。
+
+如下：
+```typescript
+const foo: { x: number } = { x: 233 };
+
+const trap1: { x: unknown } = foo;
+trap1.x = "bad";
+
+foo.x.toPrecision();
+
+// ----
+const bar: number[] = [233];
+
+const trap2: unknown[] = bar;
+trap2.push("bad");
+
+bar.pop()!.toPrecision();
+
+// ----
+const baz: [number] = [233];
+
+const trap3: [unknown] = baz;
+trap3[0] = "bad";
+
+baz[0].toPrecision();
+```
+[Playground Link](https://www.typescriptlang.org/play?#code/MYewdgzgLgBAZiEAuGBvGAPFYCuBbAIwFMAnGAXxgF41MUAmAZkYoG4BYAKC9ElihIBDAA4BGFOiwwcYANZgQAdzAVq8RB04CRogHQY1AIgKCAJoc1cEIfbqggACiSLAAlhFfgAFAEpLnAHoAmABaMJCecGgYExJsfGISAG0AXTUkpkYU-15o7WF6FBl5JTBUtVjNfPpdYRwIAAsvYzNDPy4uWNqQYV8AQjtHZzcPb3buQODwiM5c2BMALxQk3EJSNJoM5myO2aj+IWFGZeKFZQ2YwQWqw8YkgAYLlvN-RYeUwacXd08wX1YgA)
+
+- 他们的类型参数都是协变的，如 `{ x: number }` 中属性 `x` 的类型，从 `number` 协变为 `unknown` 。
+- 他们通过赋值改变部分属性的值，而且是合法的类型分配。如将 `bad` 赋值给 属性 `x` ，类型 `string` 分配给 `unknown` 。
+- 他们最终会使用被修改过的属性，调用该值的 `toPrecision` 函数。
+
+以上代码，TypeScript 都能成功编译，但显然，从上下文就能推断出代码必然报错。
+
+实际运行中，解释器会因为把 `string` 当作 `number` 使用而缺失 `toPrecision` 函数，最终会因为无法调用该函数导致解释出错。
+
+这个陷阱是协变带来的？或者是赋值带来的？如何避免？
