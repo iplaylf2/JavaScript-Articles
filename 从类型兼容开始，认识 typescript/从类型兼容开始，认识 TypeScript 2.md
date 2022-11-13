@@ -29,6 +29,7 @@
   - [`infer`](#infer)
   - [`infer ... extends ...`](#infer--extends-)
 - [泛型类型与类型兼容](#泛型类型与类型兼容)
+- [函数类型与类型兼容](#函数类型与类型兼容)
 
 ## 类型兼容
 
@@ -42,7 +43,7 @@ const bar: number = foo;
 
 - 函数调用表达式中，实参输出到形参需要类型兼容。如下：
 ```typescript
-declare function log(x: number /*形参*/): void;
+declare function log(x: number /*形参*/): unknown;
 
 const foo: 233 = 233;
 log(foo /*实参*/);
@@ -310,7 +311,7 @@ bar = ["bar", 33];
 
 函数类型就是函数的类型。如下：
 ```typescript
-let foo: (x: string) => void;
+let foo: (x: string) => unknown;
 
 foo = (x) => console.log(x);
 ```
@@ -505,7 +506,7 @@ baz = bar;
 ```typescript
 declare const foo: { a: number; b: string };
 
-function bar<T extends { a: number }>(x: T): void {
+function bar<T extends { a: number }>(x: T) {
   const baz: number = x.a;
 }
 
@@ -648,3 +649,35 @@ type Bar = Orthrus<{ a: boolean; b: string }>; // type Bar = never
 
 ## 泛型类型与类型兼容
 
+泛型类型在输入所有具体的泛型参数后，可以实例化成具体的结构化类型。此时的结构化类型才能够进行分配，谈论类型兼容才有意义。
+
+```typescript
+type MysteryBox<T> = T;
+
+declare const foo: MysteryBox; // 未实例化的泛型类型无法作为变量的类型，报错了
+
+declare let bar: MysteryBox<number>;
+declare let baz: MysteryBox<unknown>;
+
+baz = bar;
+bar = baz; // 不能向下兼容，报错了
+```
+- `MysteryBox` 不能直接作为变量的类型。
+- `MysteryBox<number>` 向下兼容了 `MysteryBox<unknown>` 。
+
+特别的， `MysteryBox<number>` 向下兼容 `MysteryBox<unknown>` ，本质上是他们的计算结果 `number` 向下兼容了 `unknown` 。与泛型参数之间的兼容关系没有直接关系。
+
+可以举一个反例，使得 `T<number>` 不能向下兼容 `T<unknown>` 。如下：
+```typescript
+type MysteryBox<T> = { trap: (x: T) => unknown };
+
+declare let foo: MysteryBox<number>;
+declare let bar: MysteryBox<unknown>;
+
+bar = foo; // 不能向下兼容，报错了
+foo = bar;
+```
+- `MysteryBox<number>` 不能向下兼容 `MysteryBox<unknown>` ，是因为 `(x: number) => unknown` 不能向下兼容 `(x: unknown) => unknown` 。
+- `MysteryBox<unknown>` 向下兼容 `MysteryBox<number>` ，是因为 `(x: unknown) => unknown` 向下兼容 `(x: number) => unknown` 。
+
+## 函数类型与类型兼容
