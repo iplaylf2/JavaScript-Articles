@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="63.999992mm"
+   height="64.000015mm"
+   viewBox="0 0 63.999992 64.000015"
+   version="1.1"
+   id="svg5"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath1302">
+      <circle
+         style="fill:none;stroke:#808000;stroke-width:0.264999"
+         id="circle1304"
+         cx="105"
+         cy="148.5"
+         r="16" />
+    </clipPath>
+  </defs>
+  <g
+     id="layer1"
+     transform="translate(-72.679453,-116.17946)">
+    <circle
+       style="fill:none;stroke:#800000;stroke-width:0.636261;stroke-dasharray:none"
+       id="path842"
+       cx="104.67945"
+       cy="148.17946"
+       r="31.68187" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:monospace;-inkscape-font-specification:'monospace, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#800000;stroke:#800000;stroke-width:0.264999"
+       x="91.985451"
+       y="128.05833"
+       id="text1011"><tspan
+         id="tspan301"
+         x="91.985451"
+         y="128.05833">number</tspan></text>
+  </g>
+  <g
+     id="layer2"
+     transform="translate(-72.679453,-116.17946)">
+    <ellipse
+       style="fill:none;stroke:#808000;stroke-width:0.632544;stroke-dasharray:none"
+       id="path955"
+       cx="105"
+       cy="148.17946"
+       rx="15.683729"
+       ry="15.683728" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.05556px;font-family:monospace;-inkscape-font-specification:'monospace, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#808000;stroke:#808000;stroke-width:0.264999"
+       x="97.533585"
+       y="144.99167"
+       id="text1298"
+       clip-path="url(#clipPath1302)"
+       transform="translate(2.2160865,5.6539306)"><tspan
+         id="tspan303"
+         x="97.533585"
+         y="144.99167">233</tspan></text>
+  </g>
+</svg>
