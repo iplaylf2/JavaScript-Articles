@@ -75,6 +75,7 @@ function mysteryBox(): number {
 ```
 
 ### 向下兼容 
+
 **TypeScript 的类型兼容总是向下兼容的。**
 
 得到输入的 A 总是要求输出的 B 拥有 A 类型的一切特性，以致于 A 能表现出的特性在实际使用中不会缺失，从而保证程序正确。
@@ -91,7 +92,8 @@ function mysteryBox(): number {
 
 ### 维恩图
 
-我们可以用表示集合关系的维恩图，表达类型间的兼容关系。如前文出现的 `233` 类型和 `number` 类型：
+我们可以用表示集合关系的维恩图，表达类型间的兼容关系。如前文出现的类型 `233` 和类型 `number` ：
+
 ![img](./1-x.svg)
 - `233` 向下兼容 `number` 。
 - `233` 是 `number` 的子类型，`233` 是 `number` 的子集。
@@ -127,7 +129,7 @@ function mysteryBox(): number {
 233 as unknown as string; // 编译通过
 ```
 
-为什么 `as unknown` 可以发挥作用？我们可以先分析一下 `unknown` 类型。
+为什么 `as unknown as` 可以发挥作用？我们可以先分析一下 `unknown` 类型。
 
 从[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)可知，任何类型都能分配给 `unknown` 。这等同于任何类型都能向下兼容 `unknown` 。
 
@@ -138,6 +140,7 @@ function mysteryBox(): number {
 上文的报错侧面告诉我们，**只要是充分重叠的两个类型，就能使用 `as` 完成转换。** 因此，将 `233 as unknown as string` 分成两步判断，`233 as unknown` 和 `unknown as string` 都是合法的，可以通过编译的。
 
 如果用维恩图表示 `number` ，`string` 和 `unknown` 之间的关系，则是这样的：
+
 ![img](./2-x.svg)
 - `number` 和 `string` 没有包含关系，不能充分重叠，。
 - `number` 是 `unknown` 的子集，与 `unknown` 充分重叠。
@@ -213,7 +216,7 @@ const zoo: string = baz;
 
 在 `type Chimera = number & string` 的举例中，TypeScript 会将其推导成 `type Chimera = never` ：
 - `number` 和 `string` 的交集是 `never` ！？
-- `as never` 难道和 `as unknown` 一样，能用于通用的类型转换？
+- `as never as` 难道和 `as unknown as` 一样，能用于通用的类型转换？
 
 从[文档](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)可知，`never` 可以分配给任何类型。这等同于 `never` 能向下兼容任何类型。
 
@@ -221,7 +224,10 @@ const zoo: string = baz;
 
 因此，`number` 和 `string` 的交集是 `never` 时，意味着 `number` 和 `string` 没有任何相同的元素。或者说不存在一个元素能同时具备 `number` 和 `string` 的特性。这很符合我们的编程经验。
 
+因为 `unknown` 与任何类型“充分重叠”，所以 `as unknown as` 能用于通用的类型转换。而作为任何类型的子类型的 `never` ，无疑与任何类型“充分重叠”，所以 `as never as` 能用于通用的类型转换。
+
 如果用维恩图表示 `number` ，`string` ，`unknown` ，`never` 之间的关系，则是这样的：
+
 ![img](./2.1-x.svg)
 - `number` & `string` 为 `never` 。
 - `number` 和 `string` 都是 `unknown` 的子集。
@@ -384,6 +390,7 @@ foo = bar;
 相关维恩图：
 
 ![img](./3-x.svg)
+
 ![img](./4-x.svg)
 
 #### `{}`
@@ -852,7 +859,7 @@ baz[0].toPrecision();
 
 - 属性的只读阻止了他的值被修改，始终保持原来的类型。
 
-当结构化类型所表达的值是不可变的、无状态的时候，就可以避免输入不兼容类型的值，提前让编译器暴露错误。
+当结构化类型所表达的值是不可变的、无状态的时候，就可以阻止赋值，从根本上避免输入不兼容类型的值。
 
 #### 2. `in` 和 `out`
 
@@ -875,9 +882,9 @@ foo.x.toPrecision();
 - 由于泛型参数 `T` 要求同时具备逆变（ `in` ）和协变（ `out` ）的性质，只有不变化才能同时满足这两点。这种不变化又称抗变。
 - 由于 `T` 的抗变，`MysteryBox<number>` 不能分配给 `MysteryBox<unknown>` 。
 
-当结构化类型根据他的属性用途显式标注他的可变性，就能在结构化类型进行分配或者说转换时，提前让编译器暴露错误。
+当结构化类型根据他的属性用途显式标注他的可变性时，就能在类型进行分配或者说转换时，提前让编译器暴露类型不兼容的错误。
 
-可惜，直到 TypeScript 4.8.4 的现在，可变性标注的使用仍有非常多的限制，此处不表。目前比较实用的用途是，规范泛型 Class 的类型兼容，避免掉入类型兼容的陷阱。
+可惜，直到 TypeScript 4.8.4 的现在，可变性标注的使用仍有非常多的限制，此处不表。目前比较实用的用途是，规范泛型 class 的类型兼容，避免掉入类型兼容的陷阱。
 
 ## 接下来
 
