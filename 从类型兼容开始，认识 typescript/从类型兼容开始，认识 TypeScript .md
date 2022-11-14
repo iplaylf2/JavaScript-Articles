@@ -44,7 +44,9 @@
   - [当一些特殊的类型遇到条件类型分配律](#当一些特殊的类型遇到条件类型分配律)
     - [never](#never-1)
     - [any](#any-1)
-  - [判断两个类型是否相等的条件类型](#判断两个类型是否相等的条件类型)
+  - [判断两个结构化类型是否相等的条件类型](#判断两个结构化类型是否相等的条件类型)
+    - [测试不能完全覆盖](#测试不能完全覆盖)
+  - [判断一个类型是否为 `any` 的条件类型](#判断一个类型是否为-any-的条件类型)
 
 ## 类型兼容
 
@@ -271,7 +273,7 @@ flowchart RL
   unknown --> rest3
 ```
 - 箭头左边的项包含于右边的项。
-- `any` 在 TypeScript 中可以兼容 `never` 以外任何的类型，我们不妨认为他是 `never` 以外任何类型的子集，同时也是任何类型的超集。因此上图有两个 `any` 。
+- `any` 在 TypeScript 中可以兼容 `never` 以外任何的类型，我们不妨认为他是 `never` 以外任何类型的子类型，同时也是任何类型的超类型。因此上图有两个 `any` 。
 
 ## 结构化类型
 
@@ -903,11 +905,11 @@ type Extract<T, U> = T extends U ? T : never;
 
 ### 当一些特殊的类型遇到条件类型分配律
 
-TypeScript 其实还有很多不完善的地方。条件类型分配律也是有几处奇怪的地方。
+条件类型分配律有几处奇怪的地方。
 
 #### never
 
-当条件类型可能呈现分配律时，将 `never` 输入总会输出 `never` 。
+当条件类型能够呈现分配律时，输入 `never` 总会输出 `never` 。
 
 如下：
 ```typescript
@@ -921,6 +923,75 @@ type Bar = Orthrus2<never>; // type Bar = true
 
 #### any
 
+当条件类型能够呈现分配律时，输入 `any` 能同时联合两条分支的结果。
 
+如下：
+```typescript
+type Orthrus<T> = T extends 233 ? 22 : 33;
 
-### 判断两个类型是否相等的条件类型
+type Foo = Orthrus<any>; // type Foo = 22 | 33
+```
+
+### 判断两个结构化类型是否相等的条件类型
+
+上文已经出现过判断两个结构化类型相等的方法：
+> 当两个集合互为子集时，两个集合相等。同样的，**当两个类型互为子类型时，也就是相互向下兼容时，两个类型相等**。
+
+如果据此构造出条件类型 `Equal<A, B>` ，并抑制条件类型分布律。那么就能得到：
+```typescript
+type Equal<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+```
+
+目前的 TypeScript 对类型进行 `|` 或 `&` ，不总是得到最终的类型，而是显示成联合类型或交叉类型的表达式。
+
+如下：
+```typescript
+type Foo = { a: unknown; b: string } & { a: number };
+type Bar = [number] & [unknown];
+type Baz = { a: number } | { a: unknown };
+type Qux = [number] | [unknown];
+```
+[Playground Link](https://www.typescriptlang.org/play?#code/C4TwDgpgBAYg9nKBeKBvKBDAXFArgOwGt84B3fAbigCMcBnYAJwEt8BzKAXygDI1Mc+XAFtqERlwoBYAFChIUAEIYJKANpDR4gLq8oagsTL5t0ueGjKAXsn7YomsRO4AfOzkMlyk2fOgBFXAAPWw0RJ103AyIvEwogA)
+
+但有了 `Equal<A, B>` 就能方便地测试这些结构化类型是否与预期的类型相等。如下：
+```typescript
+type Equal<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+
+type Foo = Equal<
+  { a: unknown; b: string } & { a: number },
+  { a: number; b: string }
+>; // type Foo = true
+type Bar = Equal<[number] & [unknown], [number]>; // type Bar = true
+type Baz = Equal<{ a: number } | { a: unknown }, { a: unknown }>; // type Baz = true
+type Qux = Equal<[number] | [unknown], [unknown]>; // type Qux = true
+```
+
+#### 测试不能完全覆盖
+
+这样的条件类型 `Equal<A, B>` 实际上没有覆盖所有的测试用例，最简单的例子是 `Equal<any, 233>` 返回 `true` 。除此之外，还有：
+```typescript
+type Equal<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+
+type Foo = Equal<{ x?: unknown }, {}>; // type Foo = true
+type Bar = Equal<(x?: unknown) => unknown, () => unknown>; // type Bar = true
+```
+- 以及更多的测试用例，此处不表。
+
+还有相关的[讨论](https://github.com/microsoft/TypeScript/issues/27024)。在讨论里，是另一种实现的测试覆盖更全面，也更受欢迎。
+
+但我认为从集合理论出发实现的 `Equal<A, B>` 才是更合理的。
+
+对于不能覆盖 `any` 的表现， `any` 语义本来就是能充当任何类型，因此我认为 `Equal<any, 233>` 返回 `true` 也是合理的。至于其他测试用例，我更偏向于 TypeScript 的实现不够完善。
+
+### 判断一个类型是否为 `any` 的条件类型
+
+这个条件类型的实现非常有意思：
+```typescript
+type IsAny<T> = 0 extends 1 & T ? true : false;
+```
+- 从集合角度看待，`0` 和 `1` 的交集是空集，所以不存在一个包含 `0` 的集合与 `1` 的交集包含 `0` 。
+- 其中包含 `0` 的集合，是 `0` 的超集、超类型，所以不存在一个类型可以使 `0 extends 1 & T` 这个断言成立。
+
+> `any` 是 `never` 以外任何类型的子类型，同时也是任何类型的超类型。
+
+但是，从结果倒推，`any` 与 `1` 相交得到他们的共同子类型 `any` ，`any` 是 `0` 的超类型。因此，`any` 可以使 `0 extends 1 & T` 这个断言成立。
