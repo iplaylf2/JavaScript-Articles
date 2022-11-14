@@ -33,7 +33,10 @@
   - [类型参数](#类型参数)
   - [逆变](#逆变)
   - [协变](#协变)
-  - [不严格的结构化类型](#不严格的结构化类型)
+- [不严格的结构化类型](#不严格的结构化类型)
+  - [使结构化类型变成严格的](#使结构化类型变成严格的)
+    - [1. `readonly`](#1-readonly)
+    - [2. `in` 和 `out`](#2-in-和-out)
 
 ## 类型兼容
 
@@ -742,7 +745,7 @@ baz = bar();
 
 直观的，位于返回值签名的类型参数是协变的，随着函数类型的分配方向，他允许向着超类型的方向进行转换/分配。
 
-### 不严格的结构化类型
+## 不严格的结构化类型
 
 上文我们谈论过的那些不平坦的结构化类型，如记录类型，数组类型，元组类型。他们的类型参数实际上在上文被认为是协变的。
 
@@ -764,9 +767,9 @@ foo.x.toPrecision();
 const bar: number[] = [233];
 
 const trap2: unknown[] = bar;
-trap2.push("bad");
+trap2[0] = "bad";
 
-bar.pop()!.toPrecision();
+bar[0].toPrecision();
 
 // ----
 const baz: [number] = [233];
@@ -776,14 +779,79 @@ trap3[0] = "bad";
 
 baz[0].toPrecision();
 ```
-[Playground Link](https://www.typescriptlang.org/play?#code/MYewdgzgLgBAZiEAuGBvGAPFYCuBbAIwFMAnGAXxgF41MUAmAZkYoG4BYAKC9ElihIBDAA4BGFOiwwcYANZgQAdzAVq8RB04CRogHQY1AIgKCAJoc1cEIfbqggACiSLAAlhFfgAFAEpLnAHoAmABaMJCecGgYExJsfGISAG0AXTUkpkYU-15o7WF6FBl5JTBUtVjNfPpdYRwIAAsvYzNDPy4uWNqQYV8AQjtHZzcPb3buQODwiM5c2BMALxQk3EJSNJoM5myO2aj+IWFGZeKFZQ2YwQWqw8YkgAYLlvN-RYeUwacXd08wX1YgA)
+[Playground Link](https://www.typescriptlang.org/play?#code/MYewdgzgLgBAZiEAuGBvGAPFYCuBbAIwFMAnGAXxgF41MUAmAZkYoG4BYAKC9ElihIBDAA4BGFOiwwcYANZgQAdzAVq8RB04CRogHQY1AIgKCAJoc1cEIfbqggACiSLAAlhFfgAFAEpLnAHoAmABaMJCecGgYExJsfGISAG0AXTUkpkYU-15o7WF6FBl5JTBUtVjNfPokgAY0mmMzCy4uWLqUu0dnNw9vP1bA4PCIzlzYEwAvFCTcQlIGmAzmbMHxmHzGGeKFZUWpqqFhRg6jE3N-KY6upxd3TzBfViA)
 
 - 他们的类型参数都是协变的，如 `{ x: number }` 中属性 `x` 的类型，从 `number` 协变为 `unknown` 。
 - 他们通过赋值改变部分属性的值，而且是合法的类型分配。如将 `bad` 赋值给 属性 `x` ，类型 `string` 分配给 `unknown` 。
 - 他们最终会使用被修改过的属性，调用该值的 `toPrecision` 函数。
 
-以上代码，TypeScript 都能成功编译，但显然，从上下文就能推断出代码必然报错。
+以上代码都能成功编译，但很显然，从上下文就能推断出代码必然报错。
 
-实际运行中，解释器会因为把 `string` 当作 `number` 使用而缺失 `toPrecision` 函数，最终会因为无法调用该函数导致解释出错。
+实际运行中，把 `string` 当作 `number` 调用 `toPrecision` 函数，最终会因为 `string` 在装箱成 `String` 时缺少对应的函数而报错。
 
-这个陷阱是协变带来的？或者是赋值带来的？如何避免？
+默认状态下，结构化类型在类型分配上存在缺陷，因此他是不严格的。
+
+### 使结构化类型变成严格的
+
+有两种方法使结构化类型变成严格的。
+
+#### 1. `readonly`
+
+在结构化类型中使用 [`readonly`](https://www.typescriptlang.org/docs/handbook/2/objects.html#readonly-properties) 关键字，使得类型参数都是对外输出的。此时类型参数的分配方向，始终和结构化类型的分配方向一致，语义上真正做到了协变。
+
+如下：
+```typescript
+const foo: { readonly x: number } = { x: 233 };
+
+const trap1: { readonly x: unknown } = foo;
+trap1.x = "bad"; // 不可赋值，报错了
+
+foo.x.toPrecision();
+
+// ----
+const bar: readonly number[] = [233];
+
+const trap2: readonly unknown[] = bar;
+trap2[0] = "bad"; // 不可赋值，报错了
+
+bar[0].toPrecision();
+
+// ----
+const baz: readonly [number] = [233];
+
+const trap3: readonly [unknown] = baz;
+trap3[0] = "bad"; // 不可赋值，报错了
+
+baz[0].toPrecision();
+```
+[Playground Link](https://www.typescriptlang.org/play?#code/MYewdgzgLgBAZiEAuGBvGAnApgQwCbgA2AnjAB4pgCuAtgEZYYwC+MAvGuSgEwDMvLANwBYAFBjQkWFAw4ADgEYU6bPiKkKMKmADWYEAHcwLdvEQjRM+QoB0ZUwCI6+B4JgB6dzECwcoHvlQNKxgDwKgDD-gKVGgJipgGFyYmIIIHY2UCAACtjAAJYQ6eAAFACUFmKeMAC0ZSUS4NAwzhgoqgRgJDDU9IwA2gC6pu18vJ2FopLVVnLc9biNzdp6hmBdprUWo9ztAAzdHE4ubsV+QWFRMaK1652JKWmZ2WD5g8XlFUNVsM4AXhNqTaTtrQwYmxgvX4A2Ow2ksjkvE+Ux+M30RkB72WkN4Z0czjwrg8Xn2IQi0XEJxwbzOF1SWAyWVyBSAA)
+
+- 属性的只读阻止了他的值被修改，始终保持原来的类型。
+
+当结构化类型所表达的值是不可变的、无状态的时候，就可以避免输入不兼容类型的值，提前让编译器暴露错误。
+
+#### 2. `in` 和 `out`
+
+在泛型参数中使用 [`in` 或 `out`](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-7.html#optional-variance-annotations-for-type-parameters) 关键字，使得类型参数显式带有逆变或协变的性质。此时，泛型类型的实例在分配时，相应的类型参数必须符合指定的可变性。
+
+单独看待结构化类型的属性的赋值（输入）行为，他的类型参数的分配方向与该结构化类型的分配方向相反，应当是逆变的，因此需要标注 `in` 。而属性的读取（输出），显然是协变的，因此需要标注 `out` 。如下：
+
+```typescript
+type MysteryBox<in out T> = { x: T };
+
+const foo: MysteryBox<number> = { x: 233 };
+
+const trap: MysteryBox<unknown> = foo; // 不可赋值，报错了
+trap.x = "bad";
+
+foo.x.toPrecision();
+```
+[Playground Link](https://www.typescriptlang.org/play?#code/C4TwDgpgBAsiDOwICcQCED2APAPASwDsoMBXYKAFQD4oBeKAbyiwC5KoBfAbgFgAofgGMMBRFABmGDGziIU6bDgIkAtgCMUNek1ZQATAGYDnXgL7DR5YMgCGYGQiSpMuEgQDWBDAHcCWiVJcUAD0wVCAsHKA98qA0rGAPAqAMP+ApUaAmKmAYXL81nYAdFh0UABEajYAJvmm-JIYOVnAGAAKyBCCePB4IgAUAJRcQA)
+
+- 由于泛型参数 `T` 要求同时具备逆变（ `in` ）和协变（ `out` ）的性质，只有不变化才能同时满足这两点。这种不变化又称抗变。
+- 由于 `T` 的抗变，`MysteryBox<number>` 不能分配给 `MysteryBox<unknown>` 。
+
+当结构化类型根据他的属性用途显式标注他的可变性，就能在结构化类型进行分配或者说转换时，提前让编译器暴露错误。
+
+可惜，直到 TypeScript 4.8.4 的现在，可变性标注的使用仍有非常多的限制，此处不表。目前比较实用的用途是，规范泛型 Class 的类型兼容，避免掉入类型兼容的陷阱。
+
