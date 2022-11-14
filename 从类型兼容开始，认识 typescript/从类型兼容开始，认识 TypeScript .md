@@ -142,7 +142,7 @@ function mysteryBox(): number {
 如果用维恩图表示 `number` ，`string` 和 `unknown` 之间的关系，则是这样的：
 
 ![img](./2-x.svg)
-- `number` 和 `string` 没有包含关系，不能充分重叠，。
+- `number` 和 `string` 没有包含关系，不能充分重叠。
 - `number` 是 `unknown` 的子集，与 `unknown` 充分重叠。
 - `string` 是 `unknown` 的子集，与 `unknown` 充分重叠。
 
